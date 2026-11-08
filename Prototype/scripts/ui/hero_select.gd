@@ -70,6 +70,7 @@ func _ready() -> void:
 	back.pressed.connect(func(): back_requested.emit())
 	actions.add_child(back)
 	_start.text = "Start Match"
+	_start.set_meta("sfx", "confirm")
 	_start.custom_minimum_size = Vector2(280, 64)
 	_start.disabled = true
 	_start.pressed.connect(func(): start_requested.emit(selected_id))

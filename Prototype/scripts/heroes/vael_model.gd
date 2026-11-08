@@ -1,15 +1,19 @@
 class_name VaelModel
 extends Node3D
-## Greybox model for Vael, built from primitives with the toon material. It
-## stands in for the future high-poly sculpt (30–50k triangles) and fixes the
-## silhouette: broad pauldrons, a glowing visor and kiln door, hammer right,
-## shield left. Faces −Z.
+## Model for Vael, built from smooth rounded primitives with the toon material.
+## It stands in for the future high-poly sculpt (30–50k triangles) and fixes the
+## silhouette: domed pauldrons, round shield with a team emblem, barrel hammer.
+## Glow sits on surfaces the top-down camera sees — shoulder vents and helm
+## crest — as well as the visor and kiln door. Faces −Z.
 
 const IRON := Color(0.45, 0.47, 0.53)
 const DARK_IRON := Color(0.26, 0.27, 0.31)
 const WOOD := Color(0.38, 0.26, 0.17)
 const SCORCHED := Color(0.3, 0.2, 0.17)
 const EMBER := Color(1.0, 0.45, 0.1)
+
+## Team colour for the shield emblem; set before the model enters the tree.
+var accent := Color(0.3, 0.55, 1.0)
 
 var _glow_materials: Array[StandardMaterial3D] = []
 var _body_material: StandardMaterial3D
@@ -19,15 +23,20 @@ var _tween: Tween
 
 func _ready() -> void:
 	_body_material = Toon.material(IRON)
-	_add(_capsule(0.45, 1.5), Vector3(0, 0.85, 0), _body_material)              # torso
-	_add(_sphere(0.3), Vector3(0, 1.85, 0), Toon.material(DARK_IRON))           # helm
-	_add(_box(Vector3(0.36, 0.06, 0.06)), Vector3(0, 1.88, -0.27), _glow())     # visor slit
-	_add(_box(Vector3(0.34, 0.42, 0.06)), Vector3(0, 1.15, -0.43), _glow())     # kiln door
+	var dark := Toon.material(DARK_IRON)
+	_add(_capsule(0.45, 1.5), Vector3(0, 0.85, 0), _body_material)                       # torso
+	_add(_torus(0.43, 0.52), Vector3(0, 0.62, 0), dark)                                  # belt: blends torso into legs
+	_add(_sphere(0.31), Vector3(0, 1.86, 0), dark)                                       # helm
+	_add(_box(Vector3(0.36, 0.06, 0.06)), Vector3(0, 1.88, -0.28), _glow())              # visor slit
+	_add(_box(Vector3(0.07, 0.07, 0.5)), Vector3(0, 2.16, 0.02), _glow())                # helm crest (top-visible glow)
+	_add(_box(Vector3(0.34, 0.42, 0.06)), Vector3(0, 1.15, -0.43), _glow())              # kiln door
 	for side in [-1.0, 1.0]:
-		_add(_box(Vector3(0.5, 0.28, 0.6)), Vector3(0.6 * side, 1.5, 0), Toon.material(DARK_IRON))  # pauldrons
-	_add(_cylinder(0.06, 1.3), Vector3(0.8, 0.95, -0.1), Toon.material(WOOD))   # hammer handle
-	_add(_box(Vector3(0.55, 0.32, 0.32)), Vector3(0.8, 1.6, -0.1), Toon.material(DARK_IRON))  # hammer head
-	_add(_box(Vector3(0.1, 0.95, 0.75)), Vector3(-0.78, 1.0, -0.05), Toon.material(IRON))     # shield
+		_add(_dome(0.34), Vector3(0.6 * side, 1.5, 0), dark, Vector3(1.0, 0.7, 1.15))  # domed pauldrons
+		_add(_dome(0.1), Vector3(0.6 * side, 1.73, 0.05), _glow(), Vector3(1.6, 0.6, 1.0))  # shoulder vents (top-visible glow)
+	_add(_cylinder(0.06, 1.3), Vector3(0.8, 0.95, -0.1), Toon.material(WOOD))            # hammer handle
+	_add(_cylinder(0.2, 0.62), Vector3(0.8, 1.6, -0.1), dark, Vector3.ONE, Vector3(0, 0, 90))  # barrel hammer head
+	_add(_cylinder(0.44, 0.09), Vector3(-0.8, 1.0, -0.05), Toon.material(IRON), Vector3.ONE, Vector3(0, 0, 90))  # round shield
+	_add(_cylinder(0.22, 0.1), Vector3(-0.86, 1.0, -0.05), Toon.material(accent, 0.3), Vector3.ONE, Vector3(0, 0, 90))  # team emblem
 	_embers = _make_embers()
 	add_child(_embers)
 
@@ -66,10 +75,12 @@ func play_slam(radius: float, hot: bool) -> void:
 	tween.tween_callback(ring.queue_free)
 
 
-func _add(mesh: Mesh, position_: Vector3, material: Material) -> void:
+func _add(mesh: Mesh, position_: Vector3, material: Material, scale_ := Vector3.ONE, rotation_deg := Vector3.ZERO) -> void:
 	var part := MeshInstance3D.new()
 	part.mesh = mesh
 	part.position = position_
+	part.scale = scale_
+	part.rotation_degrees = rotation_deg
 	part.material_override = material
 	add_child(part)
 
@@ -118,6 +129,22 @@ static func _sphere(radius: float) -> SphereMesh:
 	var mesh := SphereMesh.new()
 	mesh.radius = radius
 	mesh.height = radius * 2.0
+	return mesh
+
+
+## Half sphere, flat side down — smooth rounded armour plates.
+static func _dome(radius: float) -> SphereMesh:
+	var mesh := SphereMesh.new()
+	mesh.radius = radius
+	mesh.height = radius
+	mesh.is_hemisphere = true
+	return mesh
+
+
+static func _torus(inner: float, outer: float) -> TorusMesh:
+	var mesh := TorusMesh.new()
+	mesh.inner_radius = inner
+	mesh.outer_radius = outer
 	return mesh
 
 

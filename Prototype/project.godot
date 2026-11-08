@@ -6,15 +6,17 @@ config_version=5
 [application]
 
 config/name="FZFoC Prototype"
-config/description="Greybox prototype: one hero, a charge meter, a timed transformation."
+config/description="FZFoC (working title): an original mobile hero arena."
 run/main_scene="res://scenes/menu.tscn"
 config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "Mobile")
+config/icon="res://assets/icon/icon.png"
 
 [autoload]
 
 GameSettings="*res://scripts/ui/game_settings.gd"
 Session="*res://scripts/session.gd"
+Sfx="*res://scripts/ui/sfx.gd"
 
 [display]
 

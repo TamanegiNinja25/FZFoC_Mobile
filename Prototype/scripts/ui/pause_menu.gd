@@ -57,6 +57,7 @@ func open() -> void:
 	_panel.visible = true
 	_settings.visible = false
 	get_tree().paused = true
+	UiTheme.pop_in(_panel)
 
 
 func close() -> void:
@@ -67,6 +68,7 @@ func close() -> void:
 func _open_settings() -> void:
 	_panel.visible = false
 	_settings.visible = true
+	UiTheme.pop_in(_settings)
 
 
 func _close_settings() -> void:

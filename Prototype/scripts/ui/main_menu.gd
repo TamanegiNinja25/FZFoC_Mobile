@@ -9,6 +9,8 @@ var _hero_select: HeroSelect
 var _settings: SettingsPanel
 var _friends: PanelContainer
 var _hero_model: VaelModel
+var _title: Label
+var _time := 0.0
 var buttons := {}
 
 
@@ -23,8 +25,11 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_time += delta
 	if _hero_model:
 		_hero_model.rotation.y += delta * 0.35
+	if _title:  # slow gold pulse on the title
+		_title.modulate = Color(1, 1, 1).lerp(Color(1.25, 1.1, 0.85), 0.5 + 0.5 * sin(_time * 1.6))
 
 
 func _notification(what: int) -> void:
@@ -36,10 +41,12 @@ func _notification(what: int) -> void:
 
 
 func show_screen(screen: String) -> void:
-	_main_panel.visible = screen == "main"
-	_hero_select.visible = screen == "heroes"
-	_settings.visible = screen == "settings"
-	_friends.visible = screen == "friends"
+	var panels := {"main": _main_panel, "heroes": _hero_select, "settings": _settings, "friends": _friends}
+	for key in panels:
+		var was_visible: bool = panels[key].visible
+		panels[key].visible = key == screen
+		if key == screen and not was_visible:
+			UiTheme.pop_in.call_deferred(panels[key])
 
 
 func _build_backdrop() -> void:
@@ -84,9 +91,9 @@ func _build_backdrop() -> void:
 func _build_ui() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
-	_ui.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui.theme = UiTheme.build()
 	layer.add_child(_ui)
+	UiTheme.apply_safe_area(_ui, 0.0)
 
 	_main_panel = PanelContainer.new()
 	_main_panel.anchor_top = 0.5
@@ -101,9 +108,9 @@ func _build_ui() -> void:
 	column.add_theme_constant_override("separation", 16)
 	_main_panel.add_child(column)
 
-	var title := UiTheme.title(Label.new(), 64)
-	title.text = "FZFoC"
-	column.add_child(title)
+	_title = UiTheme.title(Label.new(), 64)
+	_title.text = "FZFoC"
+	column.add_child(_title)
 	var subtitle := Label.new()
 	subtitle.text = "Hero Arena — working title"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -136,7 +143,19 @@ func _build_ui() -> void:
 
 	_friends = _build_friends_panel()
 	_center(_friends)
-	show_screen("main")
+	for panel in [_hero_select, _settings, _friends]:
+		panel.visible = false
+	_slide_in_main_panel.call_deferred()
+
+
+## Opening flourish: the menu panel slides in from the left as it fades up.
+func _slide_in_main_panel() -> void:
+	var rest := _main_panel.position.x
+	_main_panel.position.x = rest - 120
+	_main_panel.modulate.a = 0.0
+	var tween := create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_main_panel, "position:x", rest, 0.5)
+	tween.tween_property(_main_panel, "modulate:a", 1.0, 0.4)
 
 
 func _build_friends_panel() -> PanelContainer:
