@@ -94,6 +94,7 @@ The reference map's systems, after a fidelity audit (`Outputs/2026-11-08-foc-fid
 
 - **Network:** levels, XP, ranks, attributes and the duel ride in the 20×/s snapshot; creeps, bosses and summons are mirrored on clients 5×/s as packed arrays and glide between updates. The host's Mobile/Classic choice reaches every device.
 - **Pacing** (`tests/pacing_test.gd`, all-bot Mobile match): ultimates at ~6 min, average level 17 at the end, one duel, creeps at the 80 cap.
+- **Phone (owner's test of the v0.6.0 release):** no issues; performance stayed stable with high creep counts.
 
 ### Original assets
 `tools/generate_assets.py` synthesises the app icon (hammer-and-slash emblem in gold and ember, plus Android adaptive layers) and all sound effects from code — nothing taken from other games. Rerun it to rebuild `assets/`.

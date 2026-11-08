@@ -6,6 +6,9 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Phone check
+- Owner tested the v0.6.0 release on their phone: no issues, performance stable even with high creep counts. README, prototype README and backlog updated; the creep caps (10 per camp, 80 total) stay as they are.
+
 ## 2026-11-08 — Release
 - Released v0.6.0 at the owner's request (tag pushed; the GitHub workflow published `FZFoC.apk`, 29.4 MB). README status and roadmap updated; backlog notes the release came before the phone performance check, which stays pending.
 
