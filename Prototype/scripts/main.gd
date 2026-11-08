@@ -57,7 +57,7 @@ func _build_world() -> void:
 
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-55, 30, 0)
-	sun.shadow_enabled = true
+	Platform.apply_sun_shadows(sun)
 	add_child(sun)
 
 	var environment := Environment.new()

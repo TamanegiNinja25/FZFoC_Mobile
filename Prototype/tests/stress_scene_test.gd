@@ -30,7 +30,13 @@ func _process(_delta: float) -> bool:
 		_scene._toggle_lod()
 		_check(_scene.get_viewport().mesh_lod_threshold == 0.0, "LOD toggle forces full detail")
 		_scene._toggle_effects()
+		_check(_scene.shadow_cascades == Platform.shadow_cascades(), "starts with the platform's cascade count (%d)" % _scene.shadow_cascades)
+		_scene.set_shadow_cascades(2)
+		_check(_scene._sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS, "2 cascades → parallel 2 splits")
 		_scene._toggle_shadows()
+		_check(_scene.shadow_cascades == 4 and _scene._sun.directional_shadow_mode == DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS, "toggle: 2 → 4 cascades")
+		_scene._toggle_shadows()
+		_check(_scene.shadow_cascades == 0 and not _scene._sun.shadow_enabled, "toggle: 4 → off")
 		_scene._toggle_camera()
 	elif _frames == 40:
 		for failure in _failures:

@@ -21,9 +21,9 @@ All materials use the shared toon material in `scripts/toon.gd`: banded light, t
 ## Stress test (phone performance)
 Press **STRESS TEST** in the game, or open `scenes/stress_test.tscn` and press F6. It shows 6 heroes at **40,320 triangles** each (Godot generates 10 LOD levels), toon shading, particle effects and shadows, from the game camera.
 
-On-screen toggles: LOD on/off, effects, shadows, 6/12 heroes, game/close camera, back. The top-left readout shows FPS, average and worst frame time, triangles and draw calls actually rendered, the device, GPU, and a verdict (60 FPS smooth / 30 FPS playable / too slow).
+On-screen toggles: LOD on/off, effects, shadows (2 / 4 cascades / off), 6/12 heroes, game/close camera, back. The top-left readout shows FPS, average and worst frame time, triangles and draw calls actually rendered, the device, GPU, and a verdict (60 FPS smooth / 30 FPS playable / too slow).
 
-**Benchmark mode** runs four configurations for 3 s each, prints results and quits:
+**Benchmark mode** runs six configurations (including 4 vs 2 cascades) for 3 s each, prints results and quits:
 ```
 Godot_v4.7.2-stable_win64_console.exe --path Prototype --disable-vsync res://scenes/stress_test.tscn -- --benchmark
 ```
@@ -39,6 +39,17 @@ PC baseline (2026-11-08, AMD Radeon integrated graphics, ASUS Vivobook laptop �
 
 - At the game camera, LODs cut ~240k hero triangles to ~18k rendered. A capsule simplifies easily; real sculpted models will reduce less.
 - Shadows multiply geometry cost about 4× (971k rendered from 242k): Godot's default sun shadow draws 4 cascades.
+- **Phones use 2 shadow cascades** (decision 2026-11-08, `scripts/platform.gd`); desktop keeps 4. Add `-- --phone` to the command line to simulate phone settings on a PC. The stress test's Shadows button cycles 2 → 4 → off.
+
+Cascade comparison (same PC, benchmark mode):
+
+| Configuration | 4 cascades | 2 cascades |
+|---|---|---|
+| 6 heroes, game camera, LOD on | 551 FPS, 18k tris | 521 FPS, 9k tris |
+| 6 heroes, LOD off | 419 FPS, 971k tris | 469 FPS, 486k tris |
+| 12 heroes, LOD off | — | 407 FPS, 971k tris |
+
+2 cascades halve shadow geometry; with LOD off that's +12% FPS on this PC. At the game camera with LOD on the PC isn't geometry-bound, so the small difference is noise.
 - To test on a phone, export the project to Android or iOS from Godot (Project → Export) and press STRESS TEST on the device.
 
 ## Test
@@ -87,6 +98,7 @@ The meter is locked while transformed and restarts from zero afterwards.
 - `scripts/dummy.gd` — training dummy
 - `scripts/hud.gd` — bars, status line, transform and stress-test buttons
 - `scripts/toon.gd` — shared toon material
+- `scripts/platform.gd` — phone vs desktop settings (shadow cascades)
 - `scripts/stress_test.gd` + `scenes/stress_test.tscn` — phone stress test and benchmark mode
 - `tests/smoke_test.gd` — headless check of the meter → form → revert loop
 - `tests/meter_balance_test.gd` — measures fill time, idle drain and spree rewards

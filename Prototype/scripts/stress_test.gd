@@ -19,11 +19,13 @@ var heroes: Array[Node3D] = []
 var _lod_on := true
 var _effects_on := true
 var _close_camera := false
+## 0 = off; otherwise the number of sun-shadow cascades (phones default to 2).
+var shadow_cascades := Platform.shadow_cascades()
 var _time := 0.0
 var _frame_times: Array[float] = []
 
 ## Benchmark mode: `godot --path Prototype res://scenes/stress_test.tscn -- --benchmark`
-## runs four configurations for 3 s each, prints the results and quits.
+## runs each configuration in BENCH_STEPS for 3 s, prints the results and quits.
 var _benchmark := "--benchmark" in OS.get_cmdline_user_args()
 var _bench_step := 0
 var _bench_clock := 0.0
@@ -57,11 +59,29 @@ func _process(delta: float) -> void:
 		_tick_benchmark(delta)
 
 
-const BENCH_STEPS := ["6 heroes, game camera, LOD on", "6 heroes, close camera (full detail)",
-		"6 heroes, LOD off (worst case)", "12 heroes, LOD off"]
+const BENCH_STEPS := [
+	{"label": "6 heroes, game camera, LOD on, 4 casc.", "heroes": 6, "lod": true, "close": false, "cascades": 4},
+	{"label": "6 heroes, game camera, LOD on, 2 casc.", "heroes": 6, "lod": true, "close": false, "cascades": 2},
+	{"label": "6 heroes, close camera, 2 casc.", "heroes": 6, "lod": true, "close": true, "cascades": 2},
+	{"label": "6 heroes, LOD off, 4 casc.", "heroes": 6, "lod": false, "close": false, "cascades": 4},
+	{"label": "6 heroes, LOD off, 2 casc.", "heroes": 6, "lod": false, "close": false, "cascades": 2},
+	{"label": "12 heroes, LOD off, 2 casc.", "heroes": 12, "lod": false, "close": false, "cascades": 2},
+]
+
+
+func _apply_config(config: Dictionary) -> void:
+	if heroes.size() != config.heroes:
+		_set_hero_count(config.heroes)
+	_lod_on = config.lod
+	get_viewport().mesh_lod_threshold = 1.0 if _lod_on else 0.0
+	_close_camera = config.close
+	_place_camera()
+	set_shadow_cascades(config.cascades)
 
 
 func _tick_benchmark(delta: float) -> void:
+	if _bench_step == 0 and _bench_clock == 0.0:
+		_apply_config(BENCH_STEPS[0])
 	_bench_clock += delta
 	if _bench_clock > 1.0:  # skip the first second of each step (warm-up)
 		_bench_samples.append(delta)
@@ -74,17 +94,15 @@ func _tick_benchmark(delta: float) -> void:
 		worst = maxf(worst, t)
 	var avg := total / maxf(_bench_samples.size(), 1)
 	var triangles := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
-	print("BENCH | %-38s | %5.1f FPS | avg %5.2f ms | worst %5.2f ms | %4dk tris" % [BENCH_STEPS[_bench_step], 1.0 / avg, avg * 1000.0, worst * 1000.0, triangles / 1000])
+	print("BENCH | %-40s | %5.1f FPS | avg %5.2f ms | worst %5.2f ms | %4dk tris" % [BENCH_STEPS[_bench_step].label, 1.0 / avg, avg * 1000.0, worst * 1000.0, triangles / 1000])
 	_bench_step += 1
-	_bench_clock = 0.0
+	_bench_clock = 0.0001
 	_bench_samples.clear()
-	match _bench_step:
-		1: _toggle_camera()
-		2: _toggle_camera(); _toggle_lod()
-		3: _toggle_heroes()
-		4:
-			print("BENCH | device: %s | GPU: %s" % [OS.get_model_name(), RenderingServer.get_video_adapter_name()])
-			get_tree().quit()
+	if _bench_step < BENCH_STEPS.size():
+		_apply_config(BENCH_STEPS[_bench_step])
+	else:
+		print("BENCH | device: %s | GPU: %s" % [OS.get_model_name(), RenderingServer.get_video_adapter_name()])
+		get_tree().quit()
 
 
 ## Builds a ~40k-triangle capsule and lets Godot generate LODs for it,
@@ -157,7 +175,7 @@ func _build_world() -> void:
 
 	_sun = DirectionalLight3D.new()
 	_sun.rotation_degrees = Vector3(-55, 30, 0)
-	_sun.shadow_enabled = true
+	Platform.apply_sun_shadows(_sun, shadow_cascades)
 	add_child(_sun)
 
 	var environment := Environment.new()
@@ -213,7 +231,7 @@ func _build_hud() -> void:
 func _refresh_buttons() -> void:
 	_buttons["lod"].text = "LOD: %s" % ("ON" if _lod_on else "OFF")
 	_buttons["effects"].text = "Effects: %s" % ("ON" if _effects_on else "OFF")
-	_buttons["shadows"].text = "Shadows: %s" % ("ON" if _sun.shadow_enabled else "OFF")
+	_buttons["shadows"].text = "Shadows: %s" % ("OFF" if shadow_cascades == 0 else "%d casc." % shadow_cascades)
 	_buttons["heroes"].text = "Heroes: %d" % heroes.size()
 	_buttons["camera"].text = "Camera: %s" % ("CLOSE" if _close_camera else "GAME")
 	_buttons["back"].text = "Back"
@@ -235,9 +253,19 @@ func _toggle_effects() -> void:
 	_refresh_buttons()
 
 
+## Cycles 2 → 4 → off → 2, so the phone default can be compared on the device.
 func _toggle_shadows() -> void:
-	_sun.shadow_enabled = not _sun.shadow_enabled
-	_refresh_buttons()
+	match shadow_cascades:
+		2: set_shadow_cascades(4)
+		4: set_shadow_cascades(0)
+		_: set_shadow_cascades(2)
+
+
+func set_shadow_cascades(cascades: int) -> void:
+	shadow_cascades = cascades
+	Platform.apply_sun_shadows(_sun, cascades)
+	if not _buttons.is_empty():
+		_refresh_buttons()
 
 
 func _toggle_heroes() -> void:
@@ -267,7 +295,7 @@ func _update_stats() -> void:
 	var draw_calls := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 	var verdict := "SMOOTH (60 FPS target met)" if fps >= 55 else ("PLAYABLE (30 FPS target met)" if fps >= 28 else "TOO SLOW — lower the budget")
 	_stats.text = "\n".join([
-		"STRESS TEST — %d heroes × %dk triangles (%d LOD levels)" % [heroes.size(), hero_triangles / 1000, hero_lod_levels],
+		"STRESS TEST — %d heroes × %dk triangles (%d LOD levels) — %s settings" % [heroes.size(), hero_triangles / 1000, hero_lod_levels, "phone" if Platform.is_phone() else "desktop"],
 		"%d FPS   avg %.1f ms   worst %.1f ms (last 3 s)" % [fps, avg_ms, worst * 1000.0],
 		"Rendered: %dk triangles, %d draw calls" % [triangles / 1000, draw_calls],
 		"Device: %s   GPU: %s" % [OS.get_model_name(), RenderingServer.get_video_adapter_name()],
