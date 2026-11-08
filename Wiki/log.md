@@ -6,6 +6,13 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (decision + measurement)
+- Ingested 1 new RAW file: `2026-11-08-decision-90-percent-resolution-and-touch-joystick.md` (prototype commit 170d093).
+- Created source note [decision-90-percent-resolution-and-touch-joystick](sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md).
+- [Art direction](topics/art-direction.md): 90% resolution decision with the two-round phone measurement; resolution question closed.
+- [Hero arena genre](topics/hero-arena-genre.md): touch joystick and wide-screen layout recorded under Adapting for mobile.
+- [Backlog](backlog.md): pending approval resolved (90% chosen over the proposed 75%). [Index](index.md) and README roadmap updated.
+
 ## 2026-11-08 — Ingest (measurement)
 - Ingested 1 new RAW file: `2026-11-08-phone-benchmark-infinix-note-30.md` — the first real-phone stress test (prototype commit 516fb99).
 - Created source note [phone-benchmark-infinix-note-30](sources/2026-11-08-phone-benchmark-infinix-note-30.md).

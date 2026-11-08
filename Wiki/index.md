@@ -6,9 +6,9 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 11 sources · 8 topic articles · 3 categories · 3 recorded conflicts · 1 item awaiting approval
+**Status:** 12 sources · 8 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
 
-**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md)) · phones use 2 shadow cascades ([record](sources/2026-11-08-decision-phone-shadow-cascades.md))
+**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md)) · phones use 2 shadow cascades ([record](sources/2026-11-08-decision-phone-shadow-cascades.md)) and 90% 3D resolution; floating touch joystick ([record](sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md))
 
 ## Topics
 
@@ -39,6 +39,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Toon shading decision and first stress-test benchmark](sources/2026-11-08-toon-shading-and-stress-benchmark.md) — Toon chosen; 6 × 40k-triangle stress scene; PC baseline shows LODs and shadow cost.
 - [Decision — 2 shadow cascades on phones](sources/2026-11-08-decision-phone-shadow-cascades.md) — Phones 2 cascades, desktop 4; PC benchmark: shadow geometry halved, +12% FPS worst case.
 - [Phone stress-test benchmark — Infinix NOTE 30](sources/2026-11-08-phone-benchmark-infinix-note-30.md) — First real-phone run: locked 60 FPS at realistic settings, ~3 ms headroom; pixel-bound, so 75% resolution halves GPU time.
+- [Decision — 90% render resolution on phones; touch joystick](sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md) — 90% cuts phone GPU time 13.7 → 7.4 ms; floating joystick verified on the phone; wide-screen fix.
 
 ## Admin
 - [Log](log.md) — what changed and when

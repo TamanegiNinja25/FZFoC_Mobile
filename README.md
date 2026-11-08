@@ -49,7 +49,8 @@ Workflow details are in [CLAUDE.md](CLAUDE.md).
 - [x] Choose a visual style: **high-poly stylized, toon shaded** ([art direction](Wiki/topics/art-direction.md))
 - [x] Build the stress-test scene and a PC baseline (506 FPS at the game camera)
 - [x] Run the stress test on a target phone: **Infinix NOTE 30, locked 60 FPS** at realistic settings
-- [ ] Decide the phone render resolution (75% proposed)
+- [x] Decide the phone render resolution: **90%** (GPU 13.7 → 7.4 ms on the NOTE 30)
+- [x] Touch controls: floating joystick, verified on the phone
 - [ ] Offline prototype with 2–3 original heroes
 - [ ] Local multiplayer
 

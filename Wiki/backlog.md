@@ -7,7 +7,7 @@ updated: 2026-11-08
 Open questions, gaps, wanted sources and proposals awaiting the user's approval.
 
 ## Awaiting approval
-- **75% 3D render resolution on phones** (UI stays at full resolution): on the NOTE 30 it cuts GPU time from 13.7 to 6.2 ms per frame, at some cost in sharpness — [Art direction](topics/art-direction.md#phone-infinix-note-30)
+*Nothing pending.* (Last resolved 2026-11-08: phone render resolution — owner chose 90% over the proposed 75% — [Art direction](topics/art-direction.md#phone-infinix-note-30).)
 
 ## Unsourced claims
 Marked *(inference)* in the wiki; each needs a RAW source:

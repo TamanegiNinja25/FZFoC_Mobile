@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30]
+sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30, 2026-11-08-decision-90-percent-resolution-and-touch-joystick]
 updated: 2026-11-08
 ---
 # Art direction
@@ -83,13 +83,22 @@ MT6789, Mali-G57 MC2, 1080×2460 at 60 Hz. Vsync can't be disabled, so GPU time 
 - **The 30–50k hero budget works on this phone**, with about 3 ms of GPU headroom ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
 - **Pixels, not triangles, are the bottleneck:** +477k triangles cost 1.5 ms, while 75% resolution saves 54% ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
 - **Particles in this test are nearly free; CPU is under 0.5 ms** ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
-- **Proposed, awaiting the owner:** render 3D at ~75% resolution on phones, UI at full resolution ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
+- **2026-11-08 — Decision: 90% 3D resolution on phones**, UI at full resolution. The librarian proposed 75% ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)); the owner chose 90%. Measured twice on the NOTE 30 ([src](../sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md)):
+
+| 3D resolution | GPU time |
+|---|---|
+| 100% | 13.7 ms |
+| **90% (phone default)** | **7.4 ms (−46%)** |
+| 75% | 6.2 ms (−54%) |
+
+  90% gets most of the saving with a sharper image and leaves about 9 ms of the 16.7 ms frame free. Long benchmark runs can hit mid-run throttling, so measurements use short repeated rounds ([src](../sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md)).
 - **Not yet tested:** sustained heat over a full match ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
 
 ## Open questions
 - ~~Toon/ramp shading or simplified PBR?~~ Decided: toon ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md))
 - ~~Which phone is the target device?~~ The owner's Infinix NOTE 30 (mid-range) ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md))
-- 75% 3D render resolution on phones? Thermal behaviour over a full match? ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md))
+- ~~75% 3D render resolution on phones?~~ Decided: 90% ([src](../sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md))
+- Thermal behaviour over a full match? ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md))
 - ~~How many shadow cascades for phones?~~ Decided: 2 ([src](../sources/2026-11-08-decision-phone-shadow-cascades.md))
 
 ## Related

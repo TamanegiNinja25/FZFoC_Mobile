@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick]
 updated: 2026-11-08
 ---
 # Hero arena genre
@@ -25,6 +25,7 @@ Changes the source recommends ([src](../sources/2026-11-08-fight-of-characters-m
 | Human players only | Bots to fill slots, online matchmaking |
 | — | Fair monetisation through cosmetics, not paying to win |
 
+- **Implemented in the prototype (2026-11-08):** a floating touch joystick for the left thumb — it appears where the thumb lands in the lower-left area, with analog strength and a 15% deadzone — verified on the owner's phone. Auto-attack already handles targeting; skill buttons beyond TRANSFORM are still to come. The layout fills wide (20:9) phone screens ([src](../sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md)).
 - Much of the original's feel comes from Warcraft III's built-in systems (terrain, pathfinding, right-click unit control); a mobile version must build these itself ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - Suggested tools: Unity or Godot, with a multiplayer service such as Photon or Nakama ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - Rough effort: an offline prototype with 2–3 heroes in weeks; a polished online release in many months for a small team, with art usually the biggest cost ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
