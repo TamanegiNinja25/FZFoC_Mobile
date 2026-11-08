@@ -6,7 +6,9 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 4 sources · 7 topic articles · 3 categories · 3 recorded conflicts
+**Status:** 5 sources · 7 topic articles · 3 categories · 3 recorded conflicts
+
+**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md))
 
 ## Topics
 
@@ -29,6 +31,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Using free Sketchfab assets and local multiplayer](sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md) — Per-model Sketchfab licences, the fan-art catch, best uses of free assets, and server-free local multiplayer.
 - [UI and audio direction](sources/2026-11-08-ui-and-audio-direction.md) — Why the map's UI and audio can't be reused, the patterns behind the nostalgia, asset sources, and a sound-event analysis correcting the "music tracks" claim.
 - [Hero transformations — mechanic spec](sources/2026-11-08-spec-hero-transformations.md) — Clean-room analyst spec: 11 of 25 heroes transform via timed forms, a stage chain or an awakening; numbers, archetypes, bounties, mobile design notes.
+- [Decisions — transformation meter and Godot engine](sources/2026-11-08-decisions-meter-and-godot.md) — The owner's decisions: a charge meter unlocks forms; the prototype is built in Godot.
 
 ## Admin
 - [Log](log.md) — what changed and when

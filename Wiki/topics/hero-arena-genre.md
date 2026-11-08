@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot]
 updated: 2026-11-08
 ---
 # Hero arena genre
@@ -37,8 +37,10 @@ For an offline project played with friends, online matchmaking and servers are u
 
 This replaces the online matchmaking and Photon/Nakama suggestions above only for the offline scenario; a public release would still need them *(inference)*.
 
+**Decided 2026-11-08: Godot** (4.7.2) for the prototype, using its built-in ENet multiplayer for local play ([src](../sources/2026-11-08-decisions-meter-and-godot.md)).
+
 ## Open questions
-- Godot or Unity? ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md))
+- ~~Godot or Unity?~~ Decided: Godot ([src](../sources/2026-11-08-decisions-meter-and-godot.md))
 - Casual short sessions or competitive ranked play? ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 - Which mechanics to prototype first? ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 

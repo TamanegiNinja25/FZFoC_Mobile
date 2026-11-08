@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-spec-hero-transformations]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-spec-hero-transformations, 2026-11-08-decisions-meter-and-godot]
 updated: 2026-11-08
 ---
 # Hero transformations
@@ -48,6 +48,11 @@ One hero (B) has HP-threshold buffs rather than a form: at ≤10% HP it berserks
 - In a custom engine, a form should be a state on one character, so nothing needs copying ([src](../sources/2026-11-08-spec-hero-transformations.md)).
 
 ## Design direction for FZFoC Mobile
+
+### Decisions
+- **2026-11-08 — Charge meter.** A full meter unlocks the form, replacing level gates and cooldowns ([src](../sources/2026-11-08-decisions-meter-and-godot.md)). What fills it, how fast, and whether it drains is still open. Target from the spec: a form ready about every 60–90 s ([src](../sources/2026-11-08-spec-hero-transformations.md)).
+
+### Spec recommendations
 From the spec's design notes for a mobile 3v3, 5–8 minute match ([src](../sources/2026-11-08-spec-hero-transformations.md)):
 
 | Keep | Change | Drop |
@@ -61,7 +66,7 @@ From the spec's design notes for a mobile 3v3, 5–8 minute match ([src](../sour
 - A transformation deserves its own big sound moment — see [UI and audio direction](ui-and-audio-direction.md) *(inference)*.
 
 ## Open questions
-- Meter or cooldown? ([src](../sources/2026-11-08-spec-hero-transformations.md))
+- ~~Meter or cooldown?~~ Decided: meter. Now: what fills it, how fast, does it drain? ([src](../sources/2026-11-08-decisions-meter-and-godot.md))
 - Every hero, or only some (the reference: 11 of 25)? ([src](../sources/2026-11-08-spec-hero-transformations.md))
 - Stage progression per match or per activation? ([src](../sources/2026-11-08-spec-hero-transformations.md))
 - Does a form end early on death or crowd control? ([src](../sources/2026-11-08-spec-hero-transformations.md))

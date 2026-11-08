@@ -29,12 +29,13 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 
 ## Open questions
 - ~~Which mechanics define Fight Of Characters' appeal and should be prototyped first?~~ Narrowed: hero transformations are the core candidate — see [Hero transformations](topics/hero-transformations.md#design-direction-for-fzfoc-mobile). Still open: what else belongs in the first prototype.
-- Transformation design: meter or cooldown? Every hero or only some? Stages per match or per activation? Does a form end on death or crowd control? ([source](sources/2026-11-08-spec-hero-transformations.md))
+- Meter tuning: what fills it (damage dealt, taken, kills, trickle), how fast, does it drain? ([source](sources/2026-11-08-decisions-meter-and-godot.md))
+- Transformation design: ~~meter or cooldown~~ (decided: meter). Every hero or only some? Stages per match or per activation? Does a form end on death or crowd control? ([source](sources/2026-11-08-spec-hero-transformations.md))
 - What setting and art style would make an original roster distinctive? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 - Target casual short sessions, or competitive ranked play? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 
 - Which 1–2 visual styles should the game commit to? ([source](sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md))
-- Godot or Unity for the project? ([source](sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md))
+- ~~Godot or Unity for the project?~~ Decided 2026-11-08: Godot ([source](sources/2026-11-08-decisions-meter-and-godot.md))
 
 - Who records the voices — friends, the user, or a hired actor? ([source](sources/2026-11-08-ui-and-audio-direction.md))
 - Which UI kit or style anchors the look? ([source](sources/2026-11-08-ui-and-audio-direction.md))

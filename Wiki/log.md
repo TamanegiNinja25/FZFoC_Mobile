@@ -6,6 +6,13 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (decisions)
+- Ingested 1 new RAW file: `2026-11-08-decisions-meter-and-godot.md`, recording the owner's decisions from chat.
+- Created source note [decisions-meter-and-godot](sources/2026-11-08-decisions-meter-and-godot.md).
+- [Hero transformations](topics/hero-transformations.md): new Decisions subsection (charge meter); open question narrowed to meter tuning.
+- [Hero arena genre](topics/hero-arena-genre.md): Godot recorded as the engine.
+- [Index](index.md): decisions line added. [Backlog](backlog.md): engine and meter-vs-cooldown questions closed; meter tuning added.
+
 ## 2026-11-08 — Ingest
 - Ingested 1 new RAW file: `2026-11-08-spec-hero-transformations.md` (mechanics-analyst spec, moved from Outputs at the user's request; key values spot-checked against map data before commit).
 - Created source note [spec-hero-transformations](sources/2026-11-08-spec-hero-transformations.md).

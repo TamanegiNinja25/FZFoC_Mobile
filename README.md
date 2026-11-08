@@ -42,9 +42,10 @@ Workflow details are in [CLAUDE.md](CLAUDE.md).
 
 - [x] Analyse the original map and assess mobile feasibility
 - [x] Asset licensing rules and a credits template
-- [ ] Choose engine: Godot or Unity
+- [x] Choose engine: **Godot 4.7**
+- [x] Analyse the reference transformation mechanic; decide the trigger: **charge meter**
 - [ ] Choose 1–2 visual styles
-- [ ] Design the transformation system
+- [ ] Tune the transformation meter
 - [ ] Offline prototype with 2–3 original heroes
 - [ ] Local multiplayer
 
