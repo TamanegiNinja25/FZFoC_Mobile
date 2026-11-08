@@ -7,6 +7,12 @@ updated: 2026-11-08
 Newest entry first.
 
 ## 2026-11-08 — Ingest (design)
+- Ingested 1 new RAW file: `2026-11-08-vael-eruption.md` — Eruption's design (prototype commit e2339d6).
+- Created source note [vael-eruption](sources/2026-11-08-vael-eruption.md).
+- [Roster](topics/roster.md): Vael marked complete in the prototype; Eruption row and rationale added. [Hero transformations](topics/hero-transformations.md): Eruption values.
+- [Backlog](backlog.md): Eruption question closed; 3v3 crowd-value watch item added. [Index](index.md) and README roadmap updated.
+
+## 2026-11-08 — Ingest (design)
 - Ingested 1 new RAW file: `2026-11-08-hero-design-vael.md` — the first original hero, Vael, with the Kindled transformation (prototype work in progress; commit follows once Eruption is designed).
 - Created source note [hero-design-vael](sources/2026-11-08-hero-design-vael.md) and topic [Roster](topics/roster.md) (Game design).
 - [Hero transformations](topics/hero-transformations.md): Kindled as the first original form. [Art direction](topics/art-direction.md): new "Readability from the top-down camera" section from the phone check.

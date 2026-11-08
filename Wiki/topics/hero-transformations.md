@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-spec-hero-transformations, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-hero-design-vael]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-spec-hero-transformations, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-hero-design-vael, 2026-11-08-vael-eruption]
 updated: 2026-11-08
 ---
 # Hero transformations
@@ -78,7 +78,7 @@ From the spec's design notes for a mobile 3v3, 5–8 minute match ([src](../sour
 - A transformation deserves its own big sound moment — see [UI and audio direction](ui-and-audio-direction.md) *(inference)*.
 
 ### First original form: Kindled
-The first original hero, Vael, transforms into **Kindled**: 15 s, 25% shield, ×1.25 damage, ×1.3 speed, ×1.4 size, and Bellows Slam becomes Eruption — the spec's "one changed or empowered skill" ([src](../sources/2026-11-08-hero-design-vael.md)). See [Roster](roster.md#vael-the-kiln-knight).
+The first original hero, Vael, transforms into **Kindled**: 15 s, 25% shield, ×1.25 damage, ×1.3 speed, ×1.4 size, and Bellows Slam becomes Eruption — the spec's "one changed or empowered skill" ([src](../sources/2026-11-08-hero-design-vael.md)). Eruption gains area (radius ×1.5) and a modest hit (×1.2, ×1.5 total with the form), the top of the +30–50% budget ([src](../sources/2026-11-08-vael-eruption.md)). See [Roster](roster.md#vael-the-kiln-knight).
 
 ## Open questions
 - ~~Meter or cooldown?~~ Decided: meter ([src](../sources/2026-11-08-decisions-meter-and-godot.md)). ~~What fills it?~~ Decided: charge rule above ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)).

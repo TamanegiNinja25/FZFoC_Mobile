@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-hero-design-vael, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction]
+sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction]
 updated: 2026-11-08
 ---
 # Roster
@@ -11,9 +11,9 @@ FZFoC Mobile's original heroes, each with a kit of a basic attack, two skills an
 ## Heroes
 | Hero | Archetype | Skills | Transformation | Status |
 |---|---|---|---|---|
-| **Vael, the Kiln Knight** | Bruiser (melee) | Bellows Slam, Ember Dash | Kindled — Bellows Slam becomes Eruption | In prototype; Eruption pending |
+| **Vael, the Kiln Knight** | Bruiser (melee) | Bellows Slam, Ember Dash | Kindled — Bellows Slam becomes Eruption | Complete in the prototype |
 
-Source: ([src](../sources/2026-11-08-hero-design-vael.md)).
+Sources: ([src](../sources/2026-11-08-hero-design-vael.md)), ([src](../sources/2026-11-08-vael-eruption.md)).
 
 ## Vael, the Kiln Knight
 An iron knight whose armour is a living kiln: hammer in the right hand, shield in the left, dark iron with an ember glow ([src](../sources/2026-11-08-hero-design-vael.md)).
@@ -24,8 +24,11 @@ An iron knight whose armour is a living kiln: hammer in the right hand, shield i
 | Skill 1 | Bellows Slam | 120 damage to every enemy within 3.0 | 6 s |
 | Skill 2 | Ember Dash | 5-unit burst in the stick direction over 0.18 s | 8 s |
 | Transformation | Kindled | 15 s; 25% shield; ×1.25 damage; ×1.3 speed; ×1.4 size; slam → Eruption | Meter |
+| Empowered skill | **Eruption** | 180 effective damage within **4.5** (radius ×1.5, damage ×1.2, then the form's ×1.25) | 6 s |
 
-All values from the design ([src](../sources/2026-11-08-hero-design-vael.md)).
+Values from the design ([src](../sources/2026-11-08-hero-design-vael.md)) and its Eruption addendum ([src](../sources/2026-11-08-vael-eruption.md)).
+
+- **Eruption favours area:** the reference's empowered forms grew in area, and a bigger shockwave ring reads clearly on a phone. Total power is ×1.5, the top of the spec's budget. ×1.5 radius covers ×2.25 the area, so watch its crowd value in 3v3 ([src](../sources/2026-11-08-vael-eruption.md)).
 
 - **Kindled visual:** the model grows with a springy overshoot, the armour scorches, the visor and kiln door flare, embers stream off ([src](../sources/2026-11-08-hero-design-vael.md)).
 - **Why a bruiser first:** the archetype is the easiest to read and reuses the auto-attack ([src](../sources/2026-11-08-hero-design-vael.md)); the reference map's forms fell into speed, bruiser and giant archetypes ([src](../sources/2026-11-08-spec-hero-transformations.md)).
@@ -37,7 +40,7 @@ All values from the design ([src](../sources/2026-11-08-hero-design-vael.md)).
 In the prototype each hero is a data definition (identity, stats, form values, model, skills); skills share one cooldown system and deal damage through the same path as auto-attacks, so form multipliers, meter charge and kill rewards apply everywhere ([src](../sources/2026-11-08-hero-design-vael.md)).
 
 ## Open questions
-- How is Eruption empowered? ([src](../sources/2026-11-08-hero-design-vael.md))
+- ~~How is Eruption empowered?~~ Radius ×1.5, damage ×1.2 ([src](../sources/2026-11-08-vael-eruption.md))
 - Glow placement on Vael's final model ([src](../sources/2026-11-08-hero-design-vael.md))
 - Heroes 2 and 3: which archetypes (speed and giant would complete the reference's set)? *(inference)*
 

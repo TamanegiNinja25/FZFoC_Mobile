@@ -31,7 +31,7 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 - Hero count: "36 hero forms" vs 25 playable heroes — different counting methods; the wiki uses 25 playable heroes; see [Fight Of Characters](topics/fight-of-characters.md#conflicts).
 
 ## Open questions
-- **Vael:** how is Eruption empowered (owner designing it in the prototype)? Glow placement on the final model? Voice lines and Kindled sound? ([source](sources/2026-11-08-hero-design-vael.md))
+- **Vael:** ~~how is Eruption empowered?~~ Radius ×1.5, damage ×1.2 ([source](sources/2026-11-08-vael-eruption.md)). Still open: glow placement on the final model; voice lines and Kindled sound; Eruption's crowd value in 3v3 ([source](sources/2026-11-08-hero-design-vael.md))
 - Heroes 2 and 3: which archetypes? *(speed and giant would complete the reference's set)* — [Roster](topics/roster.md)
 - ~~Which mechanics define Fight Of Characters' appeal and should be prototyped first?~~ Narrowed: hero transformations are the core candidate — see [Hero transformations](topics/hero-transformations.md#design-direction-for-fzfoc-mobile). Still open: what else belongs in the first prototype.
 - Should the transformed bounty multiplier scale with form strength or stage? ([source](sources/2026-11-08-decision-transformed-bounty.md))

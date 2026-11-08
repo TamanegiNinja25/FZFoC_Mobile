@@ -51,7 +51,8 @@ Workflow details are in [CLAUDE.md](CLAUDE.md).
 - [x] Run the stress test on a target phone: **Infinix NOTE 30, locked 60 FPS** at realistic settings
 - [x] Decide the phone render resolution: **90%** (GPU 13.7 → 7.4 ms on the NOTE 30)
 - [x] Touch controls: floating joystick, verified on the phone
-- [ ] Offline prototype with 2–3 original heroes — first hero **Vael, the Kiln Knight** in progress ([roster](Wiki/topics/roster.md))
+- [x] First original hero: **Vael, the Kiln Knight**, with the Kindled transformation and Eruption ([roster](Wiki/topics/roster.md))
+- [ ] Heroes 2 and 3
 - [ ] Local multiplayer
 
 Open decisions live in [Wiki/backlog.md](Wiki/backlog.md).

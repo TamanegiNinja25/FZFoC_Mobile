@@ -6,7 +6,7 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 13 sources · 9 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
+**Status:** 14 sources · 9 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
 
 **Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md)) · phones use 2 shadow cascades ([record](sources/2026-11-08-decision-phone-shadow-cascades.md)) and 90% 3D resolution; floating touch joystick ([record](sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md))
 
@@ -19,7 +19,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 ### Game design
 - [Hero transformations](topics/hero-transformations.md) — Three transformation models in Fight Of Characters (timed form, stage chain, awakening) with full numbers, and a keep/change/drop design direction for a mobile 3v3.
 - [Hero arena genre](topics/hero-arena-genre.md) — Team hero fights with items and kill-based victory; adapting it to mobile with 3v3, short matches and touch controls; local Wi-Fi multiplayer in Godot; the kill-spree economy.
-- [Roster](topics/roster.md) — The original heroes: Vael, the Kiln Knight (bruiser; Bellows Slam, Ember Dash; Kindled form), and how heroes are built in the prototype.
+- [Roster](topics/roster.md) — The original heroes: Vael, the Kiln Knight (bruiser; Bellows Slam, Ember Dash; Kindled form with Eruption), and how heroes are built in the prototype.
 - [Art direction](topics/art-direction.md) — High-poly stylized look with toon shading: style rules, phone polygon/LOD budget, Sketchfab sourcing, and stress-test measurements on PC and on the Infinix NOTE 30 (locked 60 FPS; pixel-bound).
 - [UI and audio direction](topics/ui-and-audio-direction.md) — Keeping the classic feel with original assets: UI and sound patterns, how the map uses sound, and where to source replacements.
 
@@ -42,6 +42,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Phone stress-test benchmark — Infinix NOTE 30](sources/2026-11-08-phone-benchmark-infinix-note-30.md) — First real-phone run: locked 60 FPS at realistic settings, ~3 ms headroom; pixel-bound, so 75% resolution halves GPU time.
 - [Decision — 90% render resolution on phones; touch joystick](sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md) — 90% cuts phone GPU time 13.7 → 7.4 ms; floating joystick verified on the phone; wide-screen fix.
 - [Hero design — Vael, the Kiln Knight](sources/2026-11-08-hero-design-vael.md) — First original hero: concept, kit, Kindled transformation, prototype build and phone readability check.
+- [Vael's Eruption — empowered skill design](sources/2026-11-08-vael-eruption.md) — Radius ×1.5, damage ×1.2 (180 effective while Kindled); area favoured; verified end to end.
 
 ## Admin
 - [Log](log.md) — what changed and when
