@@ -5,7 +5,7 @@ An original mobile hero arena for Android, inspired by the gameplay of **Fight O
 [![Download APK](https://img.shields.io/badge/Download-FZFoC.apk-e8a33d?style=for-the-badge&logo=android&logoColor=white)](https://github.com/TamanegiNinja25/FrozenThrone_FightOfTheCharacters/releases/latest/download/FZFoC.apk)
 [![Latest release](https://img.shields.io/github/v/release/TamanegiNinja25/FrozenThrone_FightOfTheCharacters?style=for-the-badge&label=latest)](https://github.com/TamanegiNinja25/FrozenThrone_FightOfTheCharacters/releases/latest)
 
-> **Status: playable alpha.** Six build phases are done: menus, 3v3 against adaptive AI, item shop, local Wi-Fi multiplayer, three heroes, and the reference map's systems (levels 1–50, attributes and ranked skills, the duel, creep waves, boss chains, a win boss, recipes, exclusive items, Mobile and Classic modes). The latest release is **v0.5.0**. **v0.6.0** (Phase 6) is on `main` and ships once it passes a phone performance check. Placeholder-quality models; balance is still being tuned.
+> **Status: playable alpha.** Six build phases are done: menus, 3v3 against adaptive AI, item shop, local Wi-Fi multiplayer, three heroes, and the reference map's systems (levels 1–50, attributes and ranked skills, the duel, creep waves, boss chains, a win boss, recipes, exclusive items, Mobile and Classic modes). The latest release is **v0.6.0**; its performance on a phone with a full creep load is still being checked. Placeholder-quality models; balance is still being tuned.
 
 ## Download and install
 
@@ -97,7 +97,8 @@ The research and design behind the game are kept as a self-maintaining markdown 
 - [x] Phase 5: heroes Ryn and Barrow, generated music ([roster](Wiki/topics/roster.md))
 - [x] Downloadable releases with an in-game update notice
 - [x] Phase 6: the reference map's systems — levels and attributes, ranked skills (+2 per hero), duel, creep waves, boss chains, win boss, stat shop, exclusive items, recipes, Mobile and Classic modes ([fidelity audit](Outputs/2026-11-08-foc-fidelity-audit.md))
-- [ ] Phone performance check for Phase 6, then release v0.6.0
+- [x] Release v0.6.0
+- [ ] Phone performance check for Phase 6 (80 creeps on the larger map)
 - [ ] Higher-detail hero models and skill effects
 - [ ] More heroes and items; balance pass
 - [ ] Confirm Wi-Fi game discovery on more Android phones (join by IP always works)

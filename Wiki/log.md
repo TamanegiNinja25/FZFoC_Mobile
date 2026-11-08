@@ -6,6 +6,9 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Release
+- Released v0.6.0 at the owner's request (tag pushed; the GitHub workflow published `FZFoC.apk`, 29.4 MB). README status and roadmap updated; backlog notes the release came before the phone performance check, which stays pending.
+
 ## 2026-11-08 — Ingest (design + implementation)
 - Ingested `2026-11-08-phase-6-map-systems.md` (Phase 6, prototype v0.6.0); source note created; [Fight Of Characters](topics/fight-of-characters.md) gains a Systems section (map facts); [Roster](topics/roster.md) gains ranks, ultimates, attributes and exclusive items; [Hero arena genre](topics/hero-arena-genre.md) notes the Mobile and Classic modes; backlog's awaiting-approval item resolved; index updated. History snapshots saved for both changed topic pages (oldest Fight Of Characters snapshot removed under the two-version rule).
 - Pending: phone performance check before tagging v0.6.0.
