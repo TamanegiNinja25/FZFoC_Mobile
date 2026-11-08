@@ -9,10 +9,21 @@ Open `Prototype/project.godot` in Godot 4.7 and press **F5**. The game opens on 
 
 ### Menus (Phase 1)
 - **Main menu:** Single Player · Play with Friends · Settings · Quit, over a dark ember-lit scene with Kindled Vael. Stone panels, gold-trimmed buttons and parchment text are an original take on the classic fantasy-RTS look (`scripts/ui/ui_theme.gd`); no assets from any existing game.
-- **Single Player → Choose Your Hero:** category tabs (All / Bruiser / Speed / Giant), hero cards with planned heroes shown locked, a scrolling detail panel (role, skills, transformation), Back / Start Match. Bots arrive in Phase 2; for now the match is the training arena.
+- **Single Player → Choose Your Hero:** category tabs (All / Bruiser / Speed / Giant), hero cards with planned heroes shown locked, a scrolling detail panel (role, skills, transformation), Back / Training / Start Match. **Start Match** opens the 3v3 arena; **Training** opens the dummy training ground.
 - **Play with Friends:** explains local Wi-Fi play; Host / Join arrive in Phase 4.
 - **Settings:** Audio (master, music, sound effects) and Video (3D resolution 75/90/100%, shadows off/2/4 cascades, 30/60 FPS cap, FPS counter; stress test from the main menu). Saved to `user://settings.cfg`; phone defaults are 90% and 2 cascades.
 - **In game:** the **II** button (or Android back) pauses: Resume · Settings · Quit to Menu · Quit Game.
+- **Polish:** panels slide and pop in, the title pulses, every button shrinks on press with a click sound; HUD and menus stay inside the phone's safe area; Settings has Reset to Defaults.
+
+### 3v3 arena (Phase 2)
+- **Original map** (`scripts/match/arena_match.gd`): blue base (west) and red base (east) with healing fountains (90 HP/s), a stone central lane, a rune circle at the centre, symmetric pillars and boulders for cover, and two neutral stone-sentinel camps (north and south).
+- **Teams:** you and two bot allies (blue) against three bots (red). Rings show sides (gold = you); health bars float overhead. Killing a hero pays its bounty to the killer.
+- **Win:** first team to **15 kills**, or the leader after **8:00**. Scoreboard, kill feed, and a Victory / Defeat / Draw screen with Play Again and Main Menu.
+- **Adaptive AI** (`scripts/ai/bot_brain.gd`): bots use the same controls as you. One `skill` value changes only decisions — reaction time (0.7 → 0.15 s), retreating to heal, focusing the weakest enemy, skill accuracy, saving the form for fights, dashing to finish. Enemy skill = 0.5 + 0.1 per kill your team leads (0.15–0.95); allies stay at 0.55. Stats never change.
+- **Phone (Infinix NOTE 30, default settings):** locked 60 FPS, GPU 10.2 ms. Godot's primitive shapes default to very high detail and get no LODs; setting their segment counts cut the arena from ~890k to ~50k triangles.
+
+### Original assets
+`tools/generate_assets.py` synthesises the app icon (hammer-and-slash emblem in gold and ember, plus Android adaptive layers) and all sound effects from code — nothing taken from other games. Rerun it to rebuild `assets/`.
 
 | Control | Action |
 |---|---|
@@ -119,6 +130,7 @@ Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/hero_kit_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/touch_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/menu_flow_test.gd
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/arena_test.gd
 ```
 The balance test measures how long the meter takes to fill against one dummy. Last result: **87.2 s** (target 90 ± 15 s), 5 kills, no deaths.
 
@@ -172,6 +184,9 @@ The meter is locked while transformed and restarts from zero afterwards.
 - `scripts/ui/` — `main_menu.gd`, `hero_select.gd`, `settings_panel.gd`, `pause_menu.gd`, `ui_theme.gd`, `game_settings.gd` (autoload)
 - `scripts/session.gd` (autoload) — mode and hero chosen in the menus; `scripts/heroes/roster.gd` — every hero plus planned slots by category
 - `scenes/menu.tscn` — main scene
+- `scripts/match/arena_match.gd` + `scenes/arena.tscn` — 3v3 match; `scripts/ai/bot_brain.gd` — adaptive bot; `scripts/controls.gd` — keyboard bindings
+- `scripts/ui/sfx.gd` (autoload) — sound effects and button animation
+- `tests/arena_test.gd` — 3v3 spawn, bots score on their own, fountain heals, adaptive skill, victory screen (9 checks)
 - `tests/menu_flow_test.gd` — menu order, hero select by category, start match, pause/resume, settings persistence (10 checks)
 - `tests/hero_kit_test.gd` — Vael's kit: slam range and cooldown, dash distance, Kindled growth, Eruption reach and damage (15 checks)
 - `tests/touch_test.gd` — simulated finger: zone, drag direction, hero moves and stops; render scale

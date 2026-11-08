@@ -5,6 +5,7 @@ extends PanelContainer
 ## hero's role, skills and transformation.
 
 signal start_requested(hero_id: String)
+signal training_requested(hero_id: String)
 signal back_requested
 
 var selected_id := ""
@@ -69,6 +70,11 @@ func _ready() -> void:
 	back.custom_minimum_size = Vector2(220, 64)
 	back.pressed.connect(func(): back_requested.emit())
 	actions.add_child(back)
+	var training := Button.new()
+	training.text = "Training"
+	training.custom_minimum_size = Vector2(220, 64)
+	training.pressed.connect(func(): training_requested.emit(selected_id))
+	actions.add_child(training)
 	_start.text = "Start Match"
 	_start.set_meta("sfx", "confirm")
 	_start.custom_minimum_size = Vector2(280, 64)

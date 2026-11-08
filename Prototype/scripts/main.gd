@@ -2,16 +2,6 @@ extends Node3D
 ## Builds the greybox arena: ground, light, camera, one hero, training dummies and the HUD.
 
 const CAMERA_OFFSET := Vector3(0, 14, 10)
-const INPUTS := {
-	"move_left": [KEY_A, KEY_LEFT],
-	"move_right": [KEY_D, KEY_RIGHT],
-	"move_up": [KEY_W, KEY_UP],
-	"move_down": [KEY_S, KEY_DOWN],
-	"transform": [KEY_SPACE],
-	"skill_1": [KEY_Q],
-	"skill_2": [KEY_E],
-}
-
 var hero: Hero
 var hud: Hud
 var pause_menu: PauseMenu
@@ -25,7 +15,7 @@ func _ready() -> void:
 	if "--benchmark" in OS.get_cmdline_user_args():
 		get_tree().change_scene_to_file.call_deferred("res://scenes/stress_test.tscn")
 		return
-	_register_inputs()
+	Controls.register()
 	_build_world()
 	GameSettings.apply_to_scene(get_viewport(), _sun)
 	GameSettings.changed.connect(func(): GameSettings.apply_to_scene(get_viewport(), _sun))
@@ -54,16 +44,6 @@ func _process(_delta: float) -> void:
 		return
 	camera.global_position = hero.global_position + CAMERA_OFFSET
 	camera.look_at(hero.global_position, Vector3.UP)
-
-
-func _register_inputs() -> void:
-	for action in INPUTS:
-		if not InputMap.has_action(action):
-			InputMap.add_action(action)
-		for key in INPUTS[action]:
-			var event := InputEventKey.new()
-			event.physical_keycode = key
-			InputMap.action_add_event(action, event)
 
 
 func _build_world() -> void:

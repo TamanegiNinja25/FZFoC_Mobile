@@ -133,7 +133,8 @@ func _build_ui() -> void:
 	_hero_select = HeroSelect.new()
 	_center(_hero_select)
 	_hero_select.back_requested.connect(func(): show_screen("main"))
-	_hero_select.start_requested.connect(_start_match)
+	_hero_select.start_requested.connect(_start_match.bind("res://scenes/arena.tscn"))
+	_hero_select.training_requested.connect(_start_match.bind("res://scenes/main.tscn"))
 
 	_settings = SettingsPanel.new()
 	_settings.show_stress_test = true
@@ -200,6 +201,6 @@ func _on_single_player() -> void:
 	show_screen("heroes")
 
 
-func _start_match(hero_id: String) -> void:
+func _start_match(hero_id: String, scene: String) -> void:
 	Session.hero_id = hero_id
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	get_tree().change_scene_to_file(scene)

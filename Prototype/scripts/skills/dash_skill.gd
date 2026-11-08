@@ -14,3 +14,4 @@ func _init() -> void:
 
 func _cast(hero: Hero) -> void:
 	hero.start_dash(hero.aim_direction() * DISTANCE / DURATION, DURATION)
+	hero.play_sfx("dash")

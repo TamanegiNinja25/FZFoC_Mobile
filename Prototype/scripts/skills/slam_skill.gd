@@ -33,9 +33,9 @@ func power(hero: Hero) -> Dictionary:
 
 func _cast(hero: Hero) -> void:
 	var p := power(hero)
-	for node in hero.get_tree().get_nodes_in_group("enemies"):
-		var enemy := node as Dummy
-		if enemy and enemy.is_alive() and hero.global_position.distance_to(enemy.global_position) <= p.radius:
-			hero.deal_damage(enemy, p.damage)
+	for node in hero.get_tree().get_nodes_in_group("units"):
+		if hero.is_hostile(node) and node.is_alive() and hero.global_position.distance_to(node.global_position) <= p.radius:
+			hero.deal_damage(node, p.damage)
+	hero.play_sfx("slam")
 	if hero.model.has_method("play_slam"):
 		hero.model.play_slam(p.radius, hero.in_form)

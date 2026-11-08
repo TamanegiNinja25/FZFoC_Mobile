@@ -7,7 +7,8 @@ extends CharacterBody3D
 signal health_changed(hp: float, max_hp: float, shield: float)
 signal form_changed(active: bool)
 signal gold_changed(gold: float, income: float, spree: int)
-signal died
+## killer is the Hero that landed the killing blow, or null.
+signal died(killer: Hero)
 
 @export var move_speed := 6.0
 @export var max_hp := 1000.0
@@ -45,8 +46,18 @@ signal died
 ## Risk/reward: a transformed hero is a richer target (spec: 1.5–2× base).
 @export var form_bounty_mult := 1.75
 
+const TEAM_COLORS := [Color(0.3, 0.55, 1.0), Color(1.0, 0.32, 0.28)]
+const PLAYER_COLOR := Color(1.0, 0.84, 0.4)
+
 ## Which hero this is. Set before adding to the tree; its values override the exports above.
 var definition: HeroDef
+## 0 = blue (the player's side), 1 = red. Neutral units use -1.
+var team := 0
+## The human-controlled hero reads touch/keyboard; bots set ai_move instead.
+var is_player := true
+var ai_move := Vector3.ZERO
+var kills := 0
+var deaths := 0
 var model: Node3D
 var skills: Array[Skill] = []
 
@@ -66,10 +77,12 @@ var _spawn_point := Vector3.ZERO
 var _facing := Vector3(0, 0, -1)
 var _dash_velocity := Vector3.ZERO
 var _dash_time := 0.0
+var _bar_pivot: Node3D
 
 
 func _ready() -> void:
 	add_to_group("heroes")
+	add_to_group("units")
 	if definition == null:
 		definition = Vael.new()
 	_apply_definition()
@@ -86,7 +99,10 @@ func _ready() -> void:
 
 	model = definition.create_model()
 	model.name = "Model"
+	if "accent" in model:
+		model.accent = TEAM_COLORS[team]
 	add_child(model)
+	_build_overhead()
 	skills = definition.create_skills()
 
 	meter = TransformMeter.new()
@@ -111,12 +127,13 @@ func _physics_process(delta: float) -> void:
 	for skill in skills:
 		skill.tick(delta)
 
-	if Input.is_action_just_pressed("transform"):
-		try_transform()
-	if Input.is_action_just_pressed("skill_1"):
-		try_skill(0)
-	if Input.is_action_just_pressed("skill_2"):
-		try_skill(1)
+	if is_player:
+		if Input.is_action_just_pressed("transform"):
+			try_transform()
+		if Input.is_action_just_pressed("skill_1"):
+			try_skill(0)
+		if Input.is_action_just_pressed("skill_2"):
+			try_skill(1)
 
 	if _dash_time > 0.0:
 		_dash_time -= delta
@@ -145,6 +162,7 @@ func try_transform() -> bool:
 	form_time_left = form_duration
 	_invulnerable_time = form_transition
 	shield = max_hp * form_shield_ratio
+	play_sfx("transform")
 	if model.has_method("set_form"):
 		model.set_form(true, form_scale)
 	form_changed.emit(true)
@@ -152,16 +170,42 @@ func try_transform() -> bool:
 	return true
 
 
-func take_damage(amount: float) -> void:
+## Returns {dealt, killed, bounty}. The bounty is read before death ends the form.
+func take_damage(amount: float, attacker: Hero = null) -> Dictionary:
 	if _dead_time > 0.0 or _invulnerable_time > 0.0:
-		return
+		return {"dealt": 0.0, "killed": false, "bounty": 0.0}
 	var absorbed := minf(shield, amount)
 	shield -= absorbed
+	var dealt := minf(hp, amount - absorbed) + absorbed
 	hp -= amount - absorbed
 	meter.on_damage_taken(amount)
 	health_changed.emit(hp, max_hp, shield)
 	if hp <= 0.0:
-		_die()
+		var reward := bounty_value()
+		_die(attacker)
+		return {"dealt": dealt, "killed": true, "bounty": reward}
+	return {"dealt": dealt, "killed": false, "bounty": 0.0}
+
+
+func heal(amount: float) -> void:
+	if _dead_time > 0.0 or hp >= max_hp:
+		return
+	hp = minf(hp + amount, max_hp)
+	health_changed.emit(hp, max_hp, shield)
+
+
+## Enemies are units on another team; neutral units (team -1) are fair game for all.
+func is_hostile(unit: Node) -> bool:
+	return unit != self and "team" in unit and unit.team != team
+
+
+## Plays a sound at full volume for the player's own hero, quieter for others.
+## The Sfx autoload is looked up at call time: test scripts compile Hero before
+## autoloads exist, so naming it directly would fail there.
+func play_sfx(sound: String, volume_db := 0.0) -> void:
+	var sfx := get_node_or_null("/root/Sfx")
+	if sfx:
+		sfx.play(sound, volume_db + (0.0 if is_player else -9.0), randf_range(0.95, 1.05))
 
 
 func is_alive() -> bool:
@@ -174,14 +218,19 @@ func try_skill(index: int) -> bool:
 	return skills[index].try_cast(self)
 
 
-## Deals damage to an enemy with the form multiplier, charging the meter and
-## paying out kills. Used by auto-attacks and skills alike.
-func deal_damage(target: Dummy, amount: float) -> void:
-	var result := target.take_damage(amount * (form_damage_mult if in_form else 1.0))
+## Deals damage with the form multiplier, charging the meter and paying out
+## kills: kill gold for neutral units, the victim's bounty for heroes.
+## Used by auto-attacks and skills alike.
+func deal_damage(target: Node3D, amount: float) -> void:
+	var result: Dictionary = target.take_damage(amount * (form_damage_mult if in_form else 1.0), self)
 	meter.on_damage_dealt(result.dealt)
 	if result.killed:
 		meter.on_kill()
-		_register_kill()
+		if target is Hero:
+			kills += 1
+			_register_kill(result.bounty)
+		else:
+			_register_kill(kill_gold)
 
 
 ## Direction skills aim in: the stick if held, otherwise where the hero faces.
@@ -197,6 +246,8 @@ func start_dash(dash_velocity: Vector3, duration: float) -> void:
 
 
 func _move_input() -> Vector3:
+	if not is_player:
+		return ai_move
 	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	return Vector3(input.x, 0.0, input.y)
 
@@ -229,10 +280,10 @@ func income_per_second() -> float:
 	return base_income + spree_income_step * maxi(spree - 1, 0)
 
 
-func _register_kill() -> void:
+func _register_kill(base_gold: float) -> void:
 	spree = mini(spree + 1, spree_max) if spree_time_left > 0.0 else 1
 	spree_time_left = spree_window
-	gold += kill_gold * (1.0 + spree_gold_bonus * (spree - 1))
+	gold += base_gold * (1.0 + spree_gold_bonus * (spree - 1))
 	gold_changed.emit(gold, income_per_second(), spree)
 
 
@@ -269,33 +320,91 @@ func _end_form() -> void:
 	health_changed.emit(hp, max_hp, shield)
 
 
-func _attack(target: Dummy) -> void:
+func _attack(target: Node3D) -> void:
 	_attack_cooldown = attack_interval
 	deal_damage(target, attack_damage)
+	if is_player:
+		play_sfx("hit", -10.0)
 
 
-func _nearest_enemy() -> Dummy:
-	var best: Dummy = null
+func _nearest_enemy() -> Node3D:
+	var best: Node3D = null
 	var best_dist := attack_range
-	for node in get_tree().get_nodes_in_group("enemies"):
-		var enemy := node as Dummy
-		if enemy and enemy.is_alive():
-			var dist := global_position.distance_to(enemy.global_position)
+	for node in get_tree().get_nodes_in_group("units"):
+		if is_hostile(node) and node.is_alive():
+			var dist := global_position.distance_to(node.global_position)
 			if dist <= best_dist:
-				best = enemy
+				best = node
 				best_dist = dist
 	return best
 
 
-func _die() -> void:
+## Team ring at the feet (gold for the player) and a health bar overhead,
+## tilted to face the top-down camera.
+func _build_overhead() -> void:
+	var color: Color = PLAYER_COLOR if is_player else TEAM_COLORS[team]
+	var ring := MeshInstance3D.new()
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.6
+	torus.outer_radius = 0.74
+	torus.rings = 32
+	torus.ring_segments = 4
+	ring.mesh = torus
+	ring.position.y = 0.04
+	ring.scale = Vector3(1, 0.15, 1)
+	ring.material_override = _flat(color)
+	add_child(ring)
+
+	var bar := Node3D.new()
+	bar.position.y = 3.1
+	bar.rotation_degrees.x = -54.0
+	add_child(bar)
+	var back := MeshInstance3D.new()
+	back.mesh = _quad(Vector2(1.3, 0.16))
+	back.material_override = _flat(Color(0.05, 0.05, 0.05, 0.85))
+	bar.add_child(back)
+	_bar_pivot = Node3D.new()
+	_bar_pivot.position = Vector3(-0.62, 0, 0.005)
+	bar.add_child(_bar_pivot)
+	var fill := MeshInstance3D.new()
+	fill.mesh = _quad(Vector2(1.24, 0.1))
+	fill.position.x = 0.62
+	fill.material_override = _flat(color)
+	_bar_pivot.add_child(fill)
+	health_changed.connect(_on_bar_health)
+
+
+func _on_bar_health(value: float, maximum: float, _shield: float) -> void:
+	_bar_pivot.scale.x = clampf(value / maximum, 0.001, 1.0)
+
+
+static func _flat(color: Color) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = color
+	if color.a < 1.0:
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.no_depth_test = true
+	material.render_priority = 1
+	return material
+
+
+static func _quad(size: Vector2) -> QuadMesh:
+	var mesh := QuadMesh.new()
+	mesh.size = size
+	return mesh
+
+
+func _die(killer: Hero = null) -> void:
 	hp = 0.0
+	deaths += 1
 	if in_form:
 		_end_form()
 	_end_spree()
 	_dash_time = 0.0
 	_dead_time = respawn_time
 	visible = false
-	died.emit()
+	died.emit(killer)
 
 
 func _respawn() -> void:

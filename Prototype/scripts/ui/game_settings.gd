@@ -22,6 +22,19 @@ func _ready() -> void:
 	apply()
 
 
+## Platform defaults: phones get 90% 3D resolution and 2 shadow cascades.
+func reset_to_defaults() -> void:
+	master_volume = 1.0
+	music_volume = 0.8
+	sfx_volume = 1.0
+	render_scale = Platform.render_scale()
+	shadow_cascades = Platform.shadow_cascades()
+	fps_cap = 60
+	show_fps = false
+	save_settings()
+	apply()
+
+
 func load_settings() -> void:
 	var file := ConfigFile.new()
 	if file.load(PATH) != OK:

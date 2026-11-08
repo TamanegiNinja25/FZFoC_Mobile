@@ -4,6 +4,9 @@ extends CharacterBody3D
 
 signal died
 
+## Neutral: every hero can attack it.
+var team := -1
+
 @export var max_hp := 600.0
 @export var damage := 25.0
 @export var attack_interval := 1.5
@@ -18,6 +21,7 @@ var _label: Label3D
 
 func _ready() -> void:
 	add_to_group("enemies")
+	add_to_group("units")
 	hp = max_hp
 
 	var shape := CollisionShape3D.new()
@@ -61,17 +65,17 @@ func _physics_process(delta: float) -> void:
 			return
 
 
-## Returns {dealt: float, killed: bool}.
-func take_damage(amount: float) -> Dictionary:
+## Returns {dealt, killed, bounty}.
+func take_damage(amount: float, _attacker: Node = null) -> Dictionary:
 	if not is_alive():
-		return {"dealt": 0.0, "killed": false}
+		return {"dealt": 0.0, "killed": false, "bounty": 0.0}
 	var dealt := minf(amount, hp)
 	hp -= dealt
 	_update_label()
 	if hp <= 0.0:
 		_die()
-		return {"dealt": dealt, "killed": true}
-	return {"dealt": dealt, "killed": false}
+		return {"dealt": dealt, "killed": true, "bounty": 0.0}
+	return {"dealt": dealt, "killed": false, "bounty": 0.0}
 
 
 func is_alive() -> bool:

@@ -82,11 +82,12 @@ func _ready() -> void:
 	_button.offset_right = -40
 	_button.offset_bottom = -40
 	_button.set_meta("sfx", "confirm")
+	_button.add_theme_font_size_override("font_size", 22)
 	_button.pressed.connect(func(): hero.try_transform())
 	root.add_child(_button)
 
 	# Skill buttons in an arc around TRANSFORM: skill 1 to its left, skill 2 above.
-	for spec in [[0, Rect2(-430, -136, 150, 96)], [1, Rect2(-240, -256, 180, 96)]]:
+	for spec in [[0, Rect2(-480, -136, 200, 96)], [1, Rect2(-250, -256, 200, 96)]]:
 		var skill_button := Button.new()
 		var r: Rect2 = spec[1]
 		skill_button.anchor_left = 1.0
@@ -97,6 +98,8 @@ func _ready() -> void:
 		skill_button.offset_top = r.position.y
 		skill_button.offset_right = r.position.x + r.size.x
 		skill_button.offset_bottom = r.position.y + r.size.y
+		skill_button.add_theme_font_size_override("font_size", 20)
+		skill_button.clip_text = true
 		var index: int = spec[0]
 		skill_button.pressed.connect(func(): hero.try_skill(index))
 		root.add_child(skill_button)

@@ -37,7 +37,7 @@ func _process(_delta: float) -> bool:
 			_hero = _main.hero
 			if _hero == null:
 				return false
-			_hero.died.connect(func(): _deaths += 1)
+			_hero.died.connect(func(_killer): _deaths += 1)
 			for node in _main.get_children():
 				if node is Dummy:
 					node.died.connect(func(): _kills += 1)

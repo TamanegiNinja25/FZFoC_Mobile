@@ -60,6 +60,8 @@ func play_slam(radius: float, hot: bool) -> void:
 	var torus := TorusMesh.new()
 	torus.inner_radius = 0.85
 	torus.outer_radius = 1.0
+	torus.rings = 40
+	torus.ring_segments = 4
 	ring.mesh = torus
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -122,6 +124,8 @@ static func _capsule(radius: float, height: float) -> CapsuleMesh:
 	var mesh := CapsuleMesh.new()
 	mesh.radius = radius
 	mesh.height = height
+	mesh.radial_segments = 24
+	mesh.rings = 6
 	return mesh
 
 
@@ -129,6 +133,8 @@ static func _sphere(radius: float) -> SphereMesh:
 	var mesh := SphereMesh.new()
 	mesh.radius = radius
 	mesh.height = radius * 2.0
+	mesh.radial_segments = 24
+	mesh.rings = 12
 	return mesh
 
 
@@ -138,6 +144,8 @@ static func _dome(radius: float) -> SphereMesh:
 	mesh.radius = radius
 	mesh.height = radius
 	mesh.is_hemisphere = true
+	mesh.radial_segments = 20
+	mesh.rings = 6
 	return mesh
 
 
@@ -145,6 +153,8 @@ static func _torus(inner: float, outer: float) -> TorusMesh:
 	var mesh := TorusMesh.new()
 	mesh.inner_radius = inner
 	mesh.outer_radius = outer
+	mesh.rings = 24
+	mesh.ring_segments = 8
 	return mesh
 
 
@@ -159,4 +169,6 @@ static func _cylinder(radius: float, height: float) -> CylinderMesh:
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius
 	mesh.height = height
+	mesh.radial_segments = 20
+	mesh.rings = 1
 	return mesh

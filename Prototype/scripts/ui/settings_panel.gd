@@ -27,12 +27,31 @@ func _ready() -> void:
 	_tabs.add_child(_audio_tab())
 	_tabs.add_child(_video_tab())
 
+	var actions := HBoxContainer.new()
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER
+	actions.add_theme_constant_override("separation", 20)
+	column.add_child(actions)
+	var reset := Button.new()
+	reset.text = "Reset to Defaults"
+	reset.custom_minimum_size = Vector2(280, 64)
+	reset.pressed.connect(_reset)
+	actions.add_child(reset)
 	var back := Button.new()
 	back.text = "Back"
 	back.custom_minimum_size = Vector2(240, 64)
-	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back.pressed.connect(func(): closed.emit())
-	column.add_child(back)
+	actions.add_child(back)
+
+
+## Restores platform defaults and rebuilds the tabs so the controls show them.
+func _reset() -> void:
+	GameSettings.reset_to_defaults()
+	var current := _tabs.current_tab
+	for child in _tabs.get_children():
+		child.queue_free()
+	_tabs.add_child(_audio_tab())
+	_tabs.add_child(_video_tab())
+	_tabs.set_deferred("current_tab", current)
 
 
 func _audio_tab() -> Control:
