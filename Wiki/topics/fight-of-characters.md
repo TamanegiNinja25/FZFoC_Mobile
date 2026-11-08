@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Warcraft III modding
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction, 2026-11-08-spec-hero-transformations]
 updated: 2026-11-08
 ---
 # Fight Of Characters
@@ -16,12 +16,12 @@ A Korean-made, 4v4 anime crossover hero arena map for Warcraft III: The Frozen T
 ## How it plays
 - Two teams of four, Red Team vs Blue Team ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - A kill-tracking scoreboard with 21 kill handlers, team victory/defeat conditions, a timer and hero levelling make up the core loop ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)) — see [hero arena genre](hero-arena-genre.md).
-- Heroes can transform mid-fight; each form is a separate hero unit ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)) — see [hero transformations](hero-transformations.md).
+- 11 of 25 playable heroes can transform mid-fight, mostly through a learned, timed, zero-mana form ability on a long cooldown; transformed heroes pay out more kill gold ([src](../sources/2026-11-08-spec-hero-transformations.md)) — see [hero transformations](hero-transformations.md).
 
 ## Content
 | Part | Count |
 |---|---|
-| Hero forms | 36 |
+| Playable heroes | 25, of which 11 can transform — see [Conflicts](#conflicts) |
 | Custom units | 160 (plus 91 modified stock units) |
 | Custom abilities | 246 (plus 56 modified stock abilities) |
 | Custom items | 59 |
@@ -44,6 +44,7 @@ Each of 45 abilities plays its own short cast clip; hero voices, music and ambie
 
 ## Conflicts
 - **What the 60 imported MP3s are.** The feasibility analysis described them as "60 MP3 music tracks" ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)). The later sound-event analysis measured them as 0.2–6.1 s clips (median 0.8 s) played as ability shouts and stings ([src](../sources/2026-11-08-ui-and-audio-direction.md)). The later source is a direct measurement, so this wiki treats them as **short clips**. The first source's other figures are unaffected.
+- **How many heroes.** The feasibility analysis counted "36 hero forms" ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)), using hero-style unit IDs as a heuristic. The transformation spec counts **25 playable heroes** from the script's hero-pick list, 11 of which have alternate forms ([src](../sources/2026-11-08-spec-hero-transformations.md)). The two count different things, and the spec's method is direct, so this wiki uses **25 playable heroes**. The total number of form units isn't settled by either source.
 
 ## Related
 - [UI and audio direction](ui-and-audio-direction.md)

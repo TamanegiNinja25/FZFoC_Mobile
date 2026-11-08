@@ -6,16 +6,16 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 3 sources · 7 topic articles · 3 categories · 2 recorded conflicts
+**Status:** 4 sources · 7 topic articles · 3 categories · 3 recorded conflicts
 
 ## Topics
 
 ### Warcraft III modding
-- [Fight Of Characters](topics/fight-of-characters.md) — Korean 4v4 anime crossover hero arena map; 36 hero forms, 246 abilities, unpublishable outside modding because of copyrighted characters.
+- [Fight Of Characters](topics/fight-of-characters.md) — Korean 4v4 anime crossover hero arena map; 25 playable heroes (11 can transform), 246 abilities, unpublishable outside modding because of copyrighted characters.
 - [Warcraft III map format](topics/warcraft-iii-map-format.md) — Maps are MPQ archives holding script, data and assets; how protection scrambles them and how to check a map's script for harm.
 
 ### Game design
-- [Hero transformations](topics/hero-transformations.md) — Heroes changing into stronger forms mid-fight; the standout mechanic of Fight Of Characters and a candidate for an original game.
+- [Hero transformations](topics/hero-transformations.md) — Three transformation models in Fight Of Characters (timed form, stage chain, awakening) with full numbers, and a keep/change/drop design direction for a mobile 3v3.
 - [Hero arena genre](topics/hero-arena-genre.md) — Team hero fights with items and kill-based victory; adapting it to mobile with 3v3, short matches and touch controls; local Wi-Fi multiplayer in Godot or Unity.
 - [UI and audio direction](topics/ui-and-audio-direction.md) — Keeping the classic feel with original assets: UI and sound patterns, how the map uses sound, and where to source replacements.
 
@@ -28,6 +28,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 
 - [Using free Sketchfab assets and local multiplayer](sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md) — Per-model Sketchfab licences, the fan-art catch, best uses of free assets, and server-free local multiplayer.
 - [UI and audio direction](sources/2026-11-08-ui-and-audio-direction.md) — Why the map's UI and audio can't be reused, the patterns behind the nostalgia, asset sources, and a sound-event analysis correcting the "music tracks" claim.
+- [Hero transformations — mechanic spec](sources/2026-11-08-spec-hero-transformations.md) — Clean-room analyst spec: 11 of 25 heroes transform via timed forms, a stage chain or an awakening; numbers, archetypes, bounties, mobile design notes.
 
 ## Admin
 - [Log](log.md) — what changed and when

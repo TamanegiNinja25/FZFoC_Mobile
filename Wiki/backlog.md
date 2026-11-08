@@ -18,11 +18,18 @@ Marked *(inference)* in the wiki; each needs a RAW source:
 - A public release would still need online matchmaking — [Hero arena genre](topics/hero-arena-genre.md#local-multiplayer)
 - Long-press tooltips as the mobile tooltip pattern; transformation as its own sound moment — [UI and audio direction](topics/ui-and-audio-direction.md)
 
+## Needs runtime verification
+Claims a source marks as its own inference about Warcraft III engine behaviour; confirming them would need runtime observation (REA or play):
+- Timed forms can't be cancelled early; level, XP, items and shared skills carry over through a morph; when the form cooldown starts — [Hero transformations](topics/hero-transformations.md)
+- Hero A's form duration and cooldown (60 s / 180 s, stock defaults) — [Hero transformations](topics/hero-transformations.md)
+
 ## Recorded conflicts
 - MP3s: "music tracks" vs measured 0.2–6.1 s clips — resolved in favour of the measurement; see [Fight Of Characters](topics/fight-of-characters.md#conflicts) and [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md#conflicts).
+- Hero count: "36 hero forms" vs 25 playable heroes — different counting methods; the wiki uses 25 playable heroes; see [Fight Of Characters](topics/fight-of-characters.md#conflicts).
 
 ## Open questions
-- Which mechanics define Fight Of Characters' appeal and should be prototyped first? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
+- ~~Which mechanics define Fight Of Characters' appeal and should be prototyped first?~~ Narrowed: hero transformations are the core candidate — see [Hero transformations](topics/hero-transformations.md#design-direction-for-fzfoc-mobile). Still open: what else belongs in the first prototype.
+- Transformation design: meter or cooldown? Every hero or only some? Stages per match or per activation? Does a form end on death or crowd control? ([source](sources/2026-11-08-spec-hero-transformations.md))
 - What setting and art style would make an original roster distinctive? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 - Target casual short sessions, or competitive ranked play? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 

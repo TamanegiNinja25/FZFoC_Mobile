@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Legal and IP
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction, 2026-11-08-spec-hero-transformations]
 updated: 2026-11-08
 ---
 # Copyright vs game mechanics
@@ -21,7 +21,7 @@ Basis: the source's feasibility assessment ([src](../sources/2026-11-08-fight-of
 ## Applied to Fight Of Characters
 Three blockers to a direct mobile port ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)):
 1. **Engine and assets:** the map runs only in Warcraft III, which has no mobile version and isn't licensed out; most of its art is Blizzard's, and Blizzard's licence forbids redistributing it.
-2. **Characters and audio:** all 36 hero forms belong to Japanese publishers and studios (Shueisha, Toei, Type-Moon and others); the 60 imported MP3 clips are likely copyrighted recordings too (see [Conflicts](#conflicts)). App stores remove unlicensed games like this, even free ones, and licensing so many franchises is impractical.
+2. **Characters and audio:** all 25 playable heroes ([src](../sources/2026-11-08-spec-hero-transformations.md)) and their forms belong to Japanese publishers and studios (Shueisha, Toei, Type-Moon and others); the 60 imported MP3 clips are likely copyrighted recordings too (see [Conflicts](#conflicts)). App stores remove unlicensed games like this, even free ones, and licensing so many franchises is impractical.
 3. **Code:** the script is scrambled, belongs to the original modders and is written for Blizzard's engine.
 
 ## What that leaves
