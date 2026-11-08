@@ -23,6 +23,9 @@ func _ready() -> void:
 	_build_backdrop()
 	_build_ui()
 	Sfx.play_music("menu")
+	var checker := UpdateChecker.new()
+	checker.update_available.connect(_on_update_available)
+	add_child(checker)
 
 
 func _process(delta: float) -> void:
@@ -113,7 +116,7 @@ func _build_ui() -> void:
 	_title.text = "FZFoC"
 	column.add_child(_title)
 	var subtitle := Label.new()
-	subtitle.text = "Hero Arena — working title"
+	subtitle.text = "Hero Arena — working title · v%s" % UpdateChecker.current_version()
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_color_override("font_color", UiTheme.MUTED)
 	column.add_child(subtitle)
@@ -174,6 +177,19 @@ func _center(control: Control) -> void:
 	control.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	control.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_ui.add_child(control)
+
+
+## A newer release exists on GitHub: offer it under the menu buttons.
+func _on_update_available(version: String, url: String) -> void:
+	var button := Button.new()
+	button.text = "Update available: %s — Download" % version
+	button.custom_minimum_size = Vector2(380, 56)
+	button.add_theme_font_size_override("font_size", 20)
+	button.add_theme_color_override("font_color", UiTheme.GOLD_BRIGHT)
+	button.set_meta("sfx", "confirm")
+	button.pressed.connect(func(): OS.shell_open(url))
+	_main_panel.get_child(0).add_child(button)
+	UiTheme.pop_in(button)
 
 
 func _on_net_match_starting(teams: Dictionary) -> void:

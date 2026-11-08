@@ -6,6 +6,12 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Release pipeline and README
+- Root `README.md` rewritten for the playable alpha (v0.5.0): download badge pointing at `releases/latest/download/FZFoC.apk`, install and update steps, feature and hero tables, phone performance, release instructions, refreshed roadmap.
+- Added `.github/workflows/release.yml`: a `v*` tag builds the APK with Godot 4.7.2 on Linux and publishes a GitHub Release; the tag sets the game version and Android version code.
+- Game: version 0.5.0 (code 500) shown in the menu; an in-game update check offers newer releases (`Prototype/scripts/ui/update_checker.gd`, test `update_check_test.gd`). `export_presets.cfg` is now committed (it holds no credentials in Godot 4).
+- Pending: owner adds the `DEBUG_KEYSTORE_BASE64` secret so releases install as updates.
+
 ## 2026-11-08 — Ingest (design + implementation)
 - Ingested `2026-11-08-phase-5-heroes-and-music.md` (prototype commit 5e7d9c9); source note created; [Roster](topics/roster.md) gains Ryn and Barrow; [UI and audio direction](topics/ui-and-audio-direction.md) gains music; backlog shows all five phases complete; index and README roadmap updated.
 

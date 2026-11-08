@@ -149,13 +149,19 @@ MediaTek MT6789, Mali-G57 MC2 (Vulkan 1.1), Android 14, 1080×2460 screen at 60 
 A longer 10-step run showed the phone slowing mid-run (GPU and CPU times both rose, e.g. 75% read 14.7 ms instead of 6.2 ms); those later steps were discarded. Long runs need a fixed order and repeats to catch throttling.
 
 ### Building for Android
-Export presets live in `export_presets.cfg` (not committed: it can hold signing details). Two presets: **Android** (the playable build) and **Android Benchmark** (opens the stress test, runs the benchmark, writes `BENCH` lines to the log, quits).
+Export presets live in `export_presets.cfg` (committed — Godot 4 keeps signing credentials in `.godot/` or Editor Settings, never in this file). Two presets: **Android** (the playable build) and **Android Benchmark** (opens the stress test, runs the benchmark, writes `BENCH` lines to the log, quits).
 ```
-Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype --export-debug "Android" build/fzfoc-prototype.apk
-adb install -r Prototype/build/fzfoc-prototype.apk
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype --export-debug "Android" build/FZFoC.apk
+adb install -r Prototype/build/FZFoC.apk
 adb logcat -s godot     # benchmark results appear here
 ```
 Requirements: Godot 4.7.2 export templates, Android SDK, a JDK path in Godot's Editor Settings, a debug keystore, and USB debugging on the phone.
+
+### Releases and the update notice
+- **Version:** `application/config/version` in `project.godot` (shown under the menu title) and `version/code` in the Android preset (major×10000 + minor×100 + patch, e.g. 0.5.0 → 500). Android only installs an update when the code goes up.
+- **Release build:** pushing a `v*` tag runs `.github/workflows/release.yml`, which stamps both values from the tag, exports with Godot on Linux and publishes a GitHub Release with `FZFoC.apk`. `https://github.com/TamanegiNinja25/FrozenThrone_FightOfTheCharacters/releases/latest/download/FZFoC.apk` always serves the newest one.
+- **Update notice** (`scripts/ui/update_checker.gd`): the main menu asks the GitHub API for the latest release (8 s timeout, silent when offline or when there are no releases). If the tag is newer than the running version, a gold **Update available** button opens the release page.
+- **Signing:** updates only install over an app signed with the same key. Set the repository secret `DEBUG_KEYSTORE_BASE64` so cloud builds share one key; local builds use the machine's own debug keystore, so a phone switching between local and cloud builds needs one uninstall.
 
 ## Test
 ```
@@ -168,6 +174,7 @@ Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/arena_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/shop_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/roster_test.gd
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/update_check_test.gd
 ```
 The balance test measures how long the meter takes to fill against one dummy. Last result: **87.2 s** (target 90 ± 15 s), 5 kills, no deaths.
 
