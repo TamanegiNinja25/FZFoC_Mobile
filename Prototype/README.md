@@ -23,7 +23,7 @@ Press **STRESS TEST** in the game, or open `scenes/stress_test.tscn` and press F
 
 On-screen toggles: LOD on/off, effects, shadows (2 / 4 cascades / off), 6/12 heroes, game/close camera, back. The top-left readout shows FPS, average and worst frame time, triangles and draw calls actually rendered, the device, GPU, and a verdict (60 FPS smooth / 30 FPS playable / too slow).
 
-**Benchmark mode** runs six configurations (including 4 vs 2 cascades) for 3 s each, prints results and quits:
+**Benchmark mode** runs eight configurations (4 vs 2 cascades, LOD off, 75% resolution, no effects) for 3 s each, prints FPS, frame times, GPU/CPU render time and triangles, and quits:
 ```
 Godot_v4.7.2-stable_win64_console.exe --path Prototype --disable-vsync res://scenes/stress_test.tscn -- --benchmark
 ```
@@ -50,7 +50,32 @@ Cascade comparison (same PC, benchmark mode):
 | 12 heroes, LOD off | — | 407 FPS, 971k tris |
 
 2 cascades halve shadow geometry; with LOD off that's +12% FPS on this PC. At the game camera with LOD on the PC isn't geometry-bound, so the small difference is noise.
-- To test on a phone, export the project to Android or iOS from Godot (Project → Export) and press STRESS TEST on the device.
+### Phone results — Infinix NOTE 30 (2026-11-08)
+MediaTek MT6789, Mali-G57 MC2 (Vulkan 1.1), Android 14, 1080×2460 screen at 60 Hz. The driver only offers vsync on, so FPS caps at 60; **GPU ms** (measured by the engine) shows the real cost per frame. Budget at 60 FPS: 16.7 ms.
+
+| Configuration | FPS | Worst frame | GPU | Triangles |
+|---|---|---|---|---|
+| 6 heroes, game camera, LOD on, 4 cascades | 60.1 | 16.7 ms | 13.9 ms | 18k |
+| 6 heroes, game camera, LOD on, **2 cascades (phone default)** | **60.0** | **16.7 ms** | **13.7 ms** | 9k |
+| 6 heroes, close camera, 2 cascades | 60.0 | 16.7 ms | 14.9 ms | 32k |
+| 6 heroes, LOD off, 4 cascades | 56.6 | 28.9 ms | 16.4 ms | 971k |
+| 6 heroes, LOD off, 2 cascades | 60.0 | 16.7 ms | 15.2 ms | 486k |
+| 12 heroes, LOD off, 2 cascades | 52.7 | 25.7 ms | 17.8 ms | 971k |
+| 6 heroes, LOD on, 2 cascades, **75% render resolution** | 60.1 | 16.7 ms | **6.2 ms** | 9k |
+| 6 heroes, LOD on, 2 cascades, no particle effects | 60.0 | 16.7 ms | 13.7 ms | 8k |
+
+- **Realistic settings hold a locked 60 FPS** with no dropped frames, but with only ~3 ms of GPU headroom.
+- **The phone is pixel-bound, not triangle-bound:** 9k → 486k triangles adds only 1.5 ms; rendering 75% resolution cuts GPU time by 54%. Particles cost almost nothing.
+- Results were stable across four runs (within ~0.5 FPS); phone thermal status stayed normal.
+
+### Building for Android
+Export presets live in `export_presets.cfg` (not committed: it can hold signing details). Two presets: **Android** (the playable build) and **Android Benchmark** (opens the stress test, runs the benchmark, writes `BENCH` lines to the log, quits).
+```
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype --export-debug "Android" build/fzfoc-prototype.apk
+adb install -r Prototype/build/fzfoc-prototype.apk
+adb logcat -s godot     # benchmark results appear here
+```
+Requirements: Godot 4.7.2 export templates, Android SDK, a JDK path in Godot's Editor Settings, a debug keystore, and USB debugging on the phone.
 
 ## Test
 ```

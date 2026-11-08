@@ -30,6 +30,10 @@ var _benchmark := "--benchmark" in OS.get_cmdline_user_args()
 var _bench_step := 0
 var _bench_clock := 0.0
 var _bench_samples: Array[float] = []
+## GPU and CPU render time per frame, measured by the engine. Unlike FPS this
+## isn't capped by vsync, so it shows the headroom left on a 60 Hz phone.
+var _bench_gpu: Array[float] = []
+var _bench_cpu: Array[float] = []
 
 var _sun: DirectionalLight3D
 var _camera: Camera3D
@@ -38,6 +42,7 @@ var _buttons := {}
 
 
 func _ready() -> void:
+	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	hero_mesh = _build_hero_mesh()
 	_build_world()
 	_set_hero_count(6)
@@ -66,6 +71,9 @@ const BENCH_STEPS := [
 	{"label": "6 heroes, LOD off, 4 casc.", "heroes": 6, "lod": false, "close": false, "cascades": 4},
 	{"label": "6 heroes, LOD off, 2 casc.", "heroes": 6, "lod": false, "close": false, "cascades": 2},
 	{"label": "12 heroes, LOD off, 2 casc.", "heroes": 12, "lod": false, "close": false, "cascades": 2},
+	# Isolate per-pixel cost: same scene as step 2 with fewer pixels, or without particles.
+	{"label": "6 heroes, LOD on, 2 casc., 75% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 0.75},
+	{"label": "6 heroes, LOD on, 2 casc., no effects", "heroes": 6, "lod": true, "close": false, "cascades": 2, "effects": false},
 ]
 
 
@@ -77,6 +85,10 @@ func _apply_config(config: Dictionary) -> void:
 	_close_camera = config.close
 	_place_camera()
 	set_shadow_cascades(config.cascades)
+	get_viewport().scaling_3d_scale = config.get("scale", 1.0)
+	var effects_wanted: bool = config.get("effects", true)
+	if _effects_on != effects_wanted:
+		_toggle_effects()
 
 
 func _tick_benchmark(delta: float) -> void:
@@ -85,6 +97,9 @@ func _tick_benchmark(delta: float) -> void:
 	_bench_clock += delta
 	if _bench_clock > 1.0:  # skip the first second of each step (warm-up)
 		_bench_samples.append(delta)
+		var rid := get_viewport().get_viewport_rid()
+		_bench_gpu.append(RenderingServer.viewport_get_measured_render_time_gpu(rid))
+		_bench_cpu.append(RenderingServer.viewport_get_measured_render_time_cpu(rid))
 	if _bench_clock < 4.0:
 		return
 	var total := 0.0
@@ -94,15 +109,26 @@ func _tick_benchmark(delta: float) -> void:
 		worst = maxf(worst, t)
 	var avg := total / maxf(_bench_samples.size(), 1)
 	var triangles := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
-	print("BENCH | %-40s | %5.1f FPS | avg %5.2f ms | worst %5.2f ms | %4dk tris" % [BENCH_STEPS[_bench_step].label, 1.0 / avg, avg * 1000.0, worst * 1000.0, triangles / 1000])
+	var gpu_ms := _average(_bench_gpu)
+	var cpu_ms := _average(_bench_cpu)
+	print("BENCH | %-40s | %5.1f FPS | avg %5.2f ms | worst %5.2f ms | GPU %5.2f ms | CPU %5.2f ms | %4dk tris" % [BENCH_STEPS[_bench_step].label, 1.0 / avg, avg * 1000.0, worst * 1000.0, gpu_ms, cpu_ms, triangles / 1000])
 	_bench_step += 1
 	_bench_clock = 0.0001
 	_bench_samples.clear()
+	_bench_gpu.clear()
+	_bench_cpu.clear()
 	if _bench_step < BENCH_STEPS.size():
 		_apply_config(BENCH_STEPS[_bench_step])
 	else:
 		print("BENCH | device: %s | GPU: %s" % [OS.get_model_name(), RenderingServer.get_video_adapter_name()])
 		get_tree().quit()
+
+
+func _average(values: Array[float]) -> float:
+	var total := 0.0
+	for v in values:
+		total += v
+	return total / maxf(values.size(), 1)
 
 
 ## Builds a ~40k-triangle capsule and lets Godot generate LODs for it,

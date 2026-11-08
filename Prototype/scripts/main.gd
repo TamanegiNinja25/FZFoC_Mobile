@@ -15,6 +15,11 @@ var camera: Camera3D
 
 
 func _ready() -> void:
+	# Exported builds can't open a scene named on the command line, so the
+	# benchmark build passes only `-- --benchmark` and is redirected here.
+	if "--benchmark" in OS.get_cmdline_user_args():
+		get_tree().change_scene_to_file.call_deferred("res://scenes/stress_test.tscn")
+		return
 	_register_inputs()
 	_build_world()
 
@@ -33,6 +38,8 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	if hero == null:
+		return
 	camera.global_position = hero.global_position + CAMERA_OFFSET
 	camera.look_at(hero.global_position, Vector3.UP)
 
