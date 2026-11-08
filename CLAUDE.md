@@ -139,7 +139,7 @@ Nobody is there to answer questions during a scheduled run.
 - **mechanics-analyst** (`.claude/agents/mechanics-analyst.md`) — studies reference games and maps, with REA tools when installed, and writes clean-room mechanic specs to `Outputs/`. Treat its specs like any output: they aren't sources. If the user moves a spec into `RAW/`, ingest it normally.
 
 ## Version control
-This folder is the git repository `TamanegiNinja25/FZFoC_Mobile` (public, branch `main`). Git history is the second record of change, alongside `log.md`.
+This folder is the git repository `TamanegiNinja25/FrozenThrone_FightOfTheCharacters` (public, branch `main`). Git history is the second record of change, alongside `log.md`.
 
 - **Commit after every workflow** that changes files — ingest, guided ingest, each first-build pass, filing back an answer, health check, cleanup. One workflow, one commit.
 - **Before committing:**
