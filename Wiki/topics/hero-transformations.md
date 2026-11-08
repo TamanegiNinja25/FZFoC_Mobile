@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-spec-hero-transformations, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-spec-hero-transformations, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty]
 updated: 2026-11-08
 ---
 # Hero transformations
@@ -62,7 +62,7 @@ One hero (B) has HP-threshold buffs rather than a form: at ≤10% HP it berserks
 | Out of combat (after 5 s) | −0.5/s | — |
 
   Locked during the form. Measured in the prototype: **87.2 s** fill against one dummy ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)).
-- **Tension to resolve:** the spec recommends a higher bounty on transformed heroes and calls it "a comeback lever" ([src](../sources/2026-11-08-spec-hero-transformations.md)), but the owner ruled out comeback mechanics ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)). A transformed-hero bounty could instead be framed as risk/reward for the transformed player. Keep it, drop it or reframe it? Awaiting the owner.
+- **2026-11-08 — Transformed-hero bounty kept as risk/reward.** The spec called a higher bounty "a comeback lever" ([src](../sources/2026-11-08-spec-hero-transformations.md)), which clashed with the owner's no-comeback rule ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)). Resolved: the bounty stays, framed as risk/reward for the transformed player, who is stronger but a richer target. Prototype placeholder: 300 gold, ×1.75 (525) in form, shown on the HUD ([src](../sources/2026-11-08-decision-transformed-bounty.md)).
 
 ### Spec recommendations
 From the spec's design notes for a mobile 3v3, 5–8 minute match ([src](../sources/2026-11-08-spec-hero-transformations.md)):

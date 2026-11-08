@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty]
 updated: 2026-11-08
 ---
 # Hero arena genre
@@ -36,7 +36,9 @@ Decided for FZFoC Mobile: a **kill-spree economy** that rewards aggression, with
 - A spree builds when the next kill lands within 15 s; each step adds +2 gold per second while it lasts (cap ×10).
 - Dying or missing the window ends the spree.
 
-Without a comeback mechanic, a team that gets ahead stays ahead, so whether this snowballs too hard is an open question *(inference)*. See also the transformed-hero bounty in [Hero transformations](hero-transformations.md#risk-and-reward).
+- **Hero bounty:** a hero is worth 300 gold to its killer, ×1.75 while transformed — risk/reward for the transformed player, not a comeback lever ([src](../sources/2026-11-08-decision-transformed-bounty.md)). See [Hero transformations](hero-transformations.md#decisions).
+
+Without a comeback mechanic, a team that gets ahead stays ahead, so whether this snowballs too hard is an open question *(inference)*.
 
 ## Local multiplayer
 For an offline project played with friends, online matchmaking and servers are unnecessary ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)):

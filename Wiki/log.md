@@ -6,6 +6,13 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (decision)
+- Ingested 1 new RAW file: `2026-11-08-decision-transformed-bounty.md`.
+- Created source note [decision-transformed-bounty](sources/2026-11-08-decision-transformed-bounty.md).
+- **Resolved the pending approval:** the transformed-hero bounty is kept as risk/reward. [Hero transformations](topics/hero-transformations.md#decisions) tension note replaced with the decision; [Hero arena genre](topics/hero-arena-genre.md#economy) Economy section gains the bounty.
+- [Backlog](backlog.md): nothing awaiting approval; new question on scaling the multiplier by form. [Index](index.md) updated.
+- Prototype implements the bounty (commit d69dd38).
+
 ## 2026-11-08 — Ingest (decisions)
 - Ingested 1 new RAW file: `2026-11-08-decisions-charge-rule-and-spree.md` — the owner's meter direction plus the prototype's rates and measured results.
 - Created source note [decisions-charge-rule-and-spree](sources/2026-11-08-decisions-charge-rule-and-spree.md).

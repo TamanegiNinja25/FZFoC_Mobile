@@ -6,9 +6,9 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 6 sources · 7 topic articles · 3 categories · 3 recorded conflicts · 1 item awaiting approval
+**Status:** 7 sources · 7 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
 
-**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md))
+**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md))
 
 ## Topics
 
@@ -33,6 +33,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Hero transformations — mechanic spec](sources/2026-11-08-spec-hero-transformations.md) — Clean-room analyst spec: 11 of 25 heroes transform via timed forms, a stage chain or an awakening; numbers, archetypes, bounties, mobile design notes.
 - [Decisions — transformation meter and Godot engine](sources/2026-11-08-decisions-meter-and-godot.md) — The owner's decisions: a charge meter unlocks forms; the prototype is built in Godot.
 - [Decisions — meter charge rule and kill-spree economy](sources/2026-11-08-decisions-charge-rule-and-spree.md) — Owner's tuning direction, the prototype's rates, and the measured 87.2 s fill.
+- [Decision — transformed-hero bounty as risk/reward](sources/2026-11-08-decision-transformed-bounty.md) — Bounty kept, reframed from comeback lever to risk/reward; prototype 300 gold ×1.75 in form.
 
 ## Admin
 - [Log](log.md) — what changed and when
