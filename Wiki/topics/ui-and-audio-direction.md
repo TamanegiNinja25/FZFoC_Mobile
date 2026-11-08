@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-ui-and-audio-direction]
+sources: [2026-11-08-ui-and-audio-direction, 2026-11-08-game-build-plan-and-phase-1]
 updated: 2026-11-08
 ---
 # UI and audio direction
@@ -39,6 +39,13 @@ What creates the feeling ([src](../sources/2026-11-08-ui-and-audio-direction.md)
 - On phones, play your own team's casts in full and enemy casts quieter and positional, so overlapping announcements don't turn to mush ([src](../sources/2026-11-08-ui-and-audio-direction.md)).
 - A transformation deserves its own big sound moment — see [hero transformations](hero-transformations.md) *(inference)*.
 - A detailed per-event shopping list exists as an analyst spec: `Outputs/2026-11-08-spec-sound-events.md`.
+
+## Menus in the prototype
+Phase 1 of the game build put the UI direction into practice ([src](../sources/2026-11-08-game-build-plan-and-phase-1.md)):
+- **Main menu:** Single Player · Play with Friends · Settings · Quit on a stone panel with gold trim and parchment text, over Kindled Vael in an ember-lit scene — the classic fantasy-RTS feel, built from scratch, not a replica of any game's UI.
+- **Hero select by category** (Bruiser / Speed / Giant) with locked planned slots and a scrolling detail panel.
+- **Settings** (audio buses; 3D resolution, shadows, FPS cap) in the main menu and in game; **pause menu** with Resume · Settings · Quit to Menu · Quit Game.
+- A phone check caught hero-select text pushing buttons off screen; detail text now scrolls in a fixed box — long text needs a fixed area on phones *(inference)*.
 
 ## Sources for assets
 Licences vary per item; record each in the credits file ([src](../sources/2026-11-08-ui-and-audio-direction.md)).

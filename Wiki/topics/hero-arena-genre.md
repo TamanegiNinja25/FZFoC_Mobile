@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1]
 updated: 2026-11-08
 ---
 # Hero arena genre
@@ -29,6 +29,12 @@ Changes the source recommends ([src](../sources/2026-11-08-fight-of-characters-m
 - Much of the original's feel comes from Warcraft III's built-in systems (terrain, pathfinding, right-click unit control); a mobile version must build these itself ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - Suggested tools: Unity or Godot, with a multiplayer service such as Photon or Nakama ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - Rough effort: an offline prototype with 2–3 heroes in weeks; a polished online release in many months for a small team, with art usually the biggest cost ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
+
+## Modes
+The planned game has two modes, reached from the main menu ([src](../sources/2026-11-08-game-build-plan-and-phase-1.md)):
+- **Single Player:** 3v3 against adaptive AI bots on an original arena map (Phase 2).
+- **Play with Friends:** host/join over local Wi-Fi with Godot's built-in multiplayer (Phase 4).
+- Item shop with categories follows in Phase 3; heroes 2–3, icons and audio in Phase 5.
 
 ## Economy
 Decided for FZFoC Mobile: a **kill-spree economy** that rewards aggression, with no comeback mechanic ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)):

@@ -6,6 +6,12 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (plan + implementation)
+- Ingested 1 new RAW file: `2026-11-08-game-build-plan-and-phase-1.md` — the owner's full-game request, the scope line (original content only), the five-phase plan and Phase 1 (prototype commit b874151).
+- Created source note [game-build-plan-and-phase-1](sources/2026-11-08-game-build-plan-and-phase-1.md).
+- [UI and audio direction](topics/ui-and-audio-direction.md): "Menus in the prototype". [Hero arena genre](topics/hero-arena-genre.md): "Modes". [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md): "Applied to the game build".
+- [Backlog](backlog.md): Phases 2–5 and an original title. [Index](index.md) and README roadmap updated.
+
 ## 2026-11-08 — Ingest (design)
 - Ingested 1 new RAW file: `2026-11-08-vael-eruption.md` — Eruption's design (prototype commit e2339d6).
 - Created source note [vael-eruption](sources/2026-11-08-vael-eruption.md).
