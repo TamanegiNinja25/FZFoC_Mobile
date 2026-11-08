@@ -1,2 +1,63 @@
-# FZFoC_Mobile
-Frozen's Throne Fight of the Character Fan made mobile game
+# FZFoC Mobile
+
+An original mobile hero arena game inspired by the gameplay of **Fight Of Characters**, a Warcraft III: The Frozen Throne custom map.
+
+> **Status: research.** This repo currently holds the project's knowledge base — the research, design notes and decisions that will guide the game. No game code yet.
+
+## The idea
+
+Fight Of Characters is a 4v4 hero arena where players pick a hero, buy items and fight until one team wins on kills. Its standout mechanic is **mid-fight hero transformations**. This project takes those *mechanics* to phones with:
+
+- **An original cast.** No characters, art, music or code from the map, from Blizzard or from any anime franchise. Game rules and mechanics are free to reuse; their expression is not — see [Copyright vs game mechanics](Wiki/topics/copyright-vs-game-mechanics.md).
+- **Mobile-first design.** 3v3, 5–8 minute matches, virtual joystick plus skill buttons.
+- **Offline play with friends.** Local Wi-Fi multiplayer; no servers or accounts.
+
+## Knowledge base
+
+The research is kept as a self-maintaining markdown wiki, modelled on Andrej Karpathy's "LLM Knowledge Bases" workflow and run locally with Claude Code acting as librarian.
+
+```
+├── CLAUDE.md   librarian instructions: rules, workflows, modes
+├── RAW/        source material (added by hand, never edited)
+├── Wiki/       compiled wiki, maintained by the librarian
+│   ├── index.md     start here — every page with a one-line summary
+│   ├── log.md       change history
+│   ├── backlog.md   open questions, gaps, wanted sources
+│   ├── sources/     one summary note per RAW file
+│   └── topics/      concept articles, every claim cited
+└── Outputs/    reports, templates and other derived work
+```
+
+**Start reading at [Wiki/index.md](Wiki/index.md).**
+
+How it works:
+1. Source material goes into `RAW/`.
+2. The librarian ingests it: a source note per file, then concept articles that link and cite each other.
+3. Questions are answered from the wiki; useful answers are filed back in so knowledge accumulates.
+4. A monthly health check flags contradictions, unexplained topics and unsourced claims.
+
+Workflow details are in [CLAUDE.md](CLAUDE.md).
+
+## Roadmap
+
+- [x] Analyse the original map and assess mobile feasibility
+- [x] Asset licensing rules and a credits template
+- [ ] Choose engine: Godot or Unity
+- [ ] Choose 1–2 visual styles
+- [ ] Design the transformation system
+- [ ] Offline prototype with 2–3 original heroes
+- [ ] Local multiplayer
+
+Open decisions live in [Wiki/backlog.md](Wiki/backlog.md).
+
+## Assets
+
+Third-party assets (e.g. free Sketchfab models) are used only under licences that allow it, and every one is recorded in a credits file — see [Assets and licensing](Wiki/topics/assets-and-licensing.md) and the [credits template](Outputs/2026-11-08-asset-credits-template.md). Warcraft III game files and map files are never committed (`.gitignore` blocks them).
+
+## Disclaimer
+
+This is an independent fan project. It is not affiliated with or endorsed by Blizzard Entertainment, the authors of Fight Of Characters, or the owners of any franchise mentioned in the research notes. Warcraft is a trademark of Blizzard Entertainment, Inc.; other names belong to their respective owners and are referenced for research purposes only.
+
+## License
+
+[MIT](LICENSE) — covers this repository's own content. Third-party assets keep their own licences, listed in the credits file.

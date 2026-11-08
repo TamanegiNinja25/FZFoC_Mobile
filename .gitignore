@@ -1,0 +1,57 @@
+# --- Never commit game files (Blizzard / third-party content) ---
+*.w3x
+*.w3m
+*.w3n
+*.mpq
+*.casc
+*.mdx
+*.mdl
+*.blp
+*.w3g
+
+# --- OS ---
+Thumbs.db
+desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+
+# --- Editors and local tool settings ---
+.vscode/
+.idea/
+.obsidian/
+.claude/settings.local.json
+*.swp
+*.tmp
+~$*
+
+# --- Python (knowledge base helper scripts) ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- Godot (if chosen) ---
+.godot/
+.import/
+export_presets.cfg
+
+# --- Unity (if chosen) ---
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+*.csproj
+*.sln
+
+# --- Builds ---
+*.apk
+*.aab
+*.ipa
+
+# --- Secrets ---
+.env
+*.keystore
+*.jks
