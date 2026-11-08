@@ -6,7 +6,7 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 18 sources · 9 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
+**Status:** 19 sources · 9 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
 
 **Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md)) · phones use 2 shadow cascades ([record](sources/2026-11-08-decision-phone-shadow-cascades.md)) and 90% 3D resolution; floating touch joystick ([record](sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md))
 
@@ -19,7 +19,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 ### Game design
 - [Hero transformations](topics/hero-transformations.md) — Three transformation models in Fight Of Characters (timed form, stage chain, awakening) with full numbers, and a keep/change/drop design direction for a mobile 3v3.
 - [Hero arena genre](topics/hero-arena-genre.md) — Team hero fights with items and kill-based victory; adapting it to mobile with 3v3, short matches and touch controls; local Wi-Fi multiplayer in Godot; the kill-spree economy.
-- [Roster](topics/roster.md) — The original heroes: Vael, the Kiln Knight (bruiser; Bellows Slam, Ember Dash; Kindled form with Eruption), and how heroes are built in the prototype.
+- [Roster](topics/roster.md) — The three original heroes: Vael (Bruiser), Ryn (Speed), Barrow (Giant) — kits, transformations, and how heroes are built.
 - [Art direction](topics/art-direction.md) — High-poly stylized look with toon shading: style rules, phone polygon/LOD budget, Sketchfab sourcing, and stress-test measurements on PC and on the Infinix NOTE 30 (locked 60 FPS; pixel-bound).
 - [UI and audio direction](topics/ui-and-audio-direction.md) — Keeping the classic feel with original assets: UI and sound patterns, how the map uses sound, and where to source replacements.
 
@@ -47,6 +47,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [UI polish and Phase 2](sources/2026-11-08-ui-polish-and-phase-2.md) — Animations, original sounds and icon, smoother Vael; the 3v3 arena with adaptive AI; locked 60 FPS after fixing primitive detail and stale settings.
 - [Phase 3 — item shop with categories](sources/2026-11-08-phase-3-item-shop.md) — 13 original items in 5 categories, fountain shop rules, bot builds.
 - [Phase 4 — play with friends over local Wi-Fi](sources/2026-11-08-phase-4-local-multiplayer.md) — Host-authoritative LAN play, lobby with discovery, verified with a real phone-hosted match.
+- [Phase 5 — heroes Ryn and Barrow, original music](sources/2026-11-08-phase-5-heroes-and-music.md) — Speed and Giant heroes with new haste, slow and projectile systems; generated menu and battle music.
 
 ## Admin
 - [Log](log.md) — what changed and when

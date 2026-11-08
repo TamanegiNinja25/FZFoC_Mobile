@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-ui-and-audio-direction, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2]
+sources: [2026-11-08-ui-and-audio-direction, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music]
 updated: 2026-11-08
 ---
 # UI and audio direction
@@ -46,6 +46,7 @@ Phase 1 of the game build put the UI direction into practice ([src](../sources/2
 - **Hero select by category** (Bruiser / Speed / Giant) with locked planned slots and a scrolling detail panel.
 - **Settings** (audio buses; 3D resolution, shadows, FPS cap) in the main menu and in game; **pause menu** with Resume · Settings · Quit to Menu · Quit Game.
 - **Polish:** safe-area insets for the camera cutout, a stone backing behind HUD text, slide/pulse/pop-in animations, press feedback on every button, and ten **original sounds synthesised from code** (click, confirm, back, hit, slam, dash, transform, kill, victory, defeat). The app icon is an original hammer-and-slash emblem. A generator script rebuilds the icon and sounds, documenting their originality ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
+- **Music (Phase 5):** an original slow minor menu theme with bells and a 110 BPM war-drum battle loop, generated from code and played on the Music bus — the orchestral, folk-with-drums direction above, made without any existing recording ([src](../sources/2026-11-08-phase-5-heroes-and-music.md)).
 - A phone check caught hero-select text pushing buttons off screen; detail text now scrolls in a fixed box — long text needs a fixed area on phones *(inference)*.
 
 ## Sources for assets

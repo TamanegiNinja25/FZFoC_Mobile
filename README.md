@@ -57,7 +57,7 @@ Workflow details are in [CLAUDE.md](CLAUDE.md).
 - [x] Phase 2: single player 3v3 vs adaptive AI on an original arena map (60 FPS on the NOTE 30)
 - [x] Phase 3: item shop with categories (13 original items, 5 categories)
 - [x] Phase 4: play with friends over local Wi-Fi (verified phone ↔ laptop)
-- [ ] Phase 5: heroes 2 and 3, original icons, audio
+- [x] Phase 5: heroes Ryn (Speed) and Barrow (Giant), original icons, generated music
 - [ ] Local multiplayer
 
 Open decisions live in [Wiki/backlog.md](Wiki/backlog.md).

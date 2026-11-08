@@ -6,6 +6,9 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (design + implementation)
+- Ingested `2026-11-08-phase-5-heroes-and-music.md` (prototype commit 5e7d9c9); source note created; [Roster](topics/roster.md) gains Ryn and Barrow; [UI and audio direction](topics/ui-and-audio-direction.md) gains music; backlog shows all five phases complete; index and README roadmap updated.
+
 ## 2026-11-08 — Ingest (implementation)
 - Ingested `2026-11-08-phase-4-local-multiplayer.md` (prototype commit 01b3b0a); source note created; [Hero arena genre](topics/hero-arena-genre.md) Modes updated; backlog, index and README roadmap updated.
 
