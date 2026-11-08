@@ -1,6 +1,6 @@
-# Prototype — transformation meter
+# Prototype — Vael and the transformation meter
 
-Greybox Godot 4.7 project testing one question: **does a charge meter make transformations feel good?** One hero (blue capsule), three training dummies (red boxes) that hit back, a meter, and a timed form (gold, larger).
+Greybox Godot 4.7 project testing one question: **does a charge meter make transformations feel good?** The first original hero, **Vael, the Kiln Knight**, three training dummies (red boxes) that hit back, a meter, and Vael's timed form, **Kindled**.
 
 Design basis: [Hero transformations](../Wiki/topics/hero-transformations.md#design-direction-for-fzfoc-mobile) and the decision to use a meter ([record](../Wiki/sources/2026-11-08-decisions-meter-and-godot.md)).
 
@@ -12,9 +12,23 @@ Open `Prototype/project.godot` in Godot 4.7 and press **F5**.
 | Touch: drag in the lower-left area (floating joystick) | Move — the stick appears under your thumb |
 | WASD / arrow keys | Move (desktop) |
 | Walk into range | Auto-attack the nearest dummy |
-| Space or the TRANSFORM button | Transform when the meter is full |
+| Bellows Slam button, or Q | Hit every enemy around Vael (Eruption while Kindled) |
+| Ember Dash button, or E | Dash in the stick direction (or forward) |
+| Space or the TRANSFORM button | Transform into Kindled when the meter is full |
 
 On desktop, the mouse emulates touch, so the joystick can be tested by clicking and dragging. The game fills wide phone screens (stretch aspect "expand"), so there are no black bars on 20:9 displays.
+
+## Vael, the Kiln Knight
+An original iron knight whose armour is a living kiln; hammer and shield; bruiser. Design: [Roster](../Wiki/topics/roster.md).
+
+| Slot | Name | Normal | Kindled |
+|---|---|---|---|
+| Basic attack | Hammer | 40 per 0.8 s, range 2.5 | ×1.25 damage |
+| Skill 1 | Bellows Slam → **Eruption** | 120 damage within 3.0; 6 s cooldown | 180 effective damage within **4.5** (radius ×1.5, damage ×1.2 × form ×1.25) |
+| Skill 2 | Ember Dash | 5 units in 0.18 s; 8 s cooldown | ×1.3 move speed between dashes |
+| Form | Kindled | — | 15 s; 25% shield; ×1.4 size; scorched armour, glow ×4, embers; bounty ×1.75 |
+
+Heroes are data-driven: `scripts/hero_def.gd` (stats, form, model, skills) with Vael in `scripts/heroes/vael.gd`, his greybox model in `scripts/heroes/vael_model.gd`, and skills in `scripts/skills/`. A new hero is a new definition; game logic doesn't change.
 
 ## Look
 All materials use the shared toon material in `scripts/toon.gd`: banded light, toon highlights and a rim light (decision 2026-11-08, see [Art direction](../Wiki/topics/art-direction.md)).
@@ -95,6 +109,8 @@ Requirements: Godot 4.7.2 export templates, Android SDK, a JDK path in Godot's E
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/smoke_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/meter_balance_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/stress_scene_test.gd
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/hero_kit_test.gd
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/touch_test.gd
 ```
 The balance test measures how long the meter takes to fill against one dummy. Last result: **87.2 s** (target 90 ± 15 s), 5 kills, no deaths.
 
@@ -131,7 +147,10 @@ The meter is locked while transformed and restarts from zero afterwards.
 
 ## Files
 - `scripts/main.gd` — builds the arena, camera, inputs and HUD in code
-- `scripts/hero.gd` — movement, auto-attack, health and shield, form state
+- `scripts/hero.gd` — movement, auto-attack, skills, dash, health and shield, form state (driven by a HeroDef)
+- `scripts/hero_def.gd` — hero definition base class
+- `scripts/heroes/vael.gd`, `scripts/heroes/vael_model.gd` — Vael's definition and greybox model
+- `scripts/skills/` — `skill.gd` (cooldowns), `slam_skill.gd` (Bellows Slam / Eruption), `dash_skill.gd` (Ember Dash)
 - `scripts/transform_meter.gd` — the meter
 - `scripts/dummy.gd` — training dummy
 - `scripts/hud.gd` — bars, status line, transform and stress-test buttons
@@ -142,4 +161,5 @@ The meter is locked while transformed and restarts from zero afterwards.
 - `tests/smoke_test.gd` — headless check of the meter → form → revert loop
 - `tests/meter_balance_test.gd` — measures fill time, idle drain and spree rewards
 - `tests/stress_scene_test.gd` — checks the stress scene is built to budget (triangles, LODs, toon, toggles)
+- `tests/hero_kit_test.gd` — Vael's kit: slam range and cooldown, dash distance, Kindled growth, Eruption reach and damage (15 checks)
 - `tests/touch_test.gd` — simulated finger: zone, drag direction, hero moves and stops; render scale

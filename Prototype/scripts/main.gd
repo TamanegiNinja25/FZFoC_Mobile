@@ -8,6 +8,8 @@ const INPUTS := {
 	"move_up": [KEY_W, KEY_UP],
 	"move_down": [KEY_S, KEY_DOWN],
 	"transform": [KEY_SPACE],
+	"skill_1": [KEY_Q],
+	"skill_2": [KEY_E],
 }
 
 var hero: Hero
@@ -27,6 +29,7 @@ func _ready() -> void:
 
 	hero = Hero.new()
 	hero.name = "Hero"
+	hero.definition = Vael.new()
 	add_child(hero)
 
 	for spot in [Vector3(4, 0, -3), Vector3(-5, 0, -4), Vector3(0, 0, -8)]:

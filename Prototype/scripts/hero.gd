@@ -1,7 +1,8 @@
 class_name Hero
 extends CharacterBody3D
-## Player hero: moves, auto-attacks the nearest enemy in range,
-## and transforms into a timed form when its meter is full.
+## Player hero: moves, auto-attacks the nearest enemy in range, casts its
+## skills, and transforms into a timed form when its meter is full. Identity,
+## stats, model and skills come from a HeroDef (default: Vael).
 
 signal health_changed(hp: float, max_hp: float, shield: float)
 signal form_changed(active: bool)
@@ -44,8 +45,10 @@ signal died
 ## Risk/reward: a transformed hero is a richer target (spec: 1.5–2× base).
 @export var form_bounty_mult := 1.75
 
-const NORMAL_COLOR := Color(0.35, 0.55, 0.95)
-const FORM_COLOR := Color(1.0, 0.75, 0.2)
+## Which hero this is. Set before adding to the tree; its values override the exports above.
+var definition: HeroDef
+var model: Node3D
+var skills: Array[Skill] = []
 
 var hp := 0.0
 var shield := 0.0
@@ -60,12 +63,16 @@ var _invulnerable_time := 0.0
 var _attack_cooldown := 0.0
 var _dead_time := 0.0
 var _spawn_point := Vector3.ZERO
-var _material := Toon.material(NORMAL_COLOR)
-var _body: MeshInstance3D
+var _facing := Vector3(0, 0, -1)
+var _dash_velocity := Vector3.ZERO
+var _dash_time := 0.0
 
 
 func _ready() -> void:
 	add_to_group("heroes")
+	if definition == null:
+		definition = Vael.new()
+	_apply_definition()
 	_spawn_point = global_position
 	hp = max_hp
 
@@ -77,15 +84,10 @@ func _ready() -> void:
 	shape.position.y = 1.0
 	add_child(shape)
 
-	_body = MeshInstance3D.new()
-	var mesh := CapsuleMesh.new()
-	mesh.radius = 0.5
-	mesh.height = 2.0
-	_body.mesh = mesh
-	_body.position.y = 1.0
-	_material.albedo_color = NORMAL_COLOR
-	_body.material_override = _material
-	add_child(_body)
+	model = definition.create_model()
+	model.name = "Model"
+	add_child(model)
+	skills = definition.create_skills()
 
 	meter = TransformMeter.new()
 	meter.name = "TransformMeter"
@@ -106,12 +108,25 @@ func _physics_process(delta: float) -> void:
 		hp = minf(hp + hp_regen * delta, max_hp)
 		health_changed.emit(hp, max_hp, shield)
 
+	for skill in skills:
+		skill.tick(delta)
+
 	if Input.is_action_just_pressed("transform"):
 		try_transform()
+	if Input.is_action_just_pressed("skill_1"):
+		try_skill(0)
+	if Input.is_action_just_pressed("skill_2"):
+		try_skill(1)
 
-	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	var speed := move_speed * (form_speed_mult if in_form else 1.0)
-	velocity = Vector3(input.x, 0.0, input.y) * speed
+	if _dash_time > 0.0:
+		_dash_time -= delta
+		velocity = _dash_velocity
+	else:
+		var direction := _move_input()
+		var speed := move_speed * (form_speed_mult if in_form else 1.0)
+		velocity = direction * speed
+		if direction.length() > 0.1:
+			_face(direction)
 	move_and_slide()
 
 	_attack_cooldown -= delta
@@ -130,8 +145,8 @@ func try_transform() -> bool:
 	form_time_left = form_duration
 	_invulnerable_time = form_transition
 	shield = max_hp * form_shield_ratio
-	_material.albedo_color = FORM_COLOR
-	_body.scale = Vector3.ONE * form_scale
+	if model.has_method("set_form"):
+		model.set_form(true, form_scale)
 	form_changed.emit(true)
 	health_changed.emit(hp, max_hp, shield)
 	return true
@@ -151,6 +166,59 @@ func take_damage(amount: float) -> void:
 
 func is_alive() -> bool:
 	return _dead_time <= 0.0
+
+
+func try_skill(index: int) -> bool:
+	if _dead_time > 0.0 or index >= skills.size():
+		return false
+	return skills[index].try_cast(self)
+
+
+## Deals damage to an enemy with the form multiplier, charging the meter and
+## paying out kills. Used by auto-attacks and skills alike.
+func deal_damage(target: Dummy, amount: float) -> void:
+	var result := target.take_damage(amount * (form_damage_mult if in_form else 1.0))
+	meter.on_damage_dealt(result.dealt)
+	if result.killed:
+		meter.on_kill()
+		_register_kill()
+
+
+## Direction skills aim in: the stick if held, otherwise where the hero faces.
+func aim_direction() -> Vector3:
+	var direction := _move_input()
+	return direction.normalized() if direction.length() > 0.1 else _facing
+
+
+func start_dash(dash_velocity: Vector3, duration: float) -> void:
+	_dash_velocity = dash_velocity
+	_dash_time = duration
+	_face(dash_velocity)
+
+
+func _move_input() -> Vector3:
+	var input := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	return Vector3(input.x, 0.0, input.y)
+
+
+## Turns the model to face a direction (the model's forward is −Z).
+func _face(direction: Vector3) -> void:
+	_facing = Vector3(direction.x, 0.0, direction.z).normalized()
+	model.rotation.y = atan2(-_facing.x, -_facing.z)
+
+
+func _apply_definition() -> void:
+	max_hp = definition.max_hp
+	hp_regen = definition.hp_regen
+	move_speed = definition.move_speed
+	attack_damage = definition.attack_damage
+	attack_interval = definition.attack_interval
+	attack_range = definition.attack_range
+	form_duration = definition.form_duration
+	form_shield_ratio = definition.form_shield_ratio
+	form_damage_mult = definition.form_damage_mult
+	form_speed_mult = definition.form_speed_mult
+	form_scale = definition.form_scale
 
 
 func bounty_value() -> float:
@@ -195,20 +263,15 @@ func _end_form() -> void:
 	form_time_left = 0.0
 	shield = 0.0
 	meter.locked = false
-	_material.albedo_color = NORMAL_COLOR
-	_body.scale = Vector3.ONE
+	if model.has_method("set_form"):
+		model.set_form(false, form_scale)
 	form_changed.emit(false)
 	health_changed.emit(hp, max_hp, shield)
 
 
 func _attack(target: Dummy) -> void:
 	_attack_cooldown = attack_interval
-	var damage := attack_damage * (form_damage_mult if in_form else 1.0)
-	var result := target.take_damage(damage)
-	meter.on_damage_dealt(result.dealt)
-	if result.killed:
-		meter.on_kill()
-		_register_kill()
+	deal_damage(target, attack_damage)
 
 
 func _nearest_enemy() -> Dummy:
@@ -229,6 +292,7 @@ func _die() -> void:
 	if in_form:
 		_end_form()
 	_end_spree()
+	_dash_time = 0.0
 	_dead_time = respawn_time
 	visible = false
 	died.emit()
