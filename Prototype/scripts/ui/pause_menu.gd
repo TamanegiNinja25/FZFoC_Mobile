@@ -3,6 +3,9 @@ extends CanvasLayer
 ## In-game menu: pauses the match and offers Resume, Settings (audio and video),
 ## Quit to Menu and Quit Game. Opened by the pause button or Android back.
 
+## Online matches can't pause: the menu opens over a running game.
+var online := false
+
 var _overlay := Control.new()
 var _panel := PanelContainer.new()
 var _settings := SettingsPanel.new()
@@ -56,7 +59,7 @@ func open() -> void:
 	_overlay.visible = true
 	_panel.visible = true
 	_settings.visible = false
-	get_tree().paused = true
+	get_tree().paused = not online
 	UiTheme.pop_in(_panel)
 
 
@@ -78,6 +81,9 @@ func _close_settings() -> void:
 
 func _quit_to_menu() -> void:
 	get_tree().paused = false
+	var net := get_node_or_null("/root/Net")
+	if online and net:
+		net.leave()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 

@@ -10,6 +10,10 @@ signal gold_changed(gold: float, income: float, spree: int)
 ## killer is the Hero that landed the killing blow, or null.
 signal died(killer: Hero)
 signal items_changed
+## Network: a puppet's actions go to the host instead of running locally.
+signal action_requested(kind: String, arg: Variant)
+## Network: effects (sounds, slam rings) the host relays to clients.
+signal fx(kind: String, data: Array)
 
 @export var move_speed := 6.0
 @export var max_hp := 1000.0
@@ -68,6 +72,10 @@ var damage_reduction := 0.0
 var cooldown_reduction := 0.0
 var _hot_time := 0.0
 var _hot_rate := 0.0
+## Network client: this hero only displays the host's state.
+var puppet := false
+## Network: the peer controlling this hero (0 = bot or offline).
+var owner_peer := 0
 var model: Node3D
 var skills: Array[Skill] = []
 
@@ -122,6 +130,11 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Network clients only read input; the host's snapshots drive everything else.
+	if puppet:
+		if is_player:
+			_poll_actions()
+		return
 	if _dead_time > 0.0:
 		_dead_time -= delta
 		if _dead_time <= 0.0:
@@ -142,12 +155,7 @@ func _physics_process(delta: float) -> void:
 		skill.tick(delta)
 
 	if is_player:
-		if Input.is_action_just_pressed("transform"):
-			try_transform()
-		if Input.is_action_just_pressed("skill_1"):
-			try_skill(0)
-		if Input.is_action_just_pressed("skill_2"):
-			try_skill(1)
+		_poll_actions()
 
 	if _dash_time > 0.0:
 		_dash_time -= delta
@@ -167,7 +175,19 @@ func _physics_process(delta: float) -> void:
 			_attack(target)
 
 
+func _poll_actions() -> void:
+	if Input.is_action_just_pressed("transform"):
+		try_transform()
+	if Input.is_action_just_pressed("skill_1"):
+		try_skill(0)
+	if Input.is_action_just_pressed("skill_2"):
+		try_skill(1)
+
+
 func try_transform() -> bool:
+	if puppet:
+		action_requested.emit("transform", null)
+		return false
 	if in_form or _dead_time > 0.0 or not meter.is_full():
 		return false
 	meter.consume()
@@ -204,6 +224,9 @@ func take_damage(amount: float, attacker: Hero = null) -> Dictionary:
 
 ## Buys an item; returns "" on success or the reason it failed.
 func buy(item_id: String) -> String:
+	if puppet:
+		action_requested.emit("buy", item_id)
+		return ""
 	var item := ItemCatalog.find(item_id)
 	if item == null:
 		return "Unknown item"
@@ -221,6 +244,9 @@ func buy(item_id: String) -> String:
 
 
 func sell(index: int) -> bool:
+	if puppet:
+		action_requested.emit("sell", index)
+		return true
 	if index < 0 or index >= items.size() or not in_shop_range:
 		return false
 	gold += floorf(items[index].cost * ItemCatalog.SELL_RATE)
@@ -232,6 +258,9 @@ func sell(index: int) -> bool:
 
 ## Uses a consumable from the inventory (anywhere on the map).
 func use_item(index: int) -> bool:
+	if puppet:
+		action_requested.emit("use", index)
+		return true
 	if index < 0 or index >= items.size() or not items[index].consumable or _dead_time > 0.0:
 		return false
 	var item := items[index]
@@ -288,6 +317,7 @@ func is_hostile(unit: Node) -> bool:
 ## The Sfx autoload is looked up at call time: test scripts compile Hero before
 ## autoloads exist, so naming it directly would fail there.
 func play_sfx(sound: String, volume_db := 0.0) -> void:
+	fx.emit("sfx", [sound, volume_db])
 	var sfx := get_node_or_null("/root/Sfx")
 	if sfx:
 		sfx.play(sound, volume_db + (0.0 if is_player else -9.0), randf_range(0.95, 1.05))
@@ -298,6 +328,9 @@ func is_alive() -> bool:
 
 
 func try_skill(index: int) -> bool:
+	if puppet:
+		action_requested.emit("skill", index)
+		return false
 	if _dead_time > 0.0 or index >= skills.size():
 		return false
 	return skills[index].try_cast(self)

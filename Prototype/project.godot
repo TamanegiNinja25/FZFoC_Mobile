@@ -17,6 +17,7 @@ config/icon="res://assets/icon/icon.png"
 GameSettings="*res://scripts/ui/game_settings.gd"
 Session="*res://scripts/session.gd"
 Sfx="*res://scripts/ui/sfx.gd"
+Net="*res://scripts/net/net.gd"
 
 [display]
 

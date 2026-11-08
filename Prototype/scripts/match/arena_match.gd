@@ -30,6 +30,11 @@ var hud: Hud
 var pause_menu: PauseMenu
 var camera: Camera3D
 
+## Local multiplayer layer (null in single player).
+var net_match: NetMatch
+var online := false
+var is_authority := true  # false on network clients: the host decides everything
+
 var _sun: DirectionalLight3D
 var _score := Label.new()
 var _feed := VBoxContainer.new()
@@ -37,6 +42,8 @@ var _result: Control
 
 
 func _ready() -> void:
+	online = Net.is_online() and Session.mode == Session.Mode.LOCAL_FRIENDS
+	is_authority = not online or Net.is_host()
 	Controls.register()
 	_build_world()
 	GameSettings.apply_to_scene(get_viewport(), _sun)
@@ -49,9 +56,15 @@ func _ready() -> void:
 	hud.setup(hero)
 	_build_match_ui()
 	pause_menu = PauseMenu.new()
+	pause_menu.online = online
 	add_child(pause_menu)
 	hud.pause_requested.connect(pause_menu.open)
 	update_adaptive()
+	if online:
+		net_match = NetMatch.new()
+		net_match.name = "NetMatch"
+		net_match.arena = self
+		add_child(net_match)
 
 
 var _perf_clock := 0.0
@@ -86,13 +99,16 @@ func _process(delta: float) -> void:
 		camera.global_position = camera.global_position.lerp(target, minf(delta * 8.0, 1.0))
 	if over:
 		return
-	time_left = maxf(time_left - delta, 0.0)
-	if time_left <= 0.0:
-		_end(0 if kills[0] > kills[1] else (1 if kills[1] > kills[0] else -1))
+	if is_authority:
+		time_left = maxf(time_left - delta, 0.0)
+		if time_left <= 0.0:
+			_end(0 if kills[0] > kills[1] else (1 if kills[1] > kills[0] else -1))
 	_update_score()
 
 
 func _physics_process(delta: float) -> void:
+	if not is_authority:
+		return  # clients get shop range and health from the host's snapshots
 	for h in heroes:
 		h.in_shop_range = h.is_alive() and h.global_position.distance_to(BASES[h.team]) <= FOUNTAIN_RADIUS
 		if h.in_shop_range:
@@ -124,15 +140,13 @@ func enemy_skill() -> float:
 
 
 func _on_hero_died(killer: Hero, victim: Hero) -> void:
-	if over:
+	if over or not is_authority:
 		return
 	if killer:
 		kills[killer.team] += 1
-		_announce("%s slew %s" % [_label(killer), _label(victim)], Hero.TEAM_COLORS[killer.team])
-		if killer == hero or victim == hero:
-			Sfx.play("kill", -3.0)
+		announce("%s slew %s" % [hero_label(killer), hero_label(victim)], Hero.TEAM_COLORS[killer.team])
 	else:
-		_announce("%s fell" % _label(victim), Color(0.8, 0.8, 0.8))
+		announce("%s fell" % hero_label(victim), Color(0.8, 0.8, 0.8))
 	update_adaptive()
 	if kills[0] >= kill_target:
 		_end(0)
@@ -140,43 +154,86 @@ func _on_hero_died(killer: Hero, victim: Hero) -> void:
 		_end(1)
 
 
-func _label(h: Hero) -> String:
-	if h == hero:
+## Kill-feed name: player names online, "Name (Blue)" for bots.
+func hero_label(h: Hero) -> String:
+	if online and h.owner_peer != 0 and Net.players.has(h.owner_peer):
+		return str(Net.players[h.owner_peer])
+	if not online and h == hero:
 		return "You"
 	return "%s (%s)" % [h.definition.display_name, "Blue" if h.team == 0 else "Red"]
 
 
+## Kill feed line; the host also sends it to every client.
+func announce(text: String, color: Color) -> void:
+	_announce(text, color)
+	if hero and (text.begins_with(hero_label(hero)) or text.ends_with(hero_label(hero))):
+		Sfx.play("kill", -3.0)
+	if net_match and is_authority:
+		net_match.announce(text, color)
+
+
+func add_bot_brain(h: Hero) -> void:
+	var brain := BotBrain.new()
+	brain.hero = h
+	brain.arena = self
+	h.add_child(brain)
+	bots.append(brain)
+	update_adaptive()
+
+
 func _end(team: int) -> void:
+	if net_match:
+		net_match.end(team)
+	finish(team)
+
+
+## Shows the result; on the authority it also stops the match.
+func finish(team: int) -> void:
+	if over and winner == team:
+		return
 	over = true
 	winner = team
 	_update_score()
-	Sfx.play("victory" if team == 0 else "defeat")
+	var my_team := hero.team if hero else 0
+	Sfx.play("victory" if team == my_team else ("defeat" if team != -1 else "back"))
 	_show_result()
 	get_tree().paused = true
 
 
 # ------------------------------------------------------------------ spawning
+## Six heroes, identical on every device: slot order and names never change.
+## Offline: the player is blue slot 0. Online: each peer owns a slot on the team
+## the host gave it; bots fill the rest.
 func _spawn_teams() -> void:
+	var owners := [[0, 0, 0], [0, 0, 0]]
+	if online:
+		var peers: Array = Session.net_teams.keys()
+		peers.sort()
+		var filled := [0, 0]
+		for peer_id in peers:
+			var team: int = Session.net_teams[peer_id]
+			if filled[team] < 3:
+				owners[team][filled[team]] = peer_id
+				filled[team] += 1
+	var my_id := multiplayer.get_unique_id() if online else 0
 	for team in 2:
 		for i in 3:
 			var h := Hero.new()
 			h.team = team
-			h.is_player = team == 0 and i == 0
-			h.definition = Roster.create(Session.hero_id if h.is_player else "vael")
+			h.owner_peer = owners[team][i]
+			h.is_player = (h.owner_peer == my_id) if online else (team == 0 and i == 0)
+			h.puppet = not is_authority
+			h.definition = Roster.create(Session.hero_id if (h.is_player and not online) else "vael")
 			h.respawn_time = RESPAWN_TIME
-			h.name = "Player" if h.is_player else "%s%d" % ["Blue" if team == 0 else "Red", i]
+			h.name = "Hero%d" % (team * 3 + i)
 			h.position = BASES[team] + Vector3(0, 0, (i - 1) * 3.0)
 			add_child(h)
 			h.died.connect(_on_hero_died.bind(h))
 			heroes.append(h)
 			if h.is_player:
 				hero = h
-			else:
-				var brain := BotBrain.new()
-				brain.hero = h
-				brain.arena = self
-				h.add_child(brain)
-				bots.append(brain)
+			elif is_authority and h.owner_peer == 0:
+				add_bot_brain(h)
 
 
 func _spawn_camps() -> void:
@@ -432,7 +489,8 @@ func _show_result() -> void:
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 20)
 	column.add_child(buttons)
-	for spec in [["Play Again", _play_again], ["Main Menu", _to_menu]]:
+	var actions: Array = [["Main Menu", _to_menu]] if online else [["Play Again", _play_again], ["Main Menu", _to_menu]]
+	for spec in actions:
 		var button := Button.new()
 		button.text = spec[0]
 		button.custom_minimum_size = Vector2(260, 68)
@@ -448,4 +506,6 @@ func _play_again() -> void:
 
 func _to_menu() -> void:
 	get_tree().paused = false
+	if online:
+		Net.leave()
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")

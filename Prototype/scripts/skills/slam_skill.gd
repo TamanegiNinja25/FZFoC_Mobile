@@ -39,3 +39,4 @@ func _cast(hero: Hero) -> void:
 	hero.play_sfx("slam")
 	if hero.model.has_method("play_slam"):
 		hero.model.play_slam(p.radius, hero.in_form)
+	hero.fx.emit("slam", [p.radius, hero.in_form])

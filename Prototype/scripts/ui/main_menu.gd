@@ -7,7 +7,7 @@ var _ui := Control.new()
 var _main_panel: PanelContainer
 var _hero_select: HeroSelect
 var _settings: SettingsPanel
-var _friends: PanelContainer
+var _friends: LobbyPanel
 var _hero_model: VaelModel
 var _title: Label
 var _time := 0.0
@@ -117,6 +117,13 @@ func _build_ui() -> void:
 	subtitle.add_theme_color_override("font_color", UiTheme.MUTED)
 	column.add_child(subtitle)
 	column.add_child(HSeparator.new())
+	if Session.notice != "":
+		var notice := Label.new()
+		notice.text = Session.notice
+		notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		notice.add_theme_color_override("font_color", Color(1.0, 0.65, 0.5))
+		column.add_child(notice)
+		Session.notice = ""
 
 	for spec in [["single", "Single Player"], ["friends", "Play with Friends"], ["settings", "Settings"], ["quit", "Quit"]]:
 		var button := Button.new()
@@ -142,8 +149,10 @@ func _build_ui() -> void:
 	_settings.closed.connect(func(): show_screen("main"))
 	_settings.stress_test_requested.connect(func(): get_tree().change_scene_to_file("res://scenes/stress_test.tscn"))
 
-	_friends = _build_friends_panel()
+	_friends = LobbyPanel.new()
+	_friends.back_requested.connect(func(): show_screen("main"))
 	_center(_friends)
+	Net.match_starting.connect(_on_net_match_starting)
 	for panel in [_hero_select, _settings, _friends]:
 		panel.visible = false
 	_slide_in_main_panel.call_deferred()
@@ -159,41 +168,17 @@ func _slide_in_main_panel() -> void:
 	tween.tween_property(_main_panel, "modulate:a", 1.0, 0.4)
 
 
-func _build_friends_panel() -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(720, 420)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 16)
-	panel.add_child(column)
-	var heading := UiTheme.title(Label.new(), 40)
-	heading.text = "Play with Friends"
-	column.add_child(heading)
-	var info := Label.new()
-	info.text = "Local Wi-Fi play: one phone hosts, friends on the same network join.\nNo servers or accounts needed. Arriving in a later build."
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD
-	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(info)
-	for text in ["Host Game", "Join Game"]:
-		var button := Button.new()
-		button.text = text + "  (coming soon)"
-		button.disabled = true
-		button.custom_minimum_size = Vector2(360, 64)
-		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		column.add_child(button)
-	var back := Button.new()
-	back.text = "Back"
-	back.custom_minimum_size = Vector2(240, 64)
-	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	back.pressed.connect(func(): show_screen("main"))
-	column.add_child(back)
-	return panel
-
-
 func _center(control: Control) -> void:
 	control.set_anchors_preset(Control.PRESET_CENTER)
 	control.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	control.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_ui.add_child(control)
+
+
+func _on_net_match_starting(teams: Dictionary) -> void:
+	Session.mode = Session.Mode.LOCAL_FRIENDS
+	Session.net_teams = teams
+	get_tree().change_scene_to_file("res://scenes/arena.tscn")
 
 
 func _on_single_player() -> void:
