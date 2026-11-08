@@ -22,3 +22,4 @@ A mechanic where a hero changes into a stronger form mid-fight. It is the stando
 - [Fight Of Characters](fight-of-characters.md)
 - [Hero arena genre](hero-arena-genre.md)
 - [Copyright vs game mechanics](copyright-vs-game-mechanics.md)
+- [UI and audio direction](ui-and-audio-direction.md) — a transformation as a sound moment

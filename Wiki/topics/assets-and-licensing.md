@@ -39,5 +39,6 @@ Each Sketchfab model shows its own licence on its page ([src](../sources/2026-11
 
 ## Related
 - [Copyright vs game mechanics](copyright-vs-game-mechanics.md)
+- [UI and audio direction](ui-and-audio-direction.md) — sources for UI kits, fonts, sound and music
 - [Hero arena genre](hero-arena-genre.md)
 - [Fight Of Characters](fight-of-characters.md) — the map whose characters can't be reused

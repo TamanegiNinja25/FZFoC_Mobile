@@ -7,6 +7,13 @@ updated: 2026-11-08
 Newest entry first.
 
 ## 2026-11-08 — Ingest
+- Ingested 1 new RAW file: `2026-11-08-ui-and-audio-direction.md` (saved at the user's request; includes findings from the same-day sound-event analysis, spec at `Outputs/2026-11-08-spec-sound-events.md`).
+- Created source note [ui-and-audio-direction](sources/2026-11-08-ui-and-audio-direction.md) and topic [UI and audio direction](topics/ui-and-audio-direction.md) (Game design).
+- **Conflict recorded:** the first source called the 60 MP3s "music tracks"; the new source measured them as 0.2–6.1 s clips. Added Conflicts sections to [Fight Of Characters](topics/fight-of-characters.md#conflicts) and [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md#conflicts), resolved in favour of the measurement. Previous versions saved to `_history/`; compared — nothing removed except the corrected wording.
+- Added a Sound section to Fight Of Characters; cross-linked Assets and licensing and Hero transformations.
+- [Index](index.md) and [backlog](backlog.md) updated: +2 *(inference)* claims, +2 open questions, conflict listed.
+
+## 2026-11-08 — Ingest
 - Ingested 1 new RAW file: `2026-11-08-sketchfab-assets-and-local-multiplayer.md` (saved at the user's request).
 - Created source note [sketchfab-assets-and-local-multiplayer](sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md).
 - Created topic [Assets and licensing](topics/assets-and-licensing.md) in the existing Legal and IP category.

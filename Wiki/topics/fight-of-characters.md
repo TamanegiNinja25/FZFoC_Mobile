@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Warcraft III modding
-sources: [2026-11-08-fight-of-characters-mobile-feasibility]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction]
 updated: 2026-11-08
 ---
 # Fight Of Characters
@@ -27,7 +27,7 @@ A Korean-made, 4v4 anime crossover hero arena map for Warcraft III: The Frozen T
 | Custom items | 59 |
 | Imported assets | 189: 48 models, 80 icons, 60 MP3s, 1 WAV |
 
-All figures from the source ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
+All figures from the source ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)). The 60 MP3s are short ability clips, not music — see [Conflicts](#conflicts).
 
 - Heroes come from One Piece, Naruto, Bleach, Dragon Ball, Hellsing, InuYasha, Yu Yu Hakusho, Fate and Tsukihime; one item is a Pokémon "Monster Ball" that captures and summons creatures ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - Abilities are named after the shows' signature moves, with damage in the thousands (e.g. 1,800–2,100 per hit) ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
@@ -39,7 +39,14 @@ The map is deliberately obscured against editing, and its script showed no harmf
 ## Mobile potential
 A direct port is not feasible, but an original game using its mechanics is ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)). Why: [copyright vs game mechanics](copyright-vs-game-mechanics.md); how: [hero arena genre](hero-arena-genre.md#adapting-for-mobile).
 
+## Sound
+Each of 45 abilities plays its own short cast clip; hero voices, music and ambience are Warcraft III stock audio ([src](../sources/2026-11-08-ui-and-audio-direction.md)). Details in [UI and audio direction](ui-and-audio-direction.md#audio-patterns).
+
+## Conflicts
+- **What the 60 imported MP3s are.** The feasibility analysis described them as "60 MP3 music tracks" ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)). The later sound-event analysis measured them as 0.2–6.1 s clips (median 0.8 s) played as ability shouts and stings ([src](../sources/2026-11-08-ui-and-audio-direction.md)). The later source is a direct measurement, so this wiki treats them as **short clips**. The first source's other figures are unaffected.
+
 ## Related
+- [UI and audio direction](ui-and-audio-direction.md)
 - [Warcraft III map format](warcraft-iii-map-format.md)
 - [Hero transformations](hero-transformations.md)
 - [Hero arena genre](hero-arena-genre.md)

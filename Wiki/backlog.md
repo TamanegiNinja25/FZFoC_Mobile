@@ -16,6 +16,10 @@ Marked *(inference)* in the wiki; each needs a RAW source:
 - Copyright principles vary by country — [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md)
 - Save licence screenshots in case pages change — [Assets and licensing](topics/assets-and-licensing.md)
 - A public release would still need online matchmaking — [Hero arena genre](topics/hero-arena-genre.md#local-multiplayer)
+- Long-press tooltips as the mobile tooltip pattern; transformation as its own sound moment — [UI and audio direction](topics/ui-and-audio-direction.md)
+
+## Recorded conflicts
+- MP3s: "music tracks" vs measured 0.2–6.1 s clips — resolved in favour of the measurement; see [Fight Of Characters](topics/fight-of-characters.md#conflicts) and [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md#conflicts).
 
 ## Open questions
 - Which mechanics define Fight Of Characters' appeal and should be prototyped first? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
@@ -24,6 +28,9 @@ Marked *(inference)* in the wiki; each needs a RAW source:
 
 - Which 1–2 visual styles should the game commit to? ([source](sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md))
 - Godot or Unity for the project? ([source](sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md))
+
+- Who records the voices — friends, the user, or a hired actor? ([source](sources/2026-11-08-ui-and-audio-direction.md))
+- Which UI kit or style anchors the look? ([source](sources/2026-11-08-ui-and-audio-direction.md))
 
 ## Wanted sources
 - Sketchfab's official licence documentation and the Creative Commons licence texts (to confirm the licence table).
