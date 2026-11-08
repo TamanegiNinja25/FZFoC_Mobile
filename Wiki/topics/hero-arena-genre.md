@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-3-item-shop]
 updated: 2026-11-08
 ---
 # Hero arena genre
@@ -37,6 +37,12 @@ The planned game has two modes, reached from the main menu ([src](../sources/202
   - Killing a hero pays the killer its bounty, so the transformed-hero bounty now matters in play ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
 - **Play with Friends:** host/join over local Wi-Fi with Godot's built-in multiplayer (Phase 4).
 - Item shop with categories follows in Phase 3; heroes 2–3, icons and audio in Phase 5.
+
+## Itemization
+Built in Phase 3 ([src](../sources/2026-11-08-phase-3-item-shop.md)):
+- **Fountain shop**, 6 slots, sell for half; the match keeps running while shopping.
+- **Five categories:** Weapons, Armor, Mobility, **Relics** (meter charge, form duration, cooldowns — items built around the transformation), Consumables (tapped from the HUD).
+- 13 original items, 100–900 gold; bots buy a fixed build at their fountain.
 
 ## Economy
 Decided for FZFoC Mobile: a **kill-spree economy** that rewards aggression, with no comeback mechanic ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)):

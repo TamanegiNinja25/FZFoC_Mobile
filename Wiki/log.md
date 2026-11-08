@@ -6,6 +6,9 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (implementation)
+- Ingested `2026-11-08-phase-3-item-shop.md` (prototype commit 2843f84); source note created; [Hero arena genre](topics/hero-arena-genre.md) gains Itemization; backlog, index and README roadmap updated.
+
 ## 2026-11-08 — Ingest (implementation + measurement)
 - Ingested 1 new RAW file: `2026-11-08-ui-polish-and-phase-2.md` — UI polish and Phase 2 (prototype commits 62a8cb1, 5cf87b7).
 - Created source note [2026-11-08-ui-polish-and-phase-2](sources/2026-11-08-ui-polish-and-phase-2.md).
