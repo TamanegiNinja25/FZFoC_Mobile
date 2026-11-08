@@ -7,6 +7,9 @@ updated: 2026-11-08
 Newest entry first.
 
 ## 2026-11-08 — Ingest (implementation)
+- Ingested `2026-11-08-phase-4-local-multiplayer.md` (prototype commit 01b3b0a); source note created; [Hero arena genre](topics/hero-arena-genre.md) Modes updated; backlog, index and README roadmap updated.
+
+## 2026-11-08 — Ingest (implementation)
 - Ingested `2026-11-08-phase-3-item-shop.md` (prototype commit 2843f84); source note created; [Hero arena genre](topics/hero-arena-genre.md) gains Itemization; backlog, index and README roadmap updated.
 
 ## 2026-11-08 — Ingest (implementation + measurement)
