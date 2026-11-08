@@ -7,7 +7,7 @@ updated: 2026-11-08
 Open questions, gaps, wanted sources and proposals awaiting the user's approval.
 
 ## Awaiting approval
-*Nothing pending.* (Last resolved 2026-11-08: transformed-hero bounty kept as risk/reward — [Hero transformations](topics/hero-transformations.md#decisions).)
+- **75% 3D render resolution on phones** (UI stays at full resolution): on the NOTE 30 it cuts GPU time from 13.7 to 6.2 ms per frame, at some cost in sharpness — [Art direction](topics/art-direction.md#phone-infinix-note-30)
 
 ## Unsourced claims
 Marked *(inference)* in the wiki; each needs a RAW source:
@@ -23,7 +23,8 @@ Marked *(inference)* in the wiki; each needs a RAW source:
 Claims a source marks as its own inference about Warcraft III engine behaviour; confirming them would need runtime observation (REA or play):
 - Timed forms can't be cancelled early; level, XP, items and shared skills carry over through a morph; when the form cooldown starts — [Hero transformations](topics/hero-transformations.md)
 - Hero A's form duration and cooldown (60 s / 180 s, stock defaults) — [Hero transformations](topics/hero-transformations.md)
-- **Phone performance of high-poly heroes:** the 30–50k triangle budget is a recommendation until the stress test runs on the target phone. The scene exists and has a PC baseline (506 FPS at the game camera); the phone run is still missing — [Art direction](topics/art-direction.md#measurements)
+- ~~Phone performance of high-poly heroes~~ **Verified 2026-11-08** on the Infinix NOTE 30: locked 60 FPS at realistic settings — [Art direction](topics/art-direction.md#phone-infinix-note-30)
+- Sustained heat over a full 5–8 minute match on the NOTE 30 — [Art direction](topics/art-direction.md#phone-infinix-note-30)
 
 ## Recorded conflicts
 - MP3s: "music tracks" vs measured 0.2–6.1 s clips — resolved in favour of the measurement; see [Fight Of Characters](topics/fight-of-characters.md#conflicts) and [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md#conflicts).
@@ -39,7 +40,7 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 
 - ~~Which 1–2 visual styles should the game commit to?~~ Decided 2026-11-08: high-poly stylized ([source](sources/2026-11-08-decision-visual-style.md))
 - ~~Toon/ramp shading or simplified PBR?~~ Decided 2026-11-08: toon ([source](sources/2026-11-08-toon-shading-and-stress-benchmark.md))
-- Which phone is the stress-test target? (~~Cascades~~ decided: 2 on phones — [source](sources/2026-11-08-decision-phone-shadow-cascades.md))
+- ~~Which phone is the stress-test target?~~ The owner's Infinix NOTE 30 ([source](sources/2026-11-08-phone-benchmark-infinix-note-30.md)). Target 60 FPS, or use the phone's 90/120 Hz modes? ([source](sources/2026-11-08-phone-benchmark-infinix-note-30.md))
 - ~~Godot or Unity for the project?~~ Decided 2026-11-08: Godot ([source](sources/2026-11-08-decisions-meter-and-godot.md))
 
 - Who records the voices — friends, the user, or a hired actor? ([source](sources/2026-11-08-ui-and-audio-direction.md))

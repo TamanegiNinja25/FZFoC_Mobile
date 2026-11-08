@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades]
+sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30]
 updated: 2026-11-08
 ---
 # Art direction
@@ -66,11 +66,30 @@ The stress-test scene exists in the prototype: 6 heroes × 40,320 triangles with
 | 12 heroes, LOD off | — | 971k, 407 FPS |
 
   2 cascades halve shadow geometry; 12 heroes on 2 cascades cost about what 6 did on 4 ([src](../sources/2026-11-08-decision-phone-shadow-cascades.md)).
-- **Still needed:** a run on the target phone ([src](../sources/2026-11-08-decision-phone-shadow-cascades.md)).
+
+### Phone: Infinix NOTE 30
+MT6789, Mali-G57 MC2, 1080×2460 at 60 Hz. Vsync can't be disabled, so GPU time per frame is the real measure; the budget at 60 FPS is 16.7 ms ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
+
+| Configuration | FPS | GPU | Triangles |
+|---|---|---|---|
+| 6 heroes, LOD on, 2 cascades (phone default) | **60.0** (no dropped frames) | 13.7 ms | 9k |
+| 6 heroes, close camera | 60.0 | 14.9 ms | 32k |
+| 6 heroes, LOD off, 4 cascades | 56.6 (spikes to 28.9 ms) | 16.4 ms | 971k |
+| 6 heroes, LOD off, 2 cascades | 60.0 | 15.2 ms | 486k |
+| 12 heroes, LOD off, 2 cascades | 52.7 | 17.8 ms | 971k |
+| Phone default at **75% render resolution** | 60.1 | **6.2 ms** | 9k |
+| Phone default, no particle effects | 60.0 | 13.7 ms | 8k |
+
+- **The 30–50k hero budget works on this phone**, with about 3 ms of GPU headroom ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
+- **Pixels, not triangles, are the bottleneck:** +477k triangles cost 1.5 ms, while 75% resolution saves 54% ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
+- **Particles in this test are nearly free; CPU is under 0.5 ms** ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
+- **Proposed, awaiting the owner:** render 3D at ~75% resolution on phones, UI at full resolution ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
+- **Not yet tested:** sustained heat over a full match ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
 
 ## Open questions
 - ~~Toon/ramp shading or simplified PBR?~~ Decided: toon ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md))
-- Which phone is the target device? ([src](../sources/2026-11-08-decision-visual-style.md))
+- ~~Which phone is the target device?~~ The owner's Infinix NOTE 30 (mid-range) ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md))
+- 75% 3D render resolution on phones? Thermal behaviour over a full match? ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md))
 - ~~How many shadow cascades for phones?~~ Decided: 2 ([src](../sources/2026-11-08-decision-phone-shadow-cascades.md))
 
 ## Related

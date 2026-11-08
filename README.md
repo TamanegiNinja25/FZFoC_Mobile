@@ -48,7 +48,8 @@ Workflow details are in [CLAUDE.md](CLAUDE.md).
 - [x] Tune the transformation meter: ~90 s fill, aggression rewarded (measured 87.2 s)
 - [x] Choose a visual style: **high-poly stylized, toon shaded** ([art direction](Wiki/topics/art-direction.md))
 - [x] Build the stress-test scene and a PC baseline (506 FPS at the game camera)
-- [ ] Run the stress test on a target phone
+- [x] Run the stress test on a target phone: **Infinix NOTE 30, locked 60 FPS** at realistic settings
+- [ ] Decide the phone render resolution (75% proposed)
 - [ ] Offline prototype with 2–3 original heroes
 - [ ] Local multiplayer
 

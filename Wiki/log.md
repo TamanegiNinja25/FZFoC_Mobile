@@ -6,6 +6,12 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (measurement)
+- Ingested 1 new RAW file: `2026-11-08-phone-benchmark-infinix-note-30.md` — the first real-phone stress test (prototype commit 516fb99).
+- Created source note [phone-benchmark-infinix-note-30](sources/2026-11-08-phone-benchmark-infinix-note-30.md).
+- [Art direction](topics/art-direction.md): new "Phone: Infinix NOTE 30" measurements; target-phone question answered.
+- [Backlog](backlog.md): phone performance moved from "needs verification" to **verified**; **new item awaiting approval: 75% 3D render resolution on phones**; added thermal and refresh-rate questions. [Index](index.md) and README roadmap updated.
+
 ## 2026-11-08 — Ingest (decision + measurement)
 - Ingested 1 new RAW file: `2026-11-08-decision-phone-shadow-cascades.md` — 2 cascades on phones, with the 4-vs-2 benchmark (prototype commit 01d37fe).
 - Created source note [decision-phone-shadow-cascades](sources/2026-11-08-decision-phone-shadow-cascades.md).
