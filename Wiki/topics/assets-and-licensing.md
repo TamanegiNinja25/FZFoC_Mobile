@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Legal and IP
-sources: [2026-11-08-sketchfab-assets-and-local-multiplayer]
+sources: [2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decision-visual-style]
 updated: 2026-11-08
 ---
 # Assets and licensing
@@ -32,13 +32,14 @@ Each Sketchfab model shows its own licence on its page ([src](../sources/2026-11
 ## Practical checklist
 - Prefer glTF/GLB; Godot and Unity import it directly ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)).
 - Static models need rigging (e.g. Mixamo) — only if the licence allows modification ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)).
-- Keep characters around 5–20k polygons for phones; simplify in Blender if needed ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)).
-- Choose 1–2 visual styles before downloading, or the game will look stitched together ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)).
+- ~~Keep characters around 5–20k polygons for phones~~ ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)) — **superseded 2026-11-08** by the high-poly stylized decision: heroes 30–50k triangles with LODs, checked by a device stress test ([src](../sources/2026-11-08-decision-visual-style.md)). See [Art direction](art-direction.md#phone-performance-budget). Simplify in Blender or bake normal maps when a model is over budget.
+- Choose 1–2 visual styles before downloading, or the game will look stitched together ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)). Chosen: high-poly stylized ([src](../sources/2026-11-08-decision-visual-style.md)).
 - Track every asset in a credits file from day one; CC BY requires attribution ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)). A ready-made template: `Outputs/2026-11-08-asset-credits-template.md`.
 - Save a screenshot of each licence in case the page changes *(inference)*.
 
 ## Related
 - [Copyright vs game mechanics](copyright-vs-game-mechanics.md)
+- [Art direction](art-direction.md) — the chosen style and its polygon budget
 - [UI and audio direction](ui-and-audio-direction.md) — sources for UI kits, fonts, sound and music
 - [Hero arena genre](hero-arena-genre.md)
 - [Fight Of Characters](fight-of-characters.md) — the map whose characters can't be reused

@@ -7,6 +7,13 @@ updated: 2026-11-08
 Newest entry first.
 
 ## 2026-11-08 — Ingest (decision)
+- Ingested 1 new RAW file: `2026-11-08-decision-visual-style.md` — the owner's high-poly stylized decision, with the librarian's style rules, phone budget and stress-test plan marked as recommendations.
+- Created source note [decision-visual-style](sources/2026-11-08-decision-visual-style.md) and topic [Art direction](topics/art-direction.md) (Game design).
+- [Assets and licensing](topics/assets-and-licensing.md): the 5–20k polygon guidance marked **superseded**, not deleted, with a pointer to the new budget.
+- Cross-linked UI and audio direction and Hero transformations.
+- [Backlog](backlog.md): visual-style question closed; shading and target-phone questions added; phone performance added to "Needs runtime verification". README roadmap updated.
+
+## 2026-11-08 — Ingest (decision)
 - Ingested 1 new RAW file: `2026-11-08-decision-transformed-bounty.md`.
 - Created source note [decision-transformed-bounty](sources/2026-11-08-decision-transformed-bounty.md).
 - **Resolved the pending approval:** the transformed-hero bounty is kept as risk/reward. [Hero transformations](topics/hero-transformations.md#decisions) tension note replaced with the decision; [Hero arena genre](topics/hero-arena-genre.md#economy) Economy section gains the bounty.

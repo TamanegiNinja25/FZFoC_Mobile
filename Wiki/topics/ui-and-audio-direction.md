@@ -53,6 +53,7 @@ Licences vary per item; record each in the credits file ([src](../sources/2026-1
 | Voices | Own recordings, friends, or a hired voice actor |
 
 ## Related
+- [Art direction](art-direction.md) — the high-poly stylized look the UI should match
 - [Assets and licensing](assets-and-licensing.md)
 - [Copyright vs game mechanics](copyright-vs-game-mechanics.md)
 - [Hero transformations](hero-transformations.md)

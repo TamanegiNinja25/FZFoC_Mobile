@@ -88,4 +88,5 @@ From the spec's design notes for a mobile 3v3, 5–8 minute match ([src](../sour
 - [Fight Of Characters](fight-of-characters.md)
 - [Hero arena genre](hero-arena-genre.md)
 - [UI and audio direction](ui-and-audio-direction.md) — a transformation as a sound moment
+- [Art direction](art-direction.md) — each form needs its own look within the polygon budget
 - [Copyright vs game mechanics](copyright-vs-game-mechanics.md) — the mechanic is free to reuse; the reference's characters aren't

@@ -23,6 +23,7 @@ Marked *(inference)* in the wiki; each needs a RAW source:
 Claims a source marks as its own inference about Warcraft III engine behaviour; confirming them would need runtime observation (REA or play):
 - Timed forms can't be cancelled early; level, XP, items and shared skills carry over through a morph; when the form cooldown starts — [Hero transformations](topics/hero-transformations.md)
 - Hero A's form duration and cooldown (60 s / 180 s, stock defaults) — [Hero transformations](topics/hero-transformations.md)
+- **Phone performance of high-poly heroes:** the 30–50k triangle budget is a recommendation until a 6-hero stress test runs on the target phone — [Art direction](topics/art-direction.md#risk)
 
 ## Recorded conflicts
 - MP3s: "music tracks" vs measured 0.2–6.1 s clips — resolved in favour of the measurement; see [Fight Of Characters](topics/fight-of-characters.md#conflicts) and [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md#conflicts).
@@ -36,7 +37,8 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 - What setting and art style would make an original roster distinctive? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 - Target casual short sessions, or competitive ranked play? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 
-- Which 1–2 visual styles should the game commit to? ([source](sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md))
+- ~~Which 1–2 visual styles should the game commit to?~~ Decided 2026-11-08: high-poly stylized ([source](sources/2026-11-08-decision-visual-style.md))
+- Toon/ramp shading or simplified PBR? Which phone is the stress-test target? ([source](sources/2026-11-08-decision-visual-style.md))
 - ~~Godot or Unity for the project?~~ Decided 2026-11-08: Godot ([source](sources/2026-11-08-decisions-meter-and-godot.md))
 
 - Who records the voices — friends, the user, or a hired actor? ([source](sources/2026-11-08-ui-and-audio-direction.md))
