@@ -7,7 +7,7 @@ updated: 2026-11-08
 Open questions, gaps, wanted sources and proposals awaiting the user's approval.
 
 ## Awaiting approval
-*Nothing pending.* (Taxonomy approved 2026-11-08.)
+- **Transformed-hero bounty vs "no comeback mechanic":** the spec's higher bounty on transformed heroes was framed as a comeback lever; the owner ruled comeback mechanics out. Keep, drop or reframe as risk/reward? — [Hero transformations](topics/hero-transformations.md#decisions)
 
 ## Unsourced claims
 Marked *(inference)* in the wiki; each needs a RAW source:
@@ -17,6 +17,7 @@ Marked *(inference)* in the wiki; each needs a RAW source:
 - Save licence screenshots in case pages change — [Assets and licensing](topics/assets-and-licensing.md)
 - A public release would still need online matchmaking — [Hero arena genre](topics/hero-arena-genre.md#local-multiplayer)
 - Long-press tooltips as the mobile tooltip pattern; transformation as its own sound moment — [UI and audio direction](topics/ui-and-audio-direction.md)
+- A spree economy without a comeback mechanic may snowball — [Hero arena genre](topics/hero-arena-genre.md#economy)
 
 ## Needs runtime verification
 Claims a source marks as its own inference about Warcraft III engine behaviour; confirming them would need runtime observation (REA or play):
@@ -29,7 +30,7 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 
 ## Open questions
 - ~~Which mechanics define Fight Of Characters' appeal and should be prototyped first?~~ Narrowed: hero transformations are the core candidate — see [Hero transformations](topics/hero-transformations.md#design-direction-for-fzfoc-mobile). Still open: what else belongs in the first prototype.
-- Meter tuning: what fills it (damage dealt, taken, kills, trickle), how fast, does it drain? ([source](sources/2026-11-08-decisions-meter-and-godot.md))
+- ~~Meter tuning~~ Decided 2026-11-08: charge rule, 87.2 s measured fill ([source](sources/2026-11-08-decisions-charge-rule-and-spree.md)). Still open: does it hold in 3v3? Does the spree economy snowball too hard?
 - Transformation design: ~~meter or cooldown~~ (decided: meter). Every hero or only some? Stages per match or per activation? Does a form end on death or crowd control? ([source](sources/2026-11-08-spec-hero-transformations.md))
 - What setting and art style would make an original roster distinctive? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 - Target casual short sessions, or competitive ranked play? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))

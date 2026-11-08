@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-spec-hero-transformations, 2026-11-08-decisions-meter-and-godot]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-spec-hero-transformations, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree]
 updated: 2026-11-08
 ---
 # Hero transformations
@@ -50,7 +50,19 @@ One hero (B) has HP-threshold buffs rather than a form: at ≤10% HP it berserks
 ## Design direction for FZFoC Mobile
 
 ### Decisions
-- **2026-11-08 — Charge meter.** A full meter unlocks the form, replacing level gates and cooldowns ([src](../sources/2026-11-08-decisions-meter-and-godot.md)). What fills it, how fast, and whether it drains is still open. Target from the spec: a form ready about every 60–90 s ([src](../sources/2026-11-08-spec-hero-transformations.md)).
+- **2026-11-08 — Charge meter.** A full meter unlocks the form, replacing level gates and cooldowns ([src](../sources/2026-11-08-decisions-meter-and-godot.md)). The spec suggested a form every 60–90 s ([src](../sources/2026-11-08-spec-hero-transformations.md)).
+- **2026-11-08 — Charge rule.** About **90 s** to fill; aggression rewarded, no comeback mechanic ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)):
+
+| Source | Rate | Share of a fill |
+|---|---|---|
+| Damage dealt | 0.019 per damage, max 3 per hit | ≈ 64% |
+| Damage taken | 0.008 per damage, max 1.5 per hit | ≈ 9% |
+| Kill | +2 | ≈ 10% |
+| In combat | +0.2/s | ≈ 18% |
+| Out of combat (after 5 s) | −0.5/s | — |
+
+  Locked during the form. Measured in the prototype: **87.2 s** fill against one dummy ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)).
+- **Tension to resolve:** the spec recommends a higher bounty on transformed heroes and calls it "a comeback lever" ([src](../sources/2026-11-08-spec-hero-transformations.md)), but the owner ruled out comeback mechanics ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)). A transformed-hero bounty could instead be framed as risk/reward for the transformed player. Keep it, drop it or reframe it? Awaiting the owner.
 
 ### Spec recommendations
 From the spec's design notes for a mobile 3v3, 5–8 minute match ([src](../sources/2026-11-08-spec-hero-transformations.md)):
@@ -66,7 +78,8 @@ From the spec's design notes for a mobile 3v3, 5–8 minute match ([src](../sour
 - A transformation deserves its own big sound moment — see [UI and audio direction](ui-and-audio-direction.md) *(inference)*.
 
 ## Open questions
-- ~~Meter or cooldown?~~ Decided: meter. Now: what fills it, how fast, does it drain? ([src](../sources/2026-11-08-decisions-meter-and-godot.md))
+- ~~Meter or cooldown?~~ Decided: meter ([src](../sources/2026-11-08-decisions-meter-and-godot.md)). ~~What fills it?~~ Decided: charge rule above ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)).
+- Does the 90 s fill hold up in 3v3, with more damage spread across targets? ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md))
 - Every hero, or only some (the reference: 11 of 25)? ([src](../sources/2026-11-08-spec-hero-transformations.md))
 - Stage progression per match or per activation? ([src](../sources/2026-11-08-spec-hero-transformations.md))
 - Does a form end early on death or crowd control? ([src](../sources/2026-11-08-spec-hero-transformations.md))

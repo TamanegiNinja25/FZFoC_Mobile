@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree]
 updated: 2026-11-08
 ---
 # Hero arena genre
@@ -28,6 +28,15 @@ Changes the source recommends ([src](../sources/2026-11-08-fight-of-characters-m
 - Much of the original's feel comes from Warcraft III's built-in systems (terrain, pathfinding, right-click unit control); a mobile version must build these itself ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - Suggested tools: Unity or Godot, with a multiplayer service such as Photon or Nakama ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - Rough effort: an offline prototype with 2–3 heroes in weeks; a polished online release in many months for a small team, with art usually the biggest cost ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
+
+## Economy
+Decided for FZFoC Mobile: a **kill-spree economy** that rewards aggression, with no comeback mechanic ([src](../sources/2026-11-08-decisions-charge-rule-and-spree.md)):
+- 2 gold per second passive income.
+- Kill gold 100, plus 50% per spree step (100, 150, 200…).
+- A spree builds when the next kill lands within 15 s; each step adds +2 gold per second while it lasts (cap ×10).
+- Dying or missing the window ends the spree.
+
+Without a comeback mechanic, a team that gets ahead stays ahead, so whether this snowballs too hard is an open question *(inference)*. See also the transformed-hero bounty in [Hero transformations](hero-transformations.md#risk-and-reward).
 
 ## Local multiplayer
 For an offline project played with friends, online matchmaking and servers are unnecessary ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)):

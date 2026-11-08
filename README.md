@@ -44,8 +44,9 @@ Workflow details are in [CLAUDE.md](CLAUDE.md).
 - [x] Asset licensing rules and a credits template
 - [x] Choose engine: **Godot 4.7**
 - [x] Analyse the reference transformation mechanic; decide the trigger: **charge meter**
+- [x] Greybox prototype in Godot: charge meter, timed form, kill-spree economy ([Prototype/](Prototype/README.md))
+- [x] Tune the transformation meter: ~90 s fill, aggression rewarded (measured 87.2 s)
 - [ ] Choose 1–2 visual styles
-- [ ] Tune the transformation meter
 - [ ] Offline prototype with 2–3 original heroes
 - [ ] Local multiplayer
 

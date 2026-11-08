@@ -7,6 +7,14 @@ updated: 2026-11-08
 Newest entry first.
 
 ## 2026-11-08 — Ingest (decisions)
+- Ingested 1 new RAW file: `2026-11-08-decisions-charge-rule-and-spree.md` — the owner's meter direction plus the prototype's rates and measured results.
+- Created source note [decisions-charge-rule-and-spree](sources/2026-11-08-decisions-charge-rule-and-spree.md).
+- [Hero transformations](topics/hero-transformations.md): charge-rule decision and table; open questions updated.
+- [Hero arena genre](topics/hero-arena-genre.md): new Economy section (kill spree).
+- **Flagged for approval:** the spec's transformed-hero bounty was framed as a comeback lever, which conflicts with the owner's "no comeback mechanic" decision. Added to the [backlog](backlog.md) under Awaiting approval rather than resolved.
+- [Index](index.md) decisions line and status updated; README roadmap updated.
+
+## 2026-11-08 — Ingest (decisions)
 - Ingested 1 new RAW file: `2026-11-08-decisions-meter-and-godot.md`, recording the owner's decisions from chat.
 - Created source note [decisions-meter-and-godot](sources/2026-11-08-decisions-meter-and-godot.md).
 - [Hero transformations](topics/hero-transformations.md): new Decisions subsection (charge meter); open question narrowed to meter tuning.
