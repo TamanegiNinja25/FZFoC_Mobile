@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30, 2026-11-08-decision-90-percent-resolution-and-touch-joystick]
+sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-hero-design-vael]
 updated: 2026-11-08
 ---
 # Art direction
@@ -93,6 +93,9 @@ MT6789, Mali-G57 MC2, 1080×2460 at 60 Hz. Vsync can't be disabled, so GPU time 
 
   90% gets most of the saving with a sharper image and leaves about 9 ms of the 16.7 ms frame free. Long benchmark runs can hit mid-run throttling, so measurements use short repeated rounds ([src](../sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md)).
 - **Not yet tested:** sustained heat over a full match ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
+
+## Readability from the top-down camera
+- First hero check on the phone: Vael's silhouette (pauldrons, helm, hammer) reads, but his chest glow faces away from the camera. Signature details — glow, colour accents — belong on **top-facing surfaces** (shoulders, back, helm) ([src](../sources/2026-11-08-hero-design-vael.md)). See [Roster](roster.md).
 
 ## Open questions
 - ~~Toon/ramp shading or simplified PBR?~~ Decided: toon ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md))
