@@ -10,6 +10,9 @@ const INPUTS := {
 	"transform": [KEY_SPACE],
 	"skill_1": [KEY_Q],
 	"skill_2": [KEY_E],
+	"skill_3": [KEY_R],
+	"skill_4": [KEY_T],
+	"attack": [KEY_F],
 }
 
 

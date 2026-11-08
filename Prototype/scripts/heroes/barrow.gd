@@ -17,6 +17,14 @@ func _init() -> void:
 	attack_damage = 58.0
 	attack_interval = 1.3
 	attack_range = 2.8
+	primary = "str"
+	strength = 34.0
+	agility = 15.0
+	intelligence = 18.0
+	strength_gain = 3.4
+	agility_gain = 1.5
+	intelligence_gain = 1.8
+	exclusive_item = "cairnstone_heart"
 	form_duration = 14.0
 	form_shield_ratio = 0.35
 	form_damage_mult = 1.3
@@ -29,4 +37,4 @@ func create_model() -> Node3D:
 
 
 func create_skills() -> Array[Skill]:
-	return [QuakeStompSkill.new(), BoulderHurlSkill.new()]
+	return arrange([QuakeStompSkill.new(), BoulderHurlSkill.new(), StoneGripSkill.new(), RockfallSkill.new()])

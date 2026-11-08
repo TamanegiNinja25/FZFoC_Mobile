@@ -65,6 +65,14 @@ func _ready() -> void:
 	_mode.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_mode.item_selected.connect(func(i: int): _net.mode = i)
 	_pages.hosting.add_child(_mode)
+	var rules := OptionButton.new()
+	rules.add_item("Mobile — first to 15 kills or 8:00", 0)
+	rules.add_item("Classic — first to 50 kills, no time limit", 1)
+	rules.custom_minimum_size = Vector2(560, 56)
+	rules.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	rules.select(1 if _net.classic else 0)
+	rules.item_selected.connect(func(i: int): _net.classic = i == 1)
+	_pages.hosting.add_child(rules)
 	_players.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_pages.hosting.add_child(_players)
 	_start.text = "Start Match"

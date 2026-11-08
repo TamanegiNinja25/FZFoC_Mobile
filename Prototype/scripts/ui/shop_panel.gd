@@ -1,7 +1,9 @@
 class_name ShopPanel
 extends PanelContainer
-## Item shop by category: tabs, an icon grid with prices, a detail pane with
-## Buy, and the 6-slot inventory (tap an item to sell it for half price).
+## Shop by category: tabs, an icon grid with prices, a detail pane with Buy,
+## and the 6-slot inventory (tap an item to sell it for 75%). Stats sells the
+## reference map's tomes (used up at once), Exclusive the heroes' signature
+## items, and Artifacts lists the combining-circle recipes (made, not bought).
 ## The match keeps running while it's open, as in classic hero arenas.
 
 signal closed
@@ -42,8 +44,8 @@ func _ready() -> void:
 		var tab := Button.new()
 		tab.text = category
 		tab.toggle_mode = true
-		tab.custom_minimum_size = Vector2(150, 48)
-		tab.add_theme_font_size_override("font_size", 20)
+		tab.custom_minimum_size = Vector2(118, 48)
+		tab.add_theme_font_size_override("font_size", 17)
 		tab.pressed.connect(show_category.bind(category))
 		tabs.add_child(tab)
 		_tabs[category] = tab
@@ -120,7 +122,15 @@ func _process(_delta: float) -> void:
 	if visible and hero:
 		_gold.text = "%d gold" % floori(hero.gold)
 		var item := ItemCatalog.find(selected_id)
-		_buy.disabled = item == null or hero.gold < item.cost or hero.items.size() >= ItemCatalog.INVENTORY_SIZE or not hero.in_shop_range
+		var full := item != null and not item.is_tome() and hero.items.size() >= ItemCatalog.INVENTORY_SIZE
+		var wrong_hero := item != null and item.hero_only != "" and item.hero_only != hero.definition.id
+		_buy.disabled = item == null or not item.buyable or wrong_hero or hero.gold < item.cost or full or not hero.in_shop_range
+		if item and not item.buyable:
+			_buy.text = "Forge at a combining circle"
+		elif wrong_hero:
+			_buy.text = "%s only" % item.hero_only.capitalize()
+		else:
+			_buy.text = "Buy"
 
 
 func show_category(category: String) -> void:
@@ -130,7 +140,7 @@ func show_category(category: String) -> void:
 		child.queue_free()
 	for item in ItemCatalog.in_category(category):
 		var card := Button.new()
-		card.text = "%s\n%d" % [item.display_name, item.cost]
+		card.text = "%s\n%s" % [item.display_name, "recipe" if not item.buyable else str(item.cost)]
 		card.icon = item.icon()
 		card.expand_icon = true
 		card.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -152,15 +162,25 @@ func select_item(item_id: String) -> void:
 		if card.has_meta("item_id"):
 			card.button_pressed = card.get_meta("item_id") == item_id
 	if item:
-		_details.text = "[font_size=28][color=#ffd673]%s[/color][/font_size]\n[i]%s[/i] — [color=#ffd673]%d gold[/color]\n\n%s%s" % [
-			item.display_name, item.category, item.cost, item.description,
-			"\n\n[i]Consumable: tap it in the HUD inventory to use.[/i]" if item.consumable else ""]
+		var note := ""
+		if item.consumable:
+			note = "\n\n[i]Consumable: tap it in the HUD inventory to use.[/i]"
+		elif item.is_tome():
+			note = "\n\n[i]Used up the moment you buy it — no inventory slot.[/i]"
+		elif not item.buyable:
+			note = "\n\n[color=#ffd673]Recipe:[/color] %s\n[i]Carry the parts into a combining circle (beside each base).[/i]" % ItemCatalog.recipe_text(item.id)
+		var price := "made from parts worth %d gold" % item.cost if not item.buyable else "%d gold" % item.cost
+		_details.text = "[font_size=28][color=#ffd673]%s[/color][/font_size]\n[i]%s[/i] — [color=#ffd673]%s[/color]\n\n%s%s" % [
+			item.display_name, item.category, price, item.description, note]
 	_status.text = ""
 
 
 func _on_buy() -> void:
+	var item := ItemCatalog.find(selected_id)
 	var error := hero.buy(selected_id)
 	_status.text = error
+	if error == "" and item and item.is_tome():
+		_status.text = "%s used" % item.display_name
 	if error != "":
 		Sfx.play("back", -4.0)
 

@@ -3,7 +3,8 @@ extends SceneTree
 ##   host:   godot --headless --path Prototype -s res://tests/net_test.gd -- --loopback --role=host
 ##   client: godot --headless --path Prototype -s res://tests/net_test.gd -- --loopback --role=client
 ## The client discovers the host, joins, both load the arena, the client's
-## stick input moves its hero on the host, and the host's score reaches the client.
+## stick input moves its hero on the host, and the host's score, rules, hero
+## levels and creeps reach the client.
 
 var _net: Node
 var _role := ""
@@ -42,6 +43,7 @@ func _process(delta: float) -> bool:
 			if _net.players.size() == 2:
 				_check(true, "client joined the lobby (players: %s)" % str(_net.players.values()))
 				_net.mode = _net.Mode.VERSUS
+				_net.classic = true  # the host's rules must reach the client
 				_net.start_match()
 				_phase = "loading"
 		"host:playing":
@@ -51,6 +53,7 @@ func _process(delta: float) -> bool:
 				var victim: Node = _arena.heroes.filter(func(h): return h.team == 0 and h.owner_peer == 0)[0]
 				victim.take_damage(99999.0, guest)
 				_check(_arena.kills[1] == 1, "host scored a kill for the client's team")
+				guest.add_xp(600.0)  # level 3: the client should see it
 				_phase = "linger"
 				_clock = 30.0  # give the client time to see it, then end
 		"host:linger":
@@ -94,6 +97,11 @@ func _process(delta: float) -> bool:
 			if _arena.kills[1] >= 1 and me.global_position.x > _mark.x + 3.0:
 				_check(true, "own hero moved via the host's snapshots (Δx %.1f)" % (me.global_position.x - _mark.x))
 				_check(true, "score reached the client (Blue %d — %d Red)" % [_arena.kills[0], _arena.kills[1]])
+				_check(_arena.kill_target == 50, "the host's Classic rules reached the client")
+				_check(me.level >= 3, "hero level syncs to the client (level %d)" % me.level)
+				var mirrored := get_nodes_in_group("creeps").filter(func(c): return c.puppet)
+				_check(mirrored.size() >= 3 and mirrored.any(func(c): return c.is_colossus),
+						"bosses and the win boss are mirrored on the client (%d units)" % mirrored.size())
 				Input.action_release("move_right")
 				_finish()
 	return false

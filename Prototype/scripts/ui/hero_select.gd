@@ -11,6 +11,7 @@ signal back_requested
 var selected_id := ""
 
 var _category := "All"
+var _mode_buttons := {}
 var _cards := GridContainer.new()
 var _details := RichTextLabel.new()
 var _start := Button.new()
@@ -39,6 +40,23 @@ func _ready() -> void:
 		tab.pressed.connect(_show_category.bind(category))
 		tabs.add_child(tab)
 		_tab_buttons[category] = tab
+
+	# Rules: Mobile (15 kills or 8:00) or Classic (50 kills, no time limit).
+	var modes := HBoxContainer.new()
+	modes.alignment = BoxContainer.ALIGNMENT_CENTER
+	modes.add_theme_constant_override("separation", 10)
+	column.add_child(modes)
+	for spec in [[false, "Mobile — 15 kills · 8:00"], [true, "Classic — 50 kills · no time limit"]]:
+		var mode_button := Button.new()
+		mode_button.text = spec[1]
+		mode_button.toggle_mode = true
+		mode_button.custom_minimum_size = Vector2(380, 48)
+		mode_button.add_theme_font_size_override("font_size", 18)
+		mode_button.pressed.connect(_set_classic.bind(spec[0]))
+		modes.add_child(mode_button)
+		_mode_buttons[spec[0]] = mode_button
+	var session := get_node_or_null("/root/Session")
+	_set_classic(session.classic if session else false)
 
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -86,6 +104,15 @@ func _ready() -> void:
 	select_hero(Roster.all()[0].id)
 
 
+## Autoloads are looked up at run time: tests compile this script before they exist.
+func _set_classic(on: bool) -> void:
+	var session := get_node_or_null("/root/Session")
+	if session:
+		session.classic = on
+	for key in _mode_buttons:
+		_mode_buttons[key].button_pressed = key == on
+
+
 func _show_category(category: String) -> void:
 	_category = category
 	for key in _tab_buttons:
@@ -122,10 +149,21 @@ func select_hero(hero_id: String) -> void:
 		"",
 		definition.description,
 		"",
+		"[color=#ffd673]Attributes[/color] — primary %s" % {"str": "strength", "agi": "agility", "int": "intelligence"}[definition.primary],
+		"STR %d (+%.1f)   AGI %d (+%.1f)   INT %d (+%.1f) per level" % [definition.strength, definition.strength_gain,
+			definition.agility, definition.agility_gain, definition.intelligence, definition.intelligence_gain],
+		"",
 		"[color=#ffd673]Skills[/color]",
 	]
 	for skill in definition.create_skills():
-		lines.append("• [b]%s[/b] (%ds): %s" % [skill.skill_name, skill.cooldown, skill.description])
+		var ranks := "ultimate, %d ranks from level %d" % [skill.max_rank, skill.required_level] if skill.ultimate \
+				else "%d ranks from level %d" % [skill.max_rank, skill.required_level]
+		lines.append("• [b]%s[/b] (%ds, %s): %s" % [skill.skill_name, skill.cooldown, ranks, skill.description])
+	var exclusive := ItemCatalog.find(definition.exclusive_item)
+	if exclusive:
+		lines.append("")
+		lines.append("[color=#ffd673]Exclusive item — %s[/color] (%d gold)" % [exclusive.display_name, exclusive.cost])
+		lines.append(exclusive.description)
 	lines.append("")
 	lines.append("[color=#ffd673]Transformation — %s[/color]" % definition.form_name)
 	lines.append("%d s · shield %d%% · damage ×%.2f · speed ×%.1f" % [definition.form_duration, definition.form_shield_ratio * 100, definition.form_damage_mult, definition.form_speed_mult])

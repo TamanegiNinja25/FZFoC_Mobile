@@ -1,13 +1,14 @@
 extends SceneTree
 ## Headless check of every hero in the roster:
 ##   Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/roster_test.gd
-## For each hero: every skill has a real effect (damage, movement or a buff),
-## the transformation grows the model, and roles differ in their stats.
+## For each hero: every skill (at rank 1) has a real effect — damage, movement,
+## a buff, a summon, a stun or a root — the transformation grows the model, and
+## roles differ in their stats.
 
 var _scene: Node
 var _dummy: Dummy
 var _steps: Array = []
-var _wait := 0
+var _wait := 0.0  # seconds: headless frames are far shorter than 1/60 s
 var _hero: Hero
 var _before := {}
 var _failures: Array[String] = []
@@ -24,9 +25,9 @@ func _initialize() -> void:
 		_steps.append(["form", null])
 
 
-func _process(_delta: float) -> bool:
-	if _wait > 0:
-		_wait -= 1
+func _process(delta: float) -> bool:
+	if _wait > 0.0:
+		_wait -= delta
 		return false
 	if _before.has("pending"):
 		_judge()
@@ -52,21 +53,26 @@ func _process(_delta: float) -> bool:
 			_hero.is_player = false
 			_hero.position = _dummy.position + Vector3(0, 0, 4.0)
 			_scene.add_child(_hero)
-			_wait = 3
+			_wait = 0.1
 		"skill":
 			var i: int = step[1]
+			if not _dummy.is_alive():  # a strong skill (Thousand Cuts) can kill it outright
+				_dummy._dead_time = 0.0
+				_dummy._respawn()
 			_dummy.hp = _dummy.max_hp
 			_hero.global_position = _dummy.global_position + Vector3(0, 0, 2.5 if i == 0 else 5.0)
 			_hero.ai_move = (_dummy.global_position - _hero.global_position).normalized()
 			_hero.skills[i].time_left = 0.0
+			_hero.skills[i].rank = 1
 			_before = {"pending": "skill", "index": i, "hp": _dummy.hp, "pos": _hero.global_position,
+					"summons": get_nodes_in_group("summons").size(),
 					"cast": _hero.try_skill(i), "name": _hero.skills[i].skill_name}
 			_hero.ai_move = Vector3.ZERO
-			_wait = 50  # long enough for a boulder to fly
+			_wait = 2.0  # long enough for a boulder to fly or a channel to land
 		"form":
 			_hero.meter._add(_hero.meter.max_charge)
 			_before = {"pending": "form", "cast": _hero.try_transform()}
-			_wait = 30
+			_wait = 0.6
 	return false
 
 
@@ -76,7 +82,8 @@ func _judge() -> void:
 		"skill":
 			var damaged: bool = _dummy.hp < _before.hp or not _dummy.is_alive()
 			var moved: bool = _hero.global_position.distance_to(_before.pos) > 2.0
-			var effect := "damage" if damaged else ("movement" if moved else ("haste" if _hero.is_hasted() else "none"))
+			var summoned: bool = get_nodes_in_group("summons").size() > _before.summons
+			var effect := "damage" if damaged else ("movement" if moved else ("haste" if _hero.is_hasted() else ("summon" if summoned else "none")))
 			_check(_before.cast and effect != "none", "%s — %s casts with a real effect (%s)" % [who, _before.name, effect])
 		"form":
 			_check(_before.cast and _hero.in_form, "%s transforms into %s" % [who, _hero.definition.form_name])

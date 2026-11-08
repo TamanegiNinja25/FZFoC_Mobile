@@ -8,12 +8,12 @@ const DURATION := 4.0
 
 func _init() -> void:
 	skill_name = "Flurry"
-	description = "Attack 60% faster for 4 s."
+	description = "Attack 60% faster for 4 s (+0.5 s per rank)."
 	cooldown = 10.0
 
 
 func _cast(hero: Hero) -> void:
-	hero.apply_haste(MULTIPLIER, DURATION)
+	hero.apply_haste(MULTIPLIER, DURATION + 0.5 * (rank - 1))
 	hero.play_sfx("dash", 2.0)
 
 

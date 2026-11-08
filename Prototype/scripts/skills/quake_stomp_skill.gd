@@ -9,7 +9,7 @@ const DAMAGE := 90.0
 
 func _init() -> void:
 	skill_name = "Quake Stomp"
-	description = "Hit enemies within 3.5 for 90 and slow heroes 40% for 2 s. Avalanche: 4.9 radius, 55% slow."
+	description = "Hit enemies within 3.5 for 90 (+35% per rank) and slow heroes 40% for 2 s. Avalanche: 4.9 radius, 55% slow."
 	cooldown = 8.0
 
 
@@ -21,7 +21,7 @@ func _cast(hero: Hero) -> void:
 	var r := radius(hero)
 	var slow := 0.45 if hero.in_form else 0.6
 	for node in hostiles_within(hero, r):
-		hero.deal_damage(node, DAMAGE)
+		hero.deal_damage(node, scaled(hero, DAMAGE))
 		if node is Hero:
 			node.apply_slow(slow, 2.0)
 	if hero.model.has_method("play_slam"):

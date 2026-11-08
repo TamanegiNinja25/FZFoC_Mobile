@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-3-item-shop, 2026-11-08-phase-4-local-multiplayer]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-3-item-shop, 2026-11-08-phase-4-local-multiplayer, 2026-11-08-phase-6-map-systems]
 updated: 2026-11-08
 ---
 # Hero arena genre
@@ -37,6 +37,8 @@ The planned game has two modes, reached from the main menu ([src](../sources/202
   - Killing a hero pays the killer its bounty, so the transformed-hero bounty now matters in play ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
 - **Play with Friends (built, Phase 4):** one phone hosts and runs the match; friends on the same Wi-Fi join from a discovered list or by IP; Versus or Co-op vs bots; bots fill empty slots and take over leavers. Clients send input and display the host's 20-per-second snapshots. Verified with a real match hosted on the owner's phone ([src](../sources/2026-11-08-phase-4-local-multiplayer.md)).
 - Item shop with categories follows in Phase 3; heroes 2–3, icons and audio in Phase 5.
+
+The prototype now offers both a **Mobile** mode (15 kills or 8:00) and a **Classic** mode (50 kills, no time limit), with the reference map's duel, creep waves and boss chains running in either ([src](../sources/2026-11-08-phase-6-map-systems.md)).
 
 ## Itemization
 Built in Phase 3 ([src](../sources/2026-11-08-phase-3-item-shop.md)):

@@ -7,7 +7,7 @@ updated: 2026-11-08
 Open questions, gaps, wanted sources and proposals awaiting the user's approval.
 
 ## Awaiting approval
-- **Fidelity audit findings (2026-11-08):** the map has systems FZFoC lacks: duels, levels/XP/attributes, creep waves, boss ladders, a win boss, item recipes, hero-exclusive items, a stat shop, unique picks, and a 100-kill mode. Owner to choose which to adopt. The report is [Outputs/2026-11-08-foc-fidelity-audit.md](../Outputs/2026-11-08-foc-fidelity-audit.md); move it to `RAW/` to have its map facts ingested into [Fight Of Characters](topics/fight-of-characters.md).
+*Nothing pending.* (Resolved 2026-11-08: the fidelity audit's adoptions — the owner chose all six; built in Phase 6 ([source](sources/2026-11-08-phase-6-map-systems.md)). Unique hero picks were not requested.)
 *Nothing pending.* (Last resolved 2026-11-08: phone render resolution — owner chose 90% over the proposed 75% — [Art direction](topics/art-direction.md#phone-infinix-note-30).)
 
 ## Unsourced claims
@@ -33,7 +33,7 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 
 ## Open questions
 - Difficulty choice for enemy bots' base skill? Does adaptive AI feel fair over a full match? ([source](sources/2026-11-08-ui-polish-and-phase-2.md))
-- **Game build:** ~~Phase 2~~, ~~Phase 3~~, ~~Phase 4~~, ~~Phase 5~~ done ([source](sources/2026-11-08-phase-5-heroes-and-music.md)); all five planned phases complete ([source](sources/2026-11-08-phase-4-local-multiplayer.md)) ([source](sources/2026-11-08-phase-3-item-shop.md)); ([source](sources/2026-11-08-ui-polish-and-phase-2.md)). Next: Phases 3–5 ([source](sources/2026-11-08-game-build-plan-and-phase-1.md)): adaptive AI design (what adapts?); original arena map; item categories; local Wi-Fi host/join; heroes 2–3, icons, audio.
+- **Game build:** ~~Phase 2~~, ~~Phase 3~~, ~~Phase 4~~, ~~Phase 5~~, ~~Phase 6 (map systems)~~ done ([source](sources/2026-11-08-phase-6-map-systems.md)) ([source](sources/2026-11-08-phase-5-heroes-and-music.md)); all planned phases complete. Pending: a phone performance check of Phase 6 (80 creeps, larger map) before releasing v0.6.0 ([source](sources/2026-11-08-phase-4-local-multiplayer.md)) ([source](sources/2026-11-08-phase-3-item-shop.md)); ([source](sources/2026-11-08-ui-polish-and-phase-2.md)). Next: Phases 3–5 ([source](sources/2026-11-08-game-build-plan-and-phase-1.md)): adaptive AI design (what adapts?); original arena map; item categories; local Wi-Fi host/join; heroes 2–3, icons, audio.
 - An original title to replace the working title "FZFoC" before any release ([source](sources/2026-11-08-game-build-plan-and-phase-1.md))
 - **Vael:** ~~how is Eruption empowered?~~ Radius ×1.5, damage ×1.2 ([source](sources/2026-11-08-vael-eruption.md)). Still open: glow placement on the final model; voice lines and Kindled sound; Eruption's crowd value in 3v3 ([source](sources/2026-11-08-hero-design-vael.md))
 - Heroes 2 and 3: which archetypes? *(speed and giant would complete the reference's set)* — [Roster](topics/roster.md)

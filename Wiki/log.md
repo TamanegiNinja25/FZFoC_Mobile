@@ -6,6 +6,10 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (design + implementation)
+- Ingested `2026-11-08-phase-6-map-systems.md` (Phase 6, prototype v0.6.0); source note created; [Fight Of Characters](topics/fight-of-characters.md) gains a Systems section (map facts); [Roster](topics/roster.md) gains ranks, ultimates, attributes and exclusive items; [Hero arena genre](topics/hero-arena-genre.md) notes the Mobile and Classic modes; backlog's awaiting-approval item resolved; index updated. History snapshots saved for both changed topic pages (oldest Fight Of Characters snapshot removed under the two-version rule).
+- Pending: phone performance check before tagging v0.6.0.
+
 ## 2026-11-08 — Question: fidelity audit against the map
 - Re-read the map (MPQ contents byte-identical to the earlier extraction) and parsed its items, shops, taverns, 123 hero skills and 267 triggers; simulated 500 matches per kill-rate scenario from the script's rules.
 - Answer written to `Outputs/2026-11-08-foc-fidelity-audit.md`: FZFoC keeps the genre skeleton but not the specific systems (duels, levelling, creep waves, bosses, recipes, exclusive items, unique picks, 100-kill win).

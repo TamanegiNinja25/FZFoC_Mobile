@@ -5,6 +5,8 @@ enum Mode { SINGLE_PLAYER, LOCAL_FRIENDS }
 
 var mode := Mode.SINGLE_PLAYER
 var hero_id := "vael"
+## Classic: first to 50 kills, no time limit. Otherwise Mobile: 15 kills or 8:00.
+var classic := false
 ## Local multiplayer: peer id → team, chosen by the host when the match starts.
 var net_teams := {}
 ## A message for the main menu (e.g. "The host left the game").

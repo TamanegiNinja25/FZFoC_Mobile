@@ -2,8 +2,17 @@ class_name Hud
 extends CanvasLayer
 
 signal pause_requested
-## Hero name, health, shield, meter and form countdown, plus thumb-sized
-## transform and skill buttons arranged around the right thumb.
+## Hero name, level and experience, attributes, health, shield, meter and form
+## countdown on the left; on the right a big ATTACK button with the four
+## skills on an arc around it. A "+" badge sits on each skill's top corner
+## whenever a skill point can rank it up.
+
+## Arc around the attack button: radius and angles (degrees, 180 = left).
+const ARC_RADIUS := 250.0
+const ARC_ANGLES := [180.0, 146.0, 112.0, 78.0]
+const ATTACK_CENTER := Vector2(-185, -185)
+const SKILL_SIZE := 120.0
+const BADGE_SIZE := 48.0
 
 var hero: Hero
 var joystick := TouchJoystick.new()
@@ -11,11 +20,16 @@ var joystick := TouchJoystick.new()
 var _hp_bar := ProgressBar.new()
 var _shield_bar := ProgressBar.new()
 var _meter_bar := ProgressBar.new()
+var _xp_bar := ProgressBar.new()
+var _level := Label.new()
+var _attributes := Label.new()
 var _status := Label.new()
 var _economy := Label.new()
 var _button := Button.new()
+var _attack := Button.new()
 var _name := Label.new()
 var _skill_buttons: Array[Button] = []
+var _badges: Array[Button] = []
 var _fps := Label.new()
 var _shop_button := Button.new()
 var _inventory: Array[Button] = []
@@ -31,6 +45,7 @@ func setup(target: Hero) -> void:
 	hero.meter.changed.connect(_on_meter_changed)
 	_name.text = "%s — %s" % [hero.definition.display_name, hero.definition.title]
 	hero.items_changed.connect(_refresh_inventory)
+	hero.leveled_up.connect(func(_l): _pulse(_level))
 	_refresh_inventory()
 	_on_health_changed(hero.hp, hero.max_hp, hero.shield)
 	_on_meter_changed(hero.meter.charge, hero.meter.max_charge)
@@ -50,12 +65,28 @@ func _ready() -> void:
 	backing.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(backing)
 	var panel := VBoxContainer.new()
-	panel.add_theme_constant_override("separation", 6)
+	panel.add_theme_constant_override("separation", 5)
 	backing.add_child(panel)
 
 	_name.add_theme_font_size_override("font_size", 22)
 	_name.add_theme_color_override("font_color", UiTheme.GOLD_BRIGHT)
 	panel.add_child(_name)
+
+	var level_line := HBoxContainer.new()
+	_level.custom_minimum_size = Vector2(70, 0)
+	_level.add_theme_font_size_override("font_size", 18)
+	_level.add_theme_color_override("font_color", UiTheme.GOLD_BRIGHT)
+	_xp_bar.custom_minimum_size = Vector2(300, 12)
+	_xp_bar.show_percentage = false
+	_xp_bar.max_value = 1.0
+	_xp_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_xp_bar.modulate = Color(0.75, 0.6, 1.0)
+	level_line.add_child(_level)
+	level_line.add_child(_xp_bar)
+	panel.add_child(level_line)
+	_attributes.add_theme_font_size_override("font_size", 16)
+	_attributes.add_theme_color_override("font_color", UiTheme.MUTED)
+	panel.add_child(_attributes)
 
 	for row in [["HP", _hp_bar, Color(0.3, 0.85, 0.35)], ["Shield", _shield_bar, Color(0.6, 0.8, 1.0)], ["Meter", _meter_bar, Color(1.0, 0.75, 0.2)]]:
 		var line := HBoxContainer.new()
@@ -75,40 +106,49 @@ func _ready() -> void:
 		line.add_theme_font_size_override("font_size", 18)
 		panel.add_child(line)
 
+	# ATTACK: lock onto the nearest enemy (heroes first) and chase it.
+	_attack.text = "ATTACK"
+	_corner(_attack, Rect2(ATTACK_CENTER - Vector2(85, 85), Vector2(170, 170)))
+	_attack.add_theme_font_size_override("font_size", 26)
+	_attack.button_down.connect(func(): hero.order_attack())
+	root.add_child(_attack)
+
+	# Skills on an arc around ATTACK, each with a "+" badge on its top-left corner.
+	for i in ARC_ANGLES.size():
+		var angle := deg_to_rad(ARC_ANGLES[i])
+		var center := ATTACK_CENTER + Vector2(cos(angle), -sin(angle)) * ARC_RADIUS
+		var skill_button := Button.new()
+		_corner(skill_button, Rect2(center - Vector2.ONE * SKILL_SIZE / 2.0, Vector2.ONE * SKILL_SIZE))
+		skill_button.add_theme_font_size_override("font_size", 16)
+		skill_button.clip_text = true
+		skill_button.pressed.connect(func(): hero.try_skill(i))
+		root.add_child(skill_button)
+		_skill_buttons.append(skill_button)
+
+		var badge := Button.new()
+		badge.text = "+"
+		var corner := center - Vector2.ONE * SKILL_SIZE / 2.0
+		_corner(badge, Rect2(corner - Vector2.ONE * BADGE_SIZE * 0.3, Vector2.ONE * BADGE_SIZE))
+		badge.add_theme_font_size_override("font_size", 30)
+		badge.add_theme_color_override("font_color", Color(0.15, 0.1, 0.02))
+		badge.add_theme_stylebox_override("normal", _badge_style(Color(1.0, 0.8, 0.3)))
+		badge.add_theme_stylebox_override("hover", _badge_style(Color(1.0, 0.88, 0.45)))
+		badge.add_theme_stylebox_override("pressed", _badge_style(Color(0.9, 0.65, 0.2)))
+		badge.set_meta("sfx", "confirm")
+		badge.visible = false
+		badge.pressed.connect(func(): hero.learn_skill(i))
+		root.add_child(badge)
+		_badges.append(badge)
+
+	# TRANSFORM sits outside the arc, between the second and third skills.
 	_button.text = "TRANSFORM"
-	_button.custom_minimum_size = Vector2(220, 96)
+	var form_center := ATTACK_CENTER + Vector2(cos(deg_to_rad(135.0)), -sin(deg_to_rad(135.0))) * 420.0
+	_corner(_button, Rect2(form_center - Vector2(105, 45), Vector2(210, 90)))
 	_button.disabled = true
-	_button.anchor_left = 1.0
-	_button.anchor_right = 1.0
-	_button.anchor_top = 1.0
-	_button.anchor_bottom = 1.0
-	_button.offset_left = -260
-	_button.offset_top = -136
-	_button.offset_right = -40
-	_button.offset_bottom = -40
 	_button.set_meta("sfx", "confirm")
 	_button.add_theme_font_size_override("font_size", 22)
 	_button.pressed.connect(func(): hero.try_transform())
 	root.add_child(_button)
-
-	# Skill buttons in an arc around TRANSFORM: skill 1 to its left, skill 2 above.
-	for spec in [[0, Rect2(-480, -136, 200, 96)], [1, Rect2(-250, -256, 200, 96)]]:
-		var skill_button := Button.new()
-		var r: Rect2 = spec[1]
-		skill_button.anchor_left = 1.0
-		skill_button.anchor_right = 1.0
-		skill_button.anchor_top = 1.0
-		skill_button.anchor_bottom = 1.0
-		skill_button.offset_left = r.position.x
-		skill_button.offset_top = r.position.y
-		skill_button.offset_right = r.position.x + r.size.x
-		skill_button.offset_bottom = r.position.y + r.size.y
-		skill_button.add_theme_font_size_override("font_size", 20)
-		skill_button.clip_text = true
-		var index: int = spec[0]
-		skill_button.pressed.connect(func(): hero.try_skill(index))
-		root.add_child(skill_button)
-		_skill_buttons.append(skill_button)
 
 	var pause := Button.new()
 	pause.text = "II"
@@ -171,6 +211,27 @@ func _ready() -> void:
 	root.add_child(_fps)
 
 
+## Anchors a control to the bottom-right corner at `rect` (offsets from that corner).
+static func _corner(control: Control, rect: Rect2) -> void:
+	control.anchor_left = 1.0
+	control.anchor_right = 1.0
+	control.anchor_top = 1.0
+	control.anchor_bottom = 1.0
+	control.offset_left = rect.position.x
+	control.offset_top = rect.position.y
+	control.offset_right = rect.position.x + rect.size.x
+	control.offset_bottom = rect.position.y + rect.size.y
+
+
+static func _badge_style(color: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(int(BADGE_SIZE / 2.0))
+	style.border_color = Color(0.3, 0.2, 0.05)
+	style.set_border_width_all(3)
+	return style
+
+
 func _process(_delta: float) -> void:
 	if not hero:
 		return
@@ -181,7 +242,17 @@ func _process(_delta: float) -> void:
 	_fps.visible = GameSettings.show_fps
 	if _fps.visible:
 		_fps.text = "%d FPS" % Engine.get_frames_per_second()
-	if hero.in_form:
+
+	_level.text = "Lv %d" % hero.level
+	_xp_bar.value = hero.level_progress()
+	var points := "   ·   %d skill point%s" % [hero.skill_points, "" if hero.skill_points == 1 else "s"] if hero.skill_points > 0 else ""
+	_attributes.text = "STR %d   AGI %d   INT %d%s" % [hero.attribute("str"), hero.attribute("agi"), hero.attribute("int"), points]
+
+	if hero.frozen:
+		_status.text = "Duel in progress…"
+	elif hero.is_stunned():
+		_status.text = "Stunned!"
+	elif hero.in_form:
 		_status.text = "%s  %.1f s" % [hero.definition.form_name.to_upper(), hero.form_time_left]
 	elif not hero.is_alive():
 		_status.text = "Respawning…"
@@ -197,15 +268,26 @@ func _process(_delta: float) -> void:
 	var bounty_text := "   BOUNTY %d  ⚠" % hero.bounty_value() if hero.in_form else "   Bounty %d" % hero.bounty_value()
 	_economy.text = "Gold %d   +%.0f/s%s%s" % [floori(hero.gold), hero.income_per_second(), spree_text, bounty_text]
 
+	var can_act := hero.is_alive() and not hero.frozen
+	_attack.disabled = not can_act
 	for i in _skill_buttons.size():
 		if i >= hero.skills.size():
 			_skill_buttons[i].visible = false
+			_badges[i].visible = false
 			continue
 		var skill := hero.skills[i]
 		var label := skill.display_name(hero)
-		_skill_buttons[i].text = label if skill.is_ready() else "%s
-%.1f" % [label, skill.time_left]
-		_skill_buttons[i].disabled = not skill.is_ready() or not hero.is_alive()
+		if label.length() > 10:
+			label = label.replace(" ", "\n")
+		if not skill.is_learned():
+			_skill_buttons[i].text = "%s\nLv %d" % [label, skill.next_rank_level()]
+		elif skill.is_ready():
+			_skill_buttons[i].text = "%s\n%s" % [label, skill.rank_pips()]
+		else:
+			_skill_buttons[i].text = "%s\n%.1f" % [label, skill.time_left]
+		_skill_buttons[i].disabled = not skill.is_ready() or not can_act
+		_skill_buttons[i].modulate = Color(1, 1, 1) if skill.is_learned() else Color(1, 1, 1, 0.55)
+		_badges[i].visible = hero.skill_points > 0 and skill.can_learn(hero)
 
 
 func open_shop() -> void:
@@ -220,6 +302,12 @@ func open_shop() -> void:
 func close_shop() -> void:
 	shop.visible = false
 	joystick.enabled = true
+
+
+func _pulse(control: Control) -> void:
+	control.pivot_offset = control.size / 2.0
+	control.scale = Vector2(1.5, 1.5)
+	control.create_tween().tween_property(control, "scale", Vector2.ONE, 0.35)
 
 
 func _refresh_inventory() -> void:

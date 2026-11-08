@@ -36,7 +36,7 @@ func _process(delta: float) -> bool:
 		"heal":
 			if _frames == 1:
 				_hero.hp = 300.0
-				_hero.gold = 100.0
+				_hero.gold = 1000.0
 				_hero.buy("ember_draught")
 				_hero.use_item(_hero.items.size() - 1)
 			if _sim > 0.0 and _frames > 2:
@@ -62,23 +62,24 @@ func _catalogue() -> void:
 	for item in items:
 		categories[item.category] = categories.get(item.category, 0) + 1
 		_check(item.icon() != null, "icon exists for %s" % item.id) if item.icon() == null else null
-	_check(categories.keys().size() == 5 and categories.values().all(func(n): return n >= 2),
-			"5 categories, each with ≥2 items: %s" % str(categories))
+	_check(categories.keys().size() == 8 and categories.values().all(func(n): return n >= 2),
+			"8 categories, each with ≥2 items: %s" % str(categories))
+	_check(categories.Stats == 7 and categories.Exclusive == 3 and categories.Artifacts == 7, "7 tomes, 3 exclusive items, 7 artifacts")
 	_check(ItemCatalog.in_category("Relics").size() == 3, "category filter works (3 relics)")
 
 
 func _buying() -> void:
 	_hero.gold = 0.0
 	_check(_hero.buy("tempered_blade") == "Not enough gold", "can't buy without gold")
-	_hero.gold = 1000.0
+	_hero.gold = 10000.0
 	_hero.in_shop_range = false
 	_check(_hero.buy("tempered_blade") == "Return to your fountain to shop", "can't buy away from the fountain")
 	_hero.in_shop_range = true
 	var base_damage := _hero.attack_damage
-	_check(_hero.buy("tempered_blade") == "" and is_equal_approx(_hero.gold, 700.0), "buying spends gold (1000 → 700)")
+	_check(_hero.buy("tempered_blade") == "" and is_equal_approx(_hero.gold, 7000.0), "buying spends gold (10000 → 7000)")
 	_check(is_equal_approx(_hero.attack_damage, base_damage + 12.0), "Tempered Blade adds 12 damage")
-	_check(_hero.sell(0) and is_equal_approx(_hero.gold, 850.0) and is_equal_approx(_hero.attack_damage, base_damage),
-			"selling refunds half (700 → 850) and removes the bonus")
+	_check(_hero.sell(0) and is_equal_approx(_hero.gold, 9250.0) and is_equal_approx(_hero.attack_damage, base_damage),
+			"selling refunds 75% (7000 → 9250) and removes the bonus")
 	_hero.gold = 99999.0
 	for i in 6:
 		_hero.buy("wayfarers_treads")
@@ -107,6 +108,7 @@ func _effects() -> void:
 	_check(is_equal_approx(_hero.meter.charge, 12.5), "Kindling Rune: meter gains ×1.25")
 	_hero.meter.charge = 0.0
 	_hero.skills[0].time_left = 0.0
+	_hero.skills[0].rank = 1
 	_hero.try_skill(0)
 	_check(is_equal_approx(_hero.skills[0].time_left, 6.0 * 0.8), "Sage's Hourglass: slam cooldown 6 → 4.8 s")
 	while _hero.items.size() > 0:
@@ -114,7 +116,7 @@ func _effects() -> void:
 
 
 func _consumables() -> void:
-	_hero.gold = 1000.0
+	_hero.gold = 10000.0
 	_hero.buy("spark_flask")
 	_hero.meter.charge = 0.0
 	_check(_hero.use_item(0) and is_equal_approx(_hero.meter.charge, 25.0) and _hero.items.is_empty(),
@@ -133,6 +135,9 @@ func _start_arena() -> void:
 	Engine.time_scale = 8.0
 	_sim = 0.0
 	_phase = "arena"
+	# Items now cost thousands; give the bots a purse so the test sees them shop.
+	for brain in _scene.bots:
+		brain.hero.gold = 12000.0
 
 
 func _finish() -> void:

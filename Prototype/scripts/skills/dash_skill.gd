@@ -8,12 +8,13 @@ const DURATION := 0.18
 
 func _init() -> void:
 	skill_name = "Ember Dash"
-	description = "Burst 5 units in the stick direction."
+	description = "Burst 5 units in the stick direction (+0.5 per rank)."
 	cooldown = 8.0
 
 
 func _cast(hero: Hero) -> void:
-	hero.start_dash(hero.aim_direction() * DISTANCE / DURATION, DURATION)
+	var distance := DISTANCE + 0.5 * (rank - 1)
+	hero.start_dash(hero.aim_direction() * distance / DURATION, DURATION)
 	hero.play_sfx("dash")
 
 

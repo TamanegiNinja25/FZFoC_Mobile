@@ -22,6 +22,15 @@ func _init() -> void:
 	attack_interval = 0.8
 	attack_range = 2.5
 
+	primary = "str"
+	strength = 30.0
+	agility = 20.0
+	intelligence = 20.0
+	strength_gain = 3.0
+	agility_gain = 2.0
+	intelligence_gain = 2.0
+	exclusive_item = "kilnheart_core"
+
 	form_duration = 15.0
 	form_shield_ratio = 0.25
 	form_damage_mult = 1.25
@@ -34,4 +43,4 @@ func create_model() -> Node3D:
 
 
 func create_skills() -> Array[Skill]:
-	return [SlamSkill.new(), DashSkill.new()]
+	return arrange([SlamSkill.new(), DashSkill.new(), SearingBrandSkill.new(), ForgeGolemSkill.new()])

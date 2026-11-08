@@ -1,18 +1,23 @@
 class_name NetMatch
 extends Node
 ## Network layer for the arena. The host simulates everything; this node
-##   host:   sends a snapshot of every hero and the score 20×/s, relays effects
-##           and announcements, applies each client's input to its hero;
+##   host:   sends a snapshot of every hero, the score and the duel 20×/s and
+##           of every creep, boss and summon 5×/s; relays effects and
+##           announcements; applies each client's input to its hero;
 ##   client: sends its stick direction every physics frame and its button
 ##           presses as they happen, and shows the host's snapshots.
 
 const SNAPSHOT_INTERVAL := 1.0 / 20.0
+## Creeps, bosses and summons: every 4th snapshot, as packed arrays.
+const UNIT_EVERY := 4
 
 ## The ArenaMatch (typed loosely: naming it here would create a dependency cycle).
 var arena: Node
 
 var _clock := 0.0
+var _snapshots := 0
 var _targets := {}  # hero index → target position (clients interpolate toward it)
+var _units := {}  # client: net id → puppet Creep
 
 
 func _ready() -> void:
@@ -32,6 +37,10 @@ func _physics_process(delta: float) -> void:
 		if _clock >= SNAPSHOT_INTERVAL:
 			_clock = 0.0
 			_snapshot.rpc(_pack())
+			_snapshots += 1
+			if _snapshots % UNIT_EVERY == 0:
+				var units := _pack_units()
+				_unit_snapshot.rpc(units[0], units[1], units[2])
 	elif arena.hero and multiplayer.multiplayer_peer:
 		_client_move.rpc_id(1, arena.hero._move_input())
 
@@ -54,10 +63,31 @@ func _pack() -> Dictionary:
 		var item_ids := PackedStringArray()
 		for item in h.items:
 			item_ids.append(item.id)
+		var ranks := PackedInt32Array()
+		for skill in h.skills:
+			ranks.append(skill.rank)
 		heroes.append([h.global_position.x, h.global_position.z, h.model.rotation.y, h.hp, h.max_hp, h.shield,
 				h.in_form, h.form_time_left, h.is_alive(), h.gold, h.meter.charge, h.kills, h.deaths,
-				cooldowns, item_ids, h.spree, h.in_shop_range])
-	return {"heroes": heroes, "kills": arena.kills, "time": arena.time_left}
+				cooldowns, item_ids, h.spree, h.in_shop_range,
+				h.level, h.xp, h.skill_points, ranks, [h.tome_attributes.str, h.tome_attributes.agi, h.tome_attributes.int],
+				h.frozen, h.is_stunned()])
+	return {"heroes": heroes, "kills": arena.kills, "time": arena.time_left if arena.time_left != INF else -1.0,
+		"duel": [arena.duel_phase, arena.duel_text, arena.duel_in]}
+
+
+## [ids, keys, floats (x, z, hp, max hp, team per unit)].
+func _pack_units() -> Array:
+	var ids := PackedInt32Array()
+	var keys := PackedStringArray()
+	var data := PackedFloat32Array()
+	for node in get_tree().get_nodes_in_group("creeps"):
+		var unit := node as Creep
+		if unit == null or not unit.is_alive():
+			continue
+		ids.append(unit.net_id)
+		keys.append(unit.key)
+		data.append_array([unit.global_position.x, unit.global_position.z, unit.hp, unit.max_hp, unit.team])
+	return [ids, keys, data]
 
 
 @rpc("any_peer", "unreliable_ordered")
@@ -74,6 +104,8 @@ func _client_action(kind: String, arg: Variant) -> void:
 		return
 	match kind:
 		"skill": h.try_skill(int(arg))
+		"learn": h.learn_skill(int(arg))
+		"attack": h.order_attack()
 		"transform": h.try_transform()
 		"buy": h.buy(str(arg))
 		"sell": h.sell(int(arg))
@@ -112,7 +144,10 @@ func _on_peer_left(peer_id: int) -> void:
 @rpc("authority", "unreliable_ordered")
 func _snapshot(state: Dictionary) -> void:
 	arena.kills = state.kills
-	arena.time_left = state.time
+	arena.time_left = INF if state.time < 0.0 else state.time
+	arena.duel_phase = state.duel[0]
+	arena.duel_text = state.duel[1]
+	arena.duel_in = state.duel[2]
 	for i in state.heroes.size():
 		var s: Array = state.heroes[i]
 		var h: Hero = arena.heroes[i]
@@ -150,6 +185,44 @@ func _snapshot(state: Dictionary) -> void:
 			h.items_changed.emit()
 		h.spree = s[15]
 		h.in_shop_range = s[16]
+		var leveled: bool = s[17] != h.level
+		h.level = s[17]
+		h.xp = s[18]
+		h.skill_points = s[19]
+		for k in mini(s[20].size(), h.skills.size()):
+			h.skills[k].rank = s[20][k]
+		h.tome_attributes = {"str": s[21][0], "agi": s[21][1], "int": s[21][2]}
+		h.frozen = s[22]
+		h._stun_time = 0.5 if s[23] else 0.0
+		if leveled:
+			h.recompute_stats()
+			h.leveled_up.emit(h.level)
+
+
+## Clients mirror the host's creeps, bosses and summons as display-only puppets.
+@rpc("authority", "unreliable_ordered")
+func _unit_snapshot(ids: PackedInt32Array, keys: PackedStringArray, data: PackedFloat32Array) -> void:
+	var seen := {}
+	for i in ids.size():
+		var id := ids[i]
+		seen[id] = true
+		var unit: Creep = _units.get(id)
+		if unit == null or not is_instance_valid(unit):
+			unit = Creep.new()
+			unit.configure(keys[i])
+			unit.net_id = id
+			unit.puppet = true
+			unit.team = int(data[i * 5 + 4])
+			unit.position = Vector3(data[i * 5], 0.0, data[i * 5 + 1])
+			arena.add_child(unit)
+			_units[id] = unit
+		unit.apply_snapshot(data[i * 5], data[i * 5 + 1], data[i * 5 + 2], data[i * 5 + 3])
+	for id in _units.keys():
+		if not seen.has(id):
+			var gone: Creep = _units[id]
+			_units.erase(id)
+			if is_instance_valid(gone):
+				gone._die(null)
 
 
 func _same_items(h: Hero, ids: PackedStringArray) -> bool:
@@ -168,6 +241,8 @@ func _fx(index: int, kind: String, data: Array) -> void:
 				h.model.play_slam(data[0], data[1])
 		"boulder":
 			Projectile.launch(h, data[0], BoulderHurlSkill.SPEED, BoulderHurlSkill.RANGE, 0.0, true)
+		"ring":
+			Effects.ring(arena, data[0], data[1], data[2])
 		"sfx":
 			var sfx := get_node_or_null("/root/Sfx")
 			if sfx:

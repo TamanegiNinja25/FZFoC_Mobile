@@ -9,13 +9,13 @@ const RANGE := 12.0
 
 func _init() -> void:
 	skill_name = "Boulder Hurl"
-	description = "Throw a boulder 12 units; the first enemy hit takes 160."
+	description = "Throw a boulder 12 units; the first enemy hit takes 160 (+35% per rank)."
 	cooldown = 9.0
 
 
 func _cast(hero: Hero) -> void:
 	var direction := hero.aim_direction()
-	Projectile.launch(hero, direction, SPEED, RANGE, DAMAGE)
+	Projectile.launch(hero, direction, SPEED, RANGE, scaled(hero, DAMAGE))
 	hero.fx.emit("boulder", [direction])
 	hero.play_sfx("hit", 4.0)
 

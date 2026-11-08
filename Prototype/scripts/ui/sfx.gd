@@ -3,7 +3,7 @@ extends Node
 ## tools/generate_assets.py) on the SFX bus, and gives every button in the
 ## game a press animation and a click sound automatically.
 
-const SOUNDS := ["click", "confirm", "back", "hit", "slam", "dash", "transform", "kill", "victory", "defeat"]
+const SOUNDS := ["click", "confirm", "back", "hit", "slam", "dash", "transform", "kill", "victory", "defeat", "levelup", "duel"]
 const VOICES := 8
 
 var _streams := {}

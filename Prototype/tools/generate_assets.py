@@ -216,12 +216,32 @@ def make_sounds():
     phrase = sum(np.sin(2 * np.pi * f * t) * env(t - i * 0.3, 0.01, 0.4) * (t >= i * 0.3) for i, f in enumerate(notes))
     save_wav("defeat", phrase, 0.6)
 
+    t = t_axis(0.7)   # levelup: quick rising shimmer of four notes
+    notes = [523.25, 659.25, 783.99, 1046.5]
+    shimmer = sum((np.sin(2 * np.pi * f * t) + 0.25 * np.sin(6 * np.pi * f * t)) * env(t - i * 0.07, 0.003, 0.22) * (t >= i * 0.07)
+                  for i, f in enumerate(notes))
+    save_wav("levelup", shimmer, 0.55)
+
+    t = t_axis(1.1)   # duel: war-horn swell over a drum hit
+    horn = (sweep(t, 147, 196) + 0.5 * sweep(t, 294, 392)) * env(t, 0.15, 0.6)
+    drum = sweep(t, 120, 45) * env(t, 0.002, 0.15) * 1.4
+    save_wav("duel", lowpass(horn, 1400) * 1.2 + drum, 0.9)
+
 
 # ---------------------------------------------------------------- item icons
 CATEGORY_COLORS = {
     "Weapons": (0.55, 0.16, 0.08), "Armor": (0.2, 0.3, 0.45), "Mobility": (0.16, 0.42, 0.2),
     "Relics": (0.38, 0.2, 0.5), "Consumables": (0.1, 0.4, 0.42),
+    "Stats": (0.42, 0.32, 0.12), "Exclusive": (0.5, 0.1, 0.28), "Artifacts": (0.48, 0.36, 0.06),
 }
+# Artifacts show their recipe's first two parts, small and overlapped (see glyph()).
+ARTIFACT_PARTS = {
+    "pyreheart_brand": ("forgebreaker_maul", "kindling_rune"), "bastion_aegis": ("bulwark_plate", "riveted_mail"),
+    "titans_cleaver": ("forgebreaker_maul", "riveted_mail"), "galestride_boots": ("windstep_greaves", "quickening_gauntlets"),
+    "champions_medallion": ("emberheart_amulet", "kindling_rune"), "wellspring_stone": ("emberheart_amulet", "sages_hourglass"),
+    "sovereign_blade": ("tempered_blade", "bulwark_plate"),
+}
+TOME_COLORS = {"str": (0.75, 0.2, 0.15, 1), "agi": (0.2, 0.6, 0.25, 1), "all": (0.95, 0.75, 0.25, 1), "xp": (0.3, 0.45, 0.85, 1)}
 STEEL = (0.82, 0.84, 0.88, 1)
 WOODC = (0.5, 0.33, 0.18, 1)
 LIQUID = (1.0, 0.42, 0.15, 1)
@@ -248,6 +268,39 @@ def tri_sdf(x, y, a, b, c):
 
 def glyph(img, x, y, e, item):
     deg = np.deg2rad
+    if item in ARTIFACT_PARTS:
+        a, b = ARTIFACT_PARTS[item]
+        glyph(img, (x + 0.22) / 0.7, (y + 0.18) / 0.7, e / 0.7, a)
+        glyph(img, (x - 0.24) / 0.62, (y - 0.24) / 0.62, e / 0.62, b)
+        over(img, GOLD, soft(np.abs(circle_sdf(x, y, 0, 0, 0.66)) - 0.035, e))
+        return
+    if item.startswith("tome_"):
+        kind = item.split("_")[1]
+        cover = TOME_COLORS["all" if kind == "all" else kind]
+        over(img, (0.92, 0.88, 0.78, 1), soft(rect_sdf(x, y, 0.06, 0.04, 0.36, 0.48, 0) - 0.02, e))   # pages
+        over(img, cover, soft(rect_sdf(x, y, -0.02, 0, 0.36, 0.48, 0) - 0.03, e))                   # cover
+        over(img, GOLD, soft(rect_sdf(x, y, -0.3, 0, 0.04, 0.46, 0), e))                            # spine
+        pips = {"2": 1, "5": 2, "100": 3, "minor": 1, "greater": 2}.get(item.split("_")[2], 1)
+        for i in range(pips):
+            py = -0.18 + i * 0.18 - (pips - 1) * 0.0
+            over(img, GOLD, soft(rect_sdf(x, y, 0.02, py, 0.1, 0.1, deg(45)), e))
+        return
+    if item == "kilnheart_core":
+        hexagon = np.maximum(np.abs(x) * 0.866 + np.abs(y) * 0.5, np.abs(y)) - 0.46
+        over(img, (0.35, 0.33, 0.33, 1), soft(hexagon, e))
+        over(img, LIQUID, soft(circle_sdf(x, y, 0, 0, 0.26), e))
+        over(img, (1, 0.9, 0.5, 1), soft(circle_sdf(x, y, 0, 0, 0.12), e))
+        return
+    if item == "galeheart_ribbon":
+        for i, oy in enumerate((-0.3, 0.0, 0.3)):
+            over(img, (0.55, 0.95, 1.0, 1), soft(streak_sdf(x, y, -0.55, oy + 0.15, 0.55, oy - 0.15, 0.03, 0.09), e))
+        over(img, GOLD, soft(circle_sdf(x, y, 0, 0, 0.12), e))
+        return
+    if item == "cairnstone_heart":
+        for cx, cy, r in ((0, 0.3, 0.3), (0.02, -0.1, 0.24), (-0.02, -0.4, 0.16)):
+            over(img, (0.6, 0.57, 0.52, 1), soft(circle_sdf(x, y, cx, cy, r), e))
+        over(img, (1, 0.7, 0.25, 1), soft(rect_sdf(x, y, 0, -0.1, 0.06, 0.12, deg(45)), e))
+        return
     if item == "tempered_blade":
         over(img, STEEL, soft(rect_sdf(x, y, 0.05, -0.12, 0.09, 0.5, deg(45)), e))
         over(img, GOLD, soft(rect_sdf(x, y, -0.22, 0.22, 0.3, 0.06, deg(-45)), e))
@@ -310,6 +363,10 @@ ITEMS = {
     "wayfarers_treads": "Mobility", "windstep_greaves": "Mobility",
     "kindling_rune": "Relics", "everflame_sigil": "Relics", "sages_hourglass": "Relics",
     "ember_draught": "Consumables", "spark_flask": "Consumables",
+    "tome_str_2": "Stats", "tome_agi_2": "Stats", "tome_str_5": "Stats", "tome_agi_5": "Stats",
+    "tome_all_100": "Stats", "tome_xp_minor": "Stats", "tome_xp_greater": "Stats",
+    "kilnheart_core": "Exclusive", "galeheart_ribbon": "Exclusive", "cairnstone_heart": "Exclusive",
+    **{artifact: "Artifacts" for artifact in ARTIFACT_PARTS},
 }
 
 

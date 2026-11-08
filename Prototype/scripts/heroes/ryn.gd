@@ -17,6 +17,14 @@ func _init() -> void:
 	attack_damage = 26.0
 	attack_interval = 0.55
 	attack_range = 2.2
+	primary = "agi"
+	strength = 20.0
+	agility = 30.0
+	intelligence = 20.0
+	strength_gain = 2.0
+	agility_gain = 3.0
+	intelligence_gain = 2.0
+	exclusive_item = "galeheart_ribbon"
 	form_duration = 12.0
 	form_shield_ratio = 0.15
 	form_damage_mult = 1.2
@@ -29,4 +37,4 @@ func create_model() -> Node3D:
 
 
 func create_skills() -> Array[Skill]:
-	return [CycloneCutSkill.new(), FlurrySkill.new()]
+	return arrange([CycloneCutSkill.new(), FlurrySkill.new(), RazorWindSkill.new(), ThousandCutsSkill.new()])

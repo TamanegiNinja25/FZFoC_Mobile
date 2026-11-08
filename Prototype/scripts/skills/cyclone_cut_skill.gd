@@ -11,7 +11,7 @@ const DURATION := 0.2
 
 func _init() -> void:
 	skill_name = "Cyclone Cut"
-	description = "Dash 6, slicing enemies on the path for 100. Tempest: 9 units, 150 damage."
+	description = "Dash 6, slicing enemies on the path for 100 (+35% per rank). Tempest: 9 units, ×1.5 damage."
 	cooldown = 7.0
 
 
@@ -26,7 +26,7 @@ func _cast(hero: Hero) -> void:
 	var finish := start + direction * DISTANCE * scale
 	for node in hero.get_tree().get_nodes_in_group("units"):
 		if hero.is_hostile(node) and node.is_alive() and segment_distance(node.global_position, start, finish) <= WIDTH:
-			hero.deal_damage(node, DAMAGE * scale)
+			hero.deal_damage(node, scaled(hero, DAMAGE) * scale)
 	hero.start_dash(direction * DISTANCE * scale / DURATION, DURATION)
 	hero.play_sfx("dash")
 

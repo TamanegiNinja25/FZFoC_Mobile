@@ -26,7 +26,11 @@ func _process(_delta: float) -> bool:
 				if node is Dummy:
 					_dummies.append(node)
 			_check(_hero.definition.display_name == "Vael" and _hero.definition.form_name == "Kindled", "hero is Vael with the Kindled form")
-			_check(_hero.skills.size() == 2 and _hero.skills[0] is SlamSkill and _hero.skills[1] is DashSkill, "kit: Bellows Slam + Ember Dash")
+			_check(_hero.skills.size() == 4 and _hero.skills[0] is SlamSkill and _hero.skills[1] is DashSkill
+					and _hero.skills[2] is SearingBrandSkill and _hero.skills[3] is ForgeGolemSkill, "kit: Bellows Slam, Ember Dash, Searing Brand, Forge Golem")
+			_check(not _hero.try_skill(0), "an unlearned skill can't be cast")
+			for s in _hero.skills:
+				s.rank = 1  # rank 1 everywhere, so the numbers below are the base values
 			_check(_hero.model is VaelModel, "Vael's model is built")
 			# Slam: dummy 0 sits at (4, 0, -3); stand 2 units from it, far from the others.
 			_hero.global_position = Vector3(4, 0, -1)

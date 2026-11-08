@@ -1,23 +1,42 @@
 class_name ArenaMatch
 extends Node3D
-## Single player: 3v3 on an original arena. The player plus two bot allies
-## (blue, west) face three bots (red, east). First team to `kill_target` kills
-## wins, or the leader when time runs out. Enemy bots adapt to the score.
+## 3v3 on an original arena. The player plus two bot allies (blue, west) face
+## three bots (red, east); online, friends take bot slots. Rules:
+##   Mobile  — first to 15 kills, or the leader after 8:00;
+##   Classic — first to 50 kills, no time limit.
+## Either way the reference map's world runs: creep waves at 12 camps, two boss
+## chains, the win boss (kill it and your team wins), and a duel every ~5 min.
 
-const KILL_TARGET := 15
+const MOBILE_KILLS := 15
+const CLASSIC_KILLS := 50
 const MATCH_TIME := 480.0
-const BASES := [Vector3(-26, 0, 0), Vector3(26, 0, 0)]
+## Experience multiplier: Mobile packs a full levelling curve into 8 minutes.
+const MOBILE_XP_RATE := 3.0
+const BASES := [Vector3(-38, 0, 0), Vector3(38, 0, 0)]
+const HALF_FIELD := Vector2(44, 28)
 const FOUNTAIN_RADIUS := 5.0
 const FOUNTAIN_HEAL := 90.0  # HP per second
 const RESPAWN_TIME := 6.0
+## Combining circles (one by each base); any hero can use either.
+const CIRCLES := [Vector3(-32, 0, -8), Vector3(32, 0, 8)]
+const CIRCLE_RADIUS := 2.2
+## The 12 creep camps in the order of the map's camp regions (rect18…rect29),
+## laid out so each camp's wave twin sits opposite it.
+const CAMPS := [Vector3(-14, 0, -12), Vector3(-14, 0, 12), Vector3(-26, 0, -21), Vector3(-26, 0, 21),
+	Vector3(-31, 0, -12), Vector3(-31, 0, 12), Vector3(31, 0, 12), Vector3(31, 0, -12),
+	Vector3(26, 0, 21), Vector3(14, 0, 12), Vector3(26, 0, -21), Vector3(14, 0, -12)]
+const BOSS_SPOTS := {"a": Vector3(-7, 0, 22), "b": Vector3(7, 0, 22)}
+const COLOSSUS_SPOT := Vector3(0, 0, -23)
+const DUEL_CENTER := Vector3(0, 0, -46)
 const CAMERA_OFFSET := Vector3(0, 14, 10)
-const CAMERA_LIMIT := Vector2(22, 10)
+const CAMERA_LIMIT := Vector2(36, 19)
 ## Enemy bot skill: base + per-kill lead of the player's team (adaptive AI).
 const ENEMY_BASE_SKILL := 0.5
 const ADAPT_PER_KILL := 0.1
 const ALLY_SKILL := 0.55
 
-var kill_target := KILL_TARGET
+var classic := false
+var kill_target := MOBILE_KILLS
 var time_left := MATCH_TIME
 var kills := [0, 0]
 var over := false
@@ -29,6 +48,13 @@ var bots: Array[BotBrain] = []
 var hud: Hud
 var pause_menu: PauseMenu
 var camera: Camera3D
+var duel: Duel
+var events: MapEvents
+
+## Duel state, from the Duel node on the host or snapshots on clients.
+var duel_phase := "idle"
+var duel_text := ""
+var duel_in := 300.0
 
 ## Local multiplayer layer (null in single player).
 var net_match: NetMatch
@@ -38,18 +64,38 @@ var is_authority := true  # false on network clients: the host decides everythin
 var _sun: DirectionalLight3D
 var _score := Label.new()
 var _feed := VBoxContainer.new()
+var _banner := Label.new()
 var _result: Control
+var _shake := 0.0
 
 
 func _ready() -> void:
 	online = Net.is_online() and Session.mode == Session.Mode.LOCAL_FRIENDS
 	is_authority = not online or Net.is_host()
+	classic = Session.classic
+	kill_target = CLASSIC_KILLS if classic else MOBILE_KILLS
+	time_left = INF if classic else MATCH_TIME
 	Controls.register()
 	_build_world()
 	GameSettings.apply_to_scene(get_viewport(), _sun)
 	GameSettings.changed.connect(func(): GameSettings.apply_to_scene(get_viewport(), _sun))
 	_spawn_teams()
-	_spawn_camps()
+	if is_authority:
+		events = MapEvents.new()
+		events.name = "MapEvents"
+		events.arena = self
+		events.camps = CAMPS
+		events.boss_spots = BOSS_SPOTS
+		events.colossus_spot = COLOSSUS_SPOT
+		events.colossus_slain.connect(_on_colossus_slain)
+		events.boss_slain.connect(func(boss_name, killer): announce("%s felled %s" % [hero_label(killer) if killer else "Someone", boss_name], Color(0.85, 0.6, 1.0)))
+		add_child(events)
+		duel = Duel.new()
+		duel.name = "Duel"
+		duel.arena = self
+		duel.center = DUEL_CENTER
+		duel.state_changed.connect(_on_duel_state)
+		add_child(duel)
 	Sfx.play_music("battle")
 
 	hud = Hud.new()
@@ -80,7 +126,7 @@ func _log_perf(delta: float) -> void:
 	_perf_clock = 0.0
 	var rid := get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(rid, true)
-	print("PERF | %d FPS | GPU %.2f ms | render CPU %.2f ms | script %.2f ms | physics %.2f ms | %d draws | %dk tris | 3D %d%% | shadows %d | cap %d" % [
+	print("PERF | %d FPS | GPU %.2f ms | render CPU %.2f ms | script %.2f ms | physics %.2f ms | %d draws | %dk tris | 3D %d%% | shadows %d | cap %d | units %d" % [
 		Engine.get_frames_per_second(),
 		RenderingServer.viewport_get_measured_render_time_gpu(rid),
 		RenderingServer.viewport_get_measured_render_time_cpu(rid),
@@ -88,36 +134,69 @@ func _log_perf(delta: float) -> void:
 		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME) / 1000,
-		roundi(get_viewport().scaling_3d_scale * 100.0), GameSettings.shadow_cascades, GameSettings.fps_cap])
+		roundi(get_viewport().scaling_3d_scale * 100.0), GameSettings.shadow_cascades, GameSettings.fps_cap,
+		get_tree().get_node_count_in_group("units")])
 
 
 func _process(delta: float) -> void:
 	_log_perf(delta)
-	if hero:
-		var target := hero.global_position + CAMERA_OFFSET
-		target.x = clampf(target.x, -CAMERA_LIMIT.x, CAMERA_LIMIT.x)
-		target.z = clampf(target.z, -CAMERA_LIMIT.y + CAMERA_OFFSET.z, CAMERA_LIMIT.y + CAMERA_OFFSET.z)
-		camera.global_position = camera.global_position.lerp(target, minf(delta * 8.0, 1.0))
+	_update_camera(delta)
 	if over:
 		return
 	if is_authority:
-		time_left = maxf(time_left - delta, 0.0)
+		if duel:
+			duel_in = duel.time_to_duel
+		if not duel_active():  # the clock stops while a duel runs
+			time_left = maxf(time_left - delta, 0.0)
 		if time_left <= 0.0:
 			_end(0 if kills[0] > kills[1] else (1 if kills[1] > kills[0] else -1))
 	_update_score()
+
+
+func _update_camera(delta: float) -> void:
+	if camera == null:
+		return
+	var target: Vector3
+	if duel_active():
+		target = DUEL_CENTER + CAMERA_OFFSET
+	elif hero:
+		target = hero.global_position + CAMERA_OFFSET
+		target.x = clampf(target.x, -CAMERA_LIMIT.x, CAMERA_LIMIT.x)
+		target.z = clampf(target.z, -CAMERA_LIMIT.y + CAMERA_OFFSET.z, CAMERA_LIMIT.y + CAMERA_OFFSET.z)
+	else:
+		return
+	var jump := camera.global_position.distance_to(target) > 30.0
+	camera.global_position = target if jump else camera.global_position.lerp(target, minf(delta * 8.0, 1.0))
+	if _shake > 0.0:  # the duel opens with a camera shake, as in the map
+		_shake -= delta
+		camera.global_position += Vector3(randf_range(-0.35, 0.35), randf_range(-0.2, 0.2), 0)
+
+
+func duel_active() -> bool:
+	return duel_phase != "idle"
 
 
 func _physics_process(delta: float) -> void:
 	if not is_authority:
 		return  # clients get shop range and health from the host's snapshots
 	for h in heroes:
-		h.in_shop_range = h.is_alive() and h.global_position.distance_to(BASES[h.team]) <= FOUNTAIN_RADIUS
+		h.in_shop_range = h.is_alive() and not h.frozen and h.global_position.distance_to(BASES[h.team]) <= FOUNTAIN_RADIUS
 		if h.in_shop_range:
 			h.heal(FOUNTAIN_HEAL * delta)
+		if h.is_alive() and not h.frozen and not h.items.is_empty():
+			for circle in CIRCLES:
+				if h.global_position.distance_to(circle) <= CIRCLE_RADIUS:
+					var made := h.try_combine()
+					if made != "" and h == hero:
+						announce("Forged %s" % ItemCatalog.find(made).display_name, Color(1.0, 0.85, 0.4))
 
 
 func fountain_position(team: int) -> Vector3:
 	return BASES[team]
+
+
+func circle_position(team: int) -> Vector3:
+	return CIRCLES[team]
 
 
 func center_point() -> Vector3:
@@ -155,8 +234,22 @@ func _on_hero_died(killer: Hero, victim: Hero) -> void:
 		_end(1)
 
 
+func _on_colossus_slain(killer: Hero) -> void:
+	if over or killer == null:
+		return
+	announce("%s brought down %s!" % [hero_label(killer), CreepTypes.COLOSSUS.name], Color(1.0, 0.85, 0.4))
+	_end(killer.team)
+
+
+func _on_duel_state(phase: String, text: String) -> void:
+	duel_phase = phase
+	duel_text = text
+
+
 ## Kill-feed name: player names online, "Name (Blue)" for bots.
 func hero_label(h: Hero) -> String:
+	if h == null:
+		return "?"
 	if online and h.owner_peer != 0 and Net.players.has(h.owner_peer):
 		return str(Net.players[h.owner_peer])
 	if not online and h == hero:
@@ -224,6 +317,7 @@ func _spawn_teams() -> void:
 			h.owner_peer = owners[team][i]
 			h.is_player = (h.owner_peer == my_id) if online else (team == 0 and i == 0)
 			h.puppet = not is_authority
+			h.xp_rate = 1.0 if classic else MOBILE_XP_RATE
 			var slot := team * 3 + i
 			if online and h.owner_peer != 0:
 				h.definition = Roster.create(Net.heroes.get(h.owner_peer, "vael"))
@@ -243,15 +337,6 @@ func _spawn_teams() -> void:
 				add_bot_brain(h)
 
 
-func _spawn_camps() -> void:
-	for z in [-14.0, 14.0]:
-		for x in [-1.6, 1.6]:
-			var sentinel := Dummy.new()
-			sentinel.position = Vector3(x, 0, z)
-			sentinel.respawn_time = 25.0
-			add_child(sentinel)
-
-
 # ------------------------------------------------------------------ the map
 func _build_world() -> void:
 	var environment := Environment.new()
@@ -269,11 +354,19 @@ func _build_world() -> void:
 	_sun.directional_shadow_max_distance = 40.0
 	add_child(_sun)
 
-	_plane(Vector2(64, 40), Vector3.ZERO, Color(0.31, 0.36, 0.28))             # grass
-	_plane(Vector2(52, 6), Vector3(0, 0.01, 0), Color(0.42, 0.39, 0.33))       # central lane
-	for z in [-14.0, 14.0]:
-		_plane(Vector2(10, 7), Vector3(0, 0.01, z), Color(0.36, 0.33, 0.3))    # camp clearings
-	_ring(Vector3(0, 0.02, 0), 3.75, 4.0, Color(0.5, 0.42, 0.26))               # centre rune circle
+	_plane(HALF_FIELD * 2.0 + Vector2(2, 2), Vector3.ZERO, Color(0.31, 0.36, 0.28))   # grass
+	_plane(Vector2(76, 6), Vector3(0, 0.01, 0), Color(0.42, 0.39, 0.33))                # central lane
+	for camp in CAMPS:
+		_disc(camp + Vector3(0, 0.012, 0), 3.6, Color(0.36, 0.33, 0.3))                  # camp clearings
+	for chain in BOSS_SPOTS:
+		_disc(BOSS_SPOTS[chain] + Vector3(0, 0.014, 0), 4.2, Color(0.3, 0.24, 0.32))
+		_ring(BOSS_SPOTS[chain] + Vector3(0, 0.03, 0), 3.9, 4.2, Color(0.75, 0.5, 0.95))
+	_disc(COLOSSUS_SPOT + Vector3(0, 0.014, 0), 5.5, Color(0.25, 0.2, 0.3))
+	_ring(COLOSSUS_SPOT + Vector3(0, 0.03, 0), 5.2, 5.5, Color(0.95, 0.7, 0.3))
+	_ring(Vector3(0, 0.02, 0), 3.75, 4.0, Color(0.5, 0.42, 0.26))                       # centre rune circle
+	for circle in CIRCLES:                                                               # combining circles
+		_disc(circle + Vector3(0, 0.016, 0), CIRCLE_RADIUS, Color(0.35, 0.28, 0.12))
+		_ring(circle + Vector3(0, 0.035, 0), CIRCLE_RADIUS - 0.25, CIRCLE_RADIUS, Color(1.0, 0.8, 0.35))
 
 	for team in 2:  # bases with healing fountains
 		var base: Vector3 = BASES[team]
@@ -296,16 +389,26 @@ func _build_world() -> void:
 		font.material_override = water
 		add_child(font)
 
+	# The duel arena, off the field to the north: the camera pans here for duels.
+	_disc(DUEL_CENTER + Vector3(0, -0.01, 0), Duel.RADIUS + 3.0, Color(0.2, 0.19, 0.22))
+	_disc(DUEL_CENTER, Duel.RADIUS, Color(0.42, 0.36, 0.3))
+	_ring(DUEL_CENTER + Vector3(0, 0.03, 0), Duel.RADIUS - 0.35, Duel.RADIUS, Color(1.0, 0.6, 0.3))
+	for i in 8:
+		var angle := TAU * i / 8.0
+		_pillar(DUEL_CENTER + Vector3(cos(angle), 0, sin(angle)) * (Duel.RADIUS + 1.6), 0.6, 2.4)
+
 	# Border walls.
-	for spec in [[Vector3(0, 0.75, -20.5), Vector3(66, 1.5, 1)], [Vector3(0, 0.75, 20.5), Vector3(66, 1.5, 1)],
-			[Vector3(-32.5, 0.75, 0), Vector3(1, 1.5, 42)], [Vector3(32.5, 0.75, 0), Vector3(1, 1.5, 42)]]:
+	var w := HALF_FIELD.x + 0.5
+	var d := HALF_FIELD.y + 0.5
+	for spec in [[Vector3(0, 0.75, -d), Vector3(w * 2 + 2, 1.5, 1)], [Vector3(0, 0.75, d), Vector3(w * 2 + 2, 1.5, 1)],
+			[Vector3(-w, 0.75, 0), Vector3(1, 1.5, d * 2)], [Vector3(w, 0.75, 0), Vector3(1, 1.5, d * 2)]]:
 		_block(spec[0], spec[1], Color(0.3, 0.29, 0.28))
-	# Symmetric pillars and boulders: cover to fight around.
+	# Symmetric pillars: cover to fight around, clear of camps.
 	for x in [-1.0, 1.0]:
-		_pillar(Vector3(12 * x, 0, 0), 1.8, 2.2)
+		_pillar(Vector3(10 * x, 0, 0), 1.8, 2.2)
+		_pillar(Vector3(21 * x, 0, 5 * x), 1.3, 2.6)
 		for z in [-1.0, 1.0]:
-			_pillar(Vector3(8 * x, 0, 9 * z), 1.1, 3.2)
-			_pillar(Vector3(18 * x, 0, 7 * z), 1.3, 2.6)
+			_pillar(Vector3(6 * x, 0, 8 * z), 1.1, 3.2)
 
 	camera = Camera3D.new()
 	camera.fov = 50
@@ -424,8 +527,8 @@ func _build_match_ui() -> void:
 	board.add_theme_stylebox_override("panel", UiTheme.hud_panel())
 	board.anchor_left = 0.5
 	board.anchor_right = 0.5
-	board.offset_left = -190
-	board.offset_right = 190
+	board.offset_left = -230
+	board.offset_right = 230
 	board.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(board)
 	_score.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -434,24 +537,69 @@ func _build_match_ui() -> void:
 
 	_feed.anchor_left = 1.0
 	_feed.anchor_right = 1.0
-	_feed.offset_left = -420
+	_feed.offset_left = -520
 	_feed.offset_right = -130
-	_feed.offset_top = 8
+	_feed.offset_top = 120
 	_feed.alignment = BoxContainer.ALIGNMENT_BEGIN
 	_feed.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_feed)
+
+	# Big centre text for the duel: "Duel!", "3", "2", "1", "Fight!!", "Winner is …".
+	_banner.set_anchors_preset(Control.PRESET_CENTER)
+	_banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_banner.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_banner.offset_top = -160
+	_banner.offset_bottom = -60
+	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_banner.add_theme_font_size_override("font_size", 72)
+	_banner.add_theme_color_override("font_color", Color(1.0, 0.82, 0.45))
+	_banner.add_theme_constant_override("outline_size", 14)
+	_banner.add_theme_color_override("font_outline_color", Color(0.1, 0.05, 0.02))
+	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_banner)
 	_update_score()
 
 
+var _last_banner := ""
+
+
 func _update_score() -> void:
-	var t := int(ceil(time_left))
-	_score.text = "BLUE  %d  ⚔  %d  RED\n%d:%02d  ·  first to %d" % [kills[0], kills[1], t / 60, t % 60, kill_target]
+	var clock := "no time limit"
+	if time_left != INF:
+		var t := int(ceil(time_left))
+		clock = "%d:%02d" % [t / 60, t % 60]
+	var duel_line := "DUEL" if duel_active() else "Duel in %d:%02d" % [int(duel_in) / 60, int(duel_in) % 60]
+	_score.text = "BLUE  %d  ⚔  %d  RED\n%s  ·  first to %d  ·  %s" % [kills[0], kills[1], clock, kill_target, duel_line]
+	if duel_text != _last_banner:
+		_last_banner = duel_text
+		_banner.text = duel_text
+		if duel_text != "":
+			_on_banner(duel_text)
+
+
+## Banner changes drive the duel's sounds and effects on every device.
+func _on_banner(text: String) -> void:
+	_banner.scale = Vector2(1.4, 1.4)
+	_banner.pivot_offset = _banner.size / 2.0
+	var tween := _banner.create_tween()
+	tween.tween_property(_banner, "scale", Vector2.ONE, 0.25)
+	match text:
+		"Duel!":
+			_shake = 2.0
+			Sfx.play("duel", 0.0)
+		"3", "2", "1":
+			Sfx.play("click", 4.0)
+		"Fight!!":
+			Sfx.play("duel", 2.0)
+		_:
+			Sfx.play("kill", 0.0)
 
 
 func _announce(text: String, color: Color) -> void:
 	var line := Label.new()
 	line.text = text
 	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	line.add_theme_color_override("font_color", color.lightened(0.25))
 	line.add_theme_font_size_override("font_size", 18)
 	_feed.add_child(line)
@@ -490,7 +638,8 @@ func _show_result() -> void:
 	column.add_child(heading)
 	var summary := Label.new()
 	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	summary.text = "Blue %d — %d Red\nYou: %d kills · %d deaths · %d gold" % [kills[0], kills[1], hero.kills, hero.deaths, hero.gold]
+	summary.text = "Blue %d — %d Red  (%s)\nYou: level %d · %d kills · %d deaths · %d gold" % [
+		kills[0], kills[1], "Classic" if classic else "Mobile", hero.level, hero.kills, hero.deaths, hero.gold]
 	column.add_child(summary)
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER

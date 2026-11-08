@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Warcraft III modding
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction, 2026-11-08-spec-hero-transformations]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction, 2026-11-08-spec-hero-transformations, 2026-11-08-phase-6-map-systems]
 updated: 2026-11-08
 ---
 # Fight Of Characters
@@ -32,6 +32,17 @@ All figures from the source ([src](../sources/2026-11-08-fight-of-characters-mob
 - Heroes come from One Piece, Naruto, Bleach, Dragon Ball, Hellsing, InuYasha, Yu Yu Hakusho, Fate and Tsukihime; one item is a Pokémon "Monster Ball" that captures and summons creatures ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - Abilities are named after the shows' signature moves, with damage in the thousands (e.g. 1,800–2,100 per hit) ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
 - The game leans on spectacle: 175 scripted special effects, 53 animation calls and 120 script-spawned units ([src](../sources/2026-11-08-fight-of-characters-mobile-feasibility.md)).
+
+## Systems
+Read from the map file for the Phase 6 build ([src](../sources/2026-11-08-phase-6-map-systems.md)):
+- **Winning:** the scoreboard reads "100 Kills to Win" and the script ends the match at 100 team kills; killing a 100,000-HP neutral boss in a corner wins outright.
+- **Hero pick:** 24 heroes in four taverns grouped by source series; each player steers a wisp into a hero's circle, and each hero can be picked once.
+- **Progression:** level cap 50; +3 primary and +2 other attributes per level; 10 HP and 0.1 HP/s per strength, 2 damage per primary point, 0.5 armour per agility; creep XP falls to 80 / 70 / 60 / 50% with hero level and never to zero.
+- **Skills:** 4–5 per hero, mostly 5 ranks, all free of mana; ranks unlock at set levels with a 5-level skip; most damage scales with attributes.
+- **Duel:** every 290–310 s the world freezes, one random hero per team fights in an arena, and the winner earns the loser's level × 200 gold.
+- **Creep waves:** 12 camps; 42 creeps every 30 s, 68 every 60 s, and 49 every 90 s once the previous 90 s wave is dead.
+- **Bosses:** two chains (9 and 7 stages, 500 → 12,500 HP); the next boss appears 10 s after a kill.
+- **Items:** a stat shop (tomes 200–600, +100 all stats 19,000), exclusive items at 10,000 that only their hero keeps, 7 recipes at a combining circle, a 75% sell rate, and a 500-gold hero bounty.
 
 ## Protection and safety
 The map is deliberately obscured against editing, and its script showed no harmful behaviour — details in [Warcraft III map format](warcraft-iii-map-format.md#protection).

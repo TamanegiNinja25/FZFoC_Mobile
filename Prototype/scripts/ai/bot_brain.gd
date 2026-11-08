@@ -21,6 +21,8 @@ var _retreating := false
 var _stuck_time := 0.0
 var _sidestep := Vector3.ZERO
 var _sidestep_time := 0.0
+## Items already bought from the build (parts may since have been fused).
+var _bought := {}
 
 
 func reaction_time() -> float:
@@ -54,6 +56,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _decide() -> void:
+	_learn_skills()
 	if hero.in_shop_range:
 		_shop()
 	var hp_ratio := hero.hp / hero.max_hp
@@ -71,6 +74,11 @@ func _decide() -> void:
 				if hero.skills[i].ai_escape() and hero.skills[i].is_ready():
 					hero.try_skill(i)  # escape along the retreat path
 					break
+		return
+
+	# Carry a finished recipe to the combining circle when no enemy hero is close.
+	if hero.has_recipe_ready() and _count_enemy_heroes(10.0) == 0 and arena.has_method("circle_position"):
+		_move_to(arena.circle_position(hero.team))
 		return
 
 	var target := _choose_target()
@@ -96,13 +104,38 @@ func _decide() -> void:
 		hero.ai_move = Vector3.ZERO  # in range: the auto-attack does the work
 
 
-## Buys the next affordable item of the bot build (one per visit decision).
+## Buys the next item of the bot build (one per decision); once the build is
+## done, spends spare gold on primary-attribute tomes from the stat shop.
 func _shop() -> void:
-	for item_id in ItemCatalog.BOT_BUILD:
-		if hero.items.any(func(i): return i.id == item_id):
+	for entry in ItemCatalog.BOT_BUILD:
+		var item_id: String = hero.definition.exclusive_item if entry == "exclusive" else entry
+		if _bought.has(item_id):
 			continue
-		hero.buy(item_id)
+		var error := hero.buy(item_id)
+		if error != "Not enough gold":
+			_bought[item_id] = true  # bought, or never buyable (full, wrong hero): move on
 		return
+	var tome := "tome_agi_5" if hero.definition.primary == "agi" else "tome_str_5"
+	if hero.gold >= ItemCatalog.find(tome).cost * 2:
+		hero.buy(tome)
+
+
+## Spends skill points: the ultimate as soon as it can rank up, otherwise the
+## lowest-ranked skill that can (ties go to the earlier button).
+func _learn_skills() -> void:
+	while hero.skill_points > 0:
+		var pick := -1
+		for i in hero.skills.size():
+			var s: Skill = hero.skills[i]
+			if not s.can_learn(hero):
+				continue
+			if s.ultimate:
+				pick = i
+				break
+			if pick == -1 or s.rank < hero.skills[pick].rank:
+				pick = i
+		if pick == -1 or not hero.learn_skill(pick):
+			return
 
 
 ## Strong bots focus the weakest enemy hero nearby; weak bots take the nearest.
@@ -125,13 +158,25 @@ func _choose_target() -> Node3D:
 	if best:
 		return best
 	for node in get_tree().get_nodes_in_group("units"):
-		if node is Hero or not hero.is_hostile(node) or not node.is_alive():
+		if node is Hero or not hero.is_hostile(node) or not node.is_alive() or not _worth_farming(node):
 			continue
 		var distance := hero.global_position.distance_to(node.global_position)
 		if distance < FARM_RANGE and distance < best_score:
 			best = node
 			best_score = distance
 	return best
+
+
+## Bots leave bosses alone until they're strong enough, and only go for the
+## win boss late in a Classic match.
+func _worth_farming(node: Node) -> bool:
+	if "frozen" in node and node.frozen:
+		return false
+	if not ("is_boss" in node) or not node.is_boss:
+		return true
+	if node.is_colossus:
+		return hero.level >= 30
+	return hero.level + 2 >= node.level
 
 
 func _count_enemy_heroes(radius: float) -> int:
