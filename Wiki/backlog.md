@@ -7,6 +7,7 @@ updated: 2026-11-08
 Open questions, gaps, wanted sources and proposals awaiting the user's approval.
 
 ## Awaiting approval
+- **Fidelity audit findings (2026-11-08):** the map has systems FZFoC lacks: duels, levels/XP/attributes, creep waves, boss ladders, a win boss, item recipes, hero-exclusive items, a stat shop, unique picks, and a 100-kill mode. Owner to choose which to adopt. The report is [Outputs/2026-11-08-foc-fidelity-audit.md](../Outputs/2026-11-08-foc-fidelity-audit.md); move it to `RAW/` to have its map facts ingested into [Fight Of Characters](topics/fight-of-characters.md).
 *Nothing pending.* (Last resolved 2026-11-08: phone render resolution — owner chose 90% over the proposed 75% — [Art direction](topics/art-direction.md#phone-infinix-note-30).)
 
 ## Unsourced claims

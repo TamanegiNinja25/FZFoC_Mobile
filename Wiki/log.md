@@ -6,6 +6,11 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Question: fidelity audit against the map
+- Re-read the map (MPQ contents byte-identical to the earlier extraction) and parsed its items, shops, taverns, 123 hero skills and 267 triggers; simulated 500 matches per kill-rate scenario from the script's rules.
+- Answer written to `Outputs/2026-11-08-foc-fidelity-audit.md`: FZFoC keeps the genre skeleton but not the specific systems (duels, levelling, creep waves, bosses, recipes, exclusive items, unique picks, 100-kill win).
+- Not filed into topic articles: outputs aren't sources. Backlog item added for the owner to choose systems and optionally move the report to RAW.
+
 ## 2026-11-08 — Release pipeline and README
 - Root `README.md` rewritten for the playable alpha (v0.5.0): download badge pointing at `releases/latest/download/FZFoC.apk`, install and update steps, feature and hero tables, phone performance, release instructions, refreshed roadmap.
 - Added `.github/workflows/release.yml`: a `v*` tag builds the APK with Godot 4.7.2 on Linux and publishes a GitHub Release; the tag sets the game version and Android version code.
