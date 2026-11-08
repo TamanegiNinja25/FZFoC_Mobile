@@ -40,6 +40,7 @@ The meter is locked while transformed and restarts from zero afterwards.
 - Kill gold: 100, plus 50% per spree step (100, 150, 200…).
 - A spree builds when the next kill lands within 15 s; each step adds +2 gold per second while it lasts (cap ×10).
 - Dying or missing the window ends the spree.
+- **Bounty (risk/reward):** the hero is worth 300 gold to its killer, ×1.75 (525) while transformed. The HUD shows the current bounty and flags it in form. Placeholder until enemy heroes exist.
 
 ## Tuning
 | Value | Where | Starting point | Basis |

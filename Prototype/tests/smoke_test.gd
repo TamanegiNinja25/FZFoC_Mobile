@@ -22,17 +22,20 @@ func _process(_delta: float) -> bool:
 		"boot":
 			if _frames > 5:
 				_check(hero != null and hero.meter != null, "hero and meter exist")
+				var base_bounty := hero.bounty_value()
 				_check(not hero.try_transform(), "cannot transform with an empty meter")
 				hero.meter._add(hero.meter.max_charge)
 				_check(hero.meter.is_full(), "meter reports full")
 				_check(hero.try_transform(), "transform succeeds when full")
 				_check(hero.in_form and hero.shield > 0.0, "form active with shield")
 				_check(hero.meter.charge == 0.0 and hero.meter.locked, "meter consumed and locked")
+				_check(hero.bounty_value() > base_bounty, "transformed hero is worth more bounty")
 				_phase = "in_form"
 		"in_form":
 			if not hero.in_form:
 				_check(not hero.meter.locked, "meter unlocked after form")
 				_check(hero.shield == 0.0, "shield removed after form")
+				_check(hero.bounty_value() == hero.bounty, "bounty back to base after form")
 				_phase = "done"
 			elif _frames > 5000:
 				_check(false, "form ended within its duration")

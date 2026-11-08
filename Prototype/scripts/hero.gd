@@ -39,6 +39,10 @@ signal died
 ## Each spree step adds this much gold per second while the spree lasts.
 @export var spree_income_step := 2.0
 @export var spree_max := 10
+## Gold an enemy earns for killing this hero (placeholder until enemy heroes exist).
+@export var bounty := 300.0
+## Risk/reward: a transformed hero is a richer target (spec: 1.5–2× base).
+@export var form_bounty_mult := 1.75
 
 const NORMAL_COLOR := Color(0.35, 0.55, 0.95)
 const FORM_COLOR := Color(1.0, 0.75, 0.2)
@@ -147,6 +151,10 @@ func take_damage(amount: float) -> void:
 
 func is_alive() -> bool:
 	return _dead_time <= 0.0
+
+
+func bounty_value() -> float:
+	return bounty * (form_bounty_mult if in_form else 1.0)
 
 
 func income_per_second() -> float:

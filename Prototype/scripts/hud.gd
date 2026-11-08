@@ -74,7 +74,8 @@ func _process(_delta: float) -> void:
 	var spree_text := ""
 	if hero.spree >= 2:
 		spree_text = "   SPREE ×%d  (%.0f s)" % [hero.spree, hero.spree_time_left]
-	_economy.text = "Gold %d   +%.0f/s%s" % [floori(hero.gold), hero.income_per_second(), spree_text]
+	var bounty_text := "   BOUNTY %d  ⚠" % hero.bounty_value() if hero.in_form else "   Bounty %d" % hero.bounty_value()
+	_economy.text = "Gold %d   +%.0f/s%s%s" % [floori(hero.gold), hero.income_per_second(), spree_text, bounty_text]
 
 
 func _on_health_changed(hp: float, max_hp: float, shield: float) -> void:
