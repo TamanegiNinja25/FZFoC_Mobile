@@ -3,6 +3,7 @@ extends CanvasLayer
 ## Health, shield, meter and form countdown, plus a touch-friendly transform button.
 
 var hero: Hero
+var joystick := TouchJoystick.new()
 
 var _hp_bar := ProgressBar.new()
 var _shield_bar := ProgressBar.new()
@@ -22,6 +23,8 @@ func setup(target: Hero) -> void:
 
 
 func _ready() -> void:
+	add_child(joystick)  # first, so buttons draw on top of it
+
 	var panel := VBoxContainer.new()
 	panel.position = Vector2(24, 24)
 	panel.add_theme_constant_override("separation", 6)

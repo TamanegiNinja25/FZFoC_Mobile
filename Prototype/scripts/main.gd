@@ -11,6 +11,7 @@ const INPUTS := {
 }
 
 var hero: Hero
+var hud: Hud
 var camera: Camera3D
 
 
@@ -21,6 +22,7 @@ func _ready() -> void:
 		get_tree().change_scene_to_file.call_deferred("res://scenes/stress_test.tscn")
 		return
 	_register_inputs()
+	Platform.apply_render_scale(get_viewport())
 	_build_world()
 
 	hero = Hero.new()
@@ -32,7 +34,7 @@ func _ready() -> void:
 		dummy.position = spot
 		add_child(dummy)
 
-	var hud := Hud.new()
+	hud = Hud.new()
 	add_child(hud)
 	hud.setup(hero)
 

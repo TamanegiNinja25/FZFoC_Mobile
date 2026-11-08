@@ -9,11 +9,12 @@ Open `Prototype/project.godot` in Godot 4.7 and press **F5**.
 
 | Control | Action |
 |---|---|
-| WASD / arrow keys | Move |
+| Touch: drag in the lower-left area (floating joystick) | Move — the stick appears under your thumb |
+| WASD / arrow keys | Move (desktop) |
 | Walk into range | Auto-attack the nearest dummy |
 | Space or the TRANSFORM button | Transform when the meter is full |
 
-Touch movement comes later; the TRANSFORM button is already sized for a thumb.
+On desktop, the mouse emulates touch, so the joystick can be tested by clicking and dragging. The game fills wide phone screens (stretch aspect "expand"), so there are no black bars on 20:9 displays.
 
 ## Look
 All materials use the shared toon material in `scripts/toon.gd`: banded light, toon highlights and a rim light (decision 2026-11-08, see [Art direction](../Wiki/topics/art-direction.md)).
@@ -67,6 +68,18 @@ MediaTek MT6789, Mali-G57 MC2 (Vulkan 1.1), Android 14, 1080×2460 screen at 60 
 - **Realistic settings hold a locked 60 FPS** with no dropped frames, but with only ~3 ms of GPU headroom.
 - **The phone is pixel-bound, not triangle-bound:** 9k → 486k triangles adds only 1.5 ms; rendering 75% resolution cuts GPU time by 54%. Particles cost almost nothing.
 - Results were stable across four runs (within ~0.5 FPS); phone thermal status stayed normal.
+
+**Render resolution (decision 2026-11-08: phones render 3D at 90%, UI at full resolution).** A focused run, repeated twice to rule out clock drift (phone default scene: 6 heroes, LOD on, 2 cascades):
+
+| 3D resolution | GPU, round 1 | GPU, round 2 |
+|---|---|---|
+| 100% | 13.71 ms | 13.68 ms |
+| **90% (phone default)** | **7.37 ms** | **7.44 ms** |
+| 75% | 6.25 ms | 6.24 ms |
+
+90% gets most of 75%'s saving (−46% vs −54%) with a sharper image, leaving ~9 ms of the 16.7 ms frame free. Run it with `-- --benchmark --bench-res`.
+
+A longer 10-step run showed the phone slowing mid-run (GPU and CPU times both rose, e.g. 75% read 14.7 ms instead of 6.2 ms); those later steps were discarded. Long runs need a fixed order and repeats to catch throttling.
 
 ### Building for Android
 Export presets live in `export_presets.cfg` (not committed: it can hold signing details). Two presets: **Android** (the playable build) and **Android Benchmark** (opens the stress test, runs the benchmark, writes `BENCH` lines to the log, quits).
@@ -123,8 +136,10 @@ The meter is locked while transformed and restarts from zero afterwards.
 - `scripts/dummy.gd` — training dummy
 - `scripts/hud.gd` — bars, status line, transform and stress-test buttons
 - `scripts/toon.gd` — shared toon material
-- `scripts/platform.gd` — phone vs desktop settings (shadow cascades)
+- `scripts/platform.gd` — phone vs desktop settings (shadow cascades, 3D render scale)
+- `scripts/touch_joystick.gd` — floating touch joystick driving the move actions
 - `scripts/stress_test.gd` + `scenes/stress_test.tscn` — phone stress test and benchmark mode
 - `tests/smoke_test.gd` — headless check of the meter → form → revert loop
 - `tests/meter_balance_test.gd` — measures fill time, idle drain and spree rewards
 - `tests/stress_scene_test.gd` — checks the stress scene is built to budget (triangles, LODs, toon, toggles)
+- `tests/touch_test.gd` — simulated finger: zone, drag direction, hero moves and stops; render scale

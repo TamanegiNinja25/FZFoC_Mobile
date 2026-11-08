@@ -43,6 +43,7 @@ var _buttons := {}
 
 func _ready() -> void:
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
+	Platform.apply_render_scale(get_viewport())
 	hero_mesh = _build_hero_mesh()
 	_build_world()
 	_set_hero_count(6)
@@ -72,9 +73,24 @@ const BENCH_STEPS := [
 	{"label": "6 heroes, LOD off, 2 casc.", "heroes": 6, "lod": false, "close": false, "cascades": 2},
 	{"label": "12 heroes, LOD off, 2 casc.", "heroes": 12, "lod": false, "close": false, "cascades": 2},
 	# Isolate per-pixel cost: same scene as step 2 with fewer pixels, or without particles.
+	{"label": "6 heroes, LOD on, 2 casc., 90% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 0.9},
+	{"label": "12 heroes, LOD off, 2 casc., 90% res.", "heroes": 12, "lod": false, "close": false, "cascades": 2, "scale": 0.9},
 	{"label": "6 heroes, LOD on, 2 casc., 75% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 0.75},
 	{"label": "6 heroes, LOD on, 2 casc., no effects", "heroes": 6, "lod": true, "close": false, "cascades": 2, "effects": false},
 ]
+
+
+## Short resolution comparison (`-- --benchmark --bench-res`): the phone-default
+## scene at three render scales, run twice so clock drift between steps shows up.
+const BENCH_RES_STEPS := [
+	{"label": "round 1: 100% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 1.0},
+	{"label": "round 1: 90% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 0.9},
+	{"label": "round 1: 75% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 0.75},
+	{"label": "round 2: 100% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 1.0},
+	{"label": "round 2: 90% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 0.9},
+	{"label": "round 2: 75% res.", "heroes": 6, "lod": true, "close": false, "cascades": 2, "scale": 0.75},
+]
+var _steps: Array = BENCH_RES_STEPS if "--bench-res" in OS.get_cmdline_user_args() else BENCH_STEPS
 
 
 func _apply_config(config: Dictionary) -> void:
@@ -93,7 +109,7 @@ func _apply_config(config: Dictionary) -> void:
 
 func _tick_benchmark(delta: float) -> void:
 	if _bench_step == 0 and _bench_clock == 0.0:
-		_apply_config(BENCH_STEPS[0])
+		_apply_config(_steps[0])
 	_bench_clock += delta
 	if _bench_clock > 1.0:  # skip the first second of each step (warm-up)
 		_bench_samples.append(delta)
@@ -111,14 +127,14 @@ func _tick_benchmark(delta: float) -> void:
 	var triangles := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)
 	var gpu_ms := _average(_bench_gpu)
 	var cpu_ms := _average(_bench_cpu)
-	print("BENCH | %-40s | %5.1f FPS | avg %5.2f ms | worst %5.2f ms | GPU %5.2f ms | CPU %5.2f ms | %4dk tris" % [BENCH_STEPS[_bench_step].label, 1.0 / avg, avg * 1000.0, worst * 1000.0, gpu_ms, cpu_ms, triangles / 1000])
+	print("BENCH | %-40s | %5.1f FPS | avg %5.2f ms | worst %5.2f ms | GPU %5.2f ms | CPU %5.2f ms | %4dk tris" % [_steps[_bench_step].label, 1.0 / avg, avg * 1000.0, worst * 1000.0, gpu_ms, cpu_ms, triangles / 1000])
 	_bench_step += 1
 	_bench_clock = 0.0001
 	_bench_samples.clear()
 	_bench_gpu.clear()
 	_bench_cpu.clear()
-	if _bench_step < BENCH_STEPS.size():
-		_apply_config(BENCH_STEPS[_bench_step])
+	if _bench_step < _steps.size():
+		_apply_config(_steps[_bench_step])
 	else:
 		print("BENCH | device: %s | GPU: %s" % [OS.get_model_name(), RenderingServer.get_video_adapter_name()])
 		get_tree().quit()
@@ -321,7 +337,7 @@ func _update_stats() -> void:
 	var draw_calls := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 	var verdict := "SMOOTH (60 FPS target met)" if fps >= 55 else ("PLAYABLE (30 FPS target met)" if fps >= 28 else "TOO SLOW — lower the budget")
 	_stats.text = "\n".join([
-		"STRESS TEST — %d heroes × %dk triangles (%d LOD levels) — %s settings" % [heroes.size(), hero_triangles / 1000, hero_lod_levels, "phone" if Platform.is_phone() else "desktop"],
+		"STRESS TEST — %d heroes × %dk triangles (%d LOD levels) — %s settings, %d%% 3D resolution" % [heroes.size(), hero_triangles / 1000, hero_lod_levels, "phone" if Platform.is_phone() else "desktop", roundi(get_viewport().scaling_3d_scale * 100.0)],
 		"%d FPS   avg %.1f ms   worst %.1f ms (last 3 s)" % [fps, avg_ms, worst * 1000.0],
 		"Rendered: %dk triangles, %d draw calls" % [triangles / 1000, draw_calls],
 		"Device: %s   GPU: %s" % [OS.get_model_name(), RenderingServer.get_video_adapter_name()],
