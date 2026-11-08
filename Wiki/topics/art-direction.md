@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction]
+sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark]
 updated: 2026-11-08
 ---
 # Art direction
@@ -11,12 +11,13 @@ FZFoC Mobile uses a **high-poly stylized** visual style: detailed, sculpted mode
 ## Decision
 - **2026-11-08 — High-poly stylized.** Chosen by the owner, overriding the earlier 5–20k polygon guidance and the "low-poly stylised" example ([src](../sources/2026-11-08-decision-visual-style.md)).
 - The earlier guidance came from phone performance limits ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)); the budget below is how the decision respects them.
+- **2026-11-08 — Toon shading.** Chosen by the owner over simplified PBR. The prototype uses one shared toon material: banded diffuse, toon specular, rim light ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)).
 
 ## The style
 Recommendations recorded with the decision ([src](../sources/2026-11-08-decision-visual-style.md)):
 - **Shapes:** smooth, sculpted forms; exaggerated proportions (large hands, weapons, silhouettes) so heroes read from a top-down camera.
 - **Surfaces:** hand-painted or simplified colour textures, not photo-realistic materials.
-- **Shading:** toon/ramp shading or simplified PBR with a rim light; outlines optional because they add rendering cost.
+- **Shading:** toon shading with a rim light (decided); outlines optional because they add rendering cost.
 - **Consistency:** one shared palette and consistent proportions across heroes. This matters more than ever when assets come from different creators ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)).
 - **UI fit:** matches the fantasy UI direction — bevelled frames, gold trim, parchment tooltips ([src](../sources/2026-11-08-ui-and-audio-direction.md)). See [UI and audio direction](ui-and-audio-direction.md).
 
@@ -42,9 +43,26 @@ Starting values, to be checked on a real device ([src](../sources/2026-11-08-dec
 - Phones have far less GPU and memory headroom than PCs; high-poly heroes could cost frame rate or battery on mid-range devices ([src](../sources/2026-11-08-decision-visual-style.md)).
 - **Mitigation:** stress-test 6 high-poly heroes with LODs and effects on the target phone before committing to final assets; lower the budget if needed ([src](../sources/2026-11-08-decision-visual-style.md)).
 
+## Measurements
+The stress-test scene exists in the prototype: 6 heroes × 40,320 triangles with 10 automatic LOD levels, toon shading, effects and shadows ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)).
+
+**PC baseline** — laptop, AMD Radeon integrated graphics, *not a phone* ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)):
+
+| Configuration | FPS | Triangles rendered |
+|---|---|---|
+| 6 heroes, game camera, LOD on | 506 | 18k |
+| 6 heroes, close camera | 433 | 25k |
+| 6 heroes, LOD off | 396 | 971k |
+| 12 heroes, LOD off | 326 | 1,941k |
+
+- **LODs carry the budget at the game camera:** ≈240k hero triangles render as ≈18k. The smooth placeholder flatters this; sculpted models will reduce less ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)).
+- **Shadows cost ≈4× geometry** (4 shadow cascades by default); fewer cascades is an easy phone saving ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)).
+- **Still needed:** a run on the target phone ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)).
+
 ## Open questions
-- Toon/ramp shading or simplified PBR? ([src](../sources/2026-11-08-decision-visual-style.md))
+- ~~Toon/ramp shading or simplified PBR?~~ Decided: toon ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md))
 - Which phone is the target device? ([src](../sources/2026-11-08-decision-visual-style.md))
+- How many shadow cascades for phones? ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md))
 
 ## Related
 - [Assets and licensing](assets-and-licensing.md)

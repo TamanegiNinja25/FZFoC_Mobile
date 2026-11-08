@@ -6,6 +6,12 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (decision + measurement)
+- Ingested 1 new RAW file: `2026-11-08-toon-shading-and-stress-benchmark.md` — the owner's toon shading decision and the first PC benchmark of the stress-test scene (prototype commit 24c064c).
+- Created source note [toon-shading-and-stress-benchmark](sources/2026-11-08-toon-shading-and-stress-benchmark.md).
+- [Art direction](topics/art-direction.md): toon decision; new Measurements section (PC baseline, LOD and shadow findings); shading question closed, shadow-cascade question added.
+- [Backlog](backlog.md): shading closed; phone performance item updated — scene and PC baseline exist, phone run pending. [Index](index.md) and README roadmap updated.
+
 ## 2026-11-08 — Ingest (decision)
 - Ingested 1 new RAW file: `2026-11-08-decision-visual-style.md` — the owner's high-poly stylized decision, with the librarian's style rules, phone budget and stress-test plan marked as recommendations.
 - Created source note [decision-visual-style](sources/2026-11-08-decision-visual-style.md) and topic [Art direction](topics/art-direction.md) (Game design).

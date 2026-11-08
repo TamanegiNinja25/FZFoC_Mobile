@@ -23,7 +23,7 @@ Marked *(inference)* in the wiki; each needs a RAW source:
 Claims a source marks as its own inference about Warcraft III engine behaviour; confirming them would need runtime observation (REA or play):
 - Timed forms can't be cancelled early; level, XP, items and shared skills carry over through a morph; when the form cooldown starts — [Hero transformations](topics/hero-transformations.md)
 - Hero A's form duration and cooldown (60 s / 180 s, stock defaults) — [Hero transformations](topics/hero-transformations.md)
-- **Phone performance of high-poly heroes:** the 30–50k triangle budget is a recommendation until a 6-hero stress test runs on the target phone — [Art direction](topics/art-direction.md#risk)
+- **Phone performance of high-poly heroes:** the 30–50k triangle budget is a recommendation until the stress test runs on the target phone. The scene exists and has a PC baseline (506 FPS at the game camera); the phone run is still missing — [Art direction](topics/art-direction.md#measurements)
 
 ## Recorded conflicts
 - MP3s: "music tracks" vs measured 0.2–6.1 s clips — resolved in favour of the measurement; see [Fight Of Characters](topics/fight-of-characters.md#conflicts) and [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md#conflicts).
@@ -38,7 +38,8 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 - Target casual short sessions, or competitive ranked play? ([source](sources/2026-11-08-fight-of-characters-mobile-feasibility.md))
 
 - ~~Which 1–2 visual styles should the game commit to?~~ Decided 2026-11-08: high-poly stylized ([source](sources/2026-11-08-decision-visual-style.md))
-- Toon/ramp shading or simplified PBR? Which phone is the stress-test target? ([source](sources/2026-11-08-decision-visual-style.md))
+- ~~Toon/ramp shading or simplified PBR?~~ Decided 2026-11-08: toon ([source](sources/2026-11-08-toon-shading-and-stress-benchmark.md))
+- Which phone is the stress-test target? How many shadow cascades on phones? ([source](sources/2026-11-08-toon-shading-and-stress-benchmark.md))
 - ~~Godot or Unity for the project?~~ Decided 2026-11-08: Godot ([source](sources/2026-11-08-decisions-meter-and-godot.md))
 
 - Who records the voices — friends, the user, or a hired actor? ([source](sources/2026-11-08-ui-and-audio-direction.md))

@@ -6,9 +6,9 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 8 sources · 8 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
+**Status:** 9 sources · 8 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
 
-**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md))
+**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md))
 
 ## Topics
 
@@ -19,7 +19,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 ### Game design
 - [Hero transformations](topics/hero-transformations.md) — Three transformation models in Fight Of Characters (timed form, stage chain, awakening) with full numbers, and a keep/change/drop design direction for a mobile 3v3.
 - [Hero arena genre](topics/hero-arena-genre.md) — Team hero fights with items and kill-based victory; adapting it to mobile with 3v3, short matches and touch controls; local Wi-Fi multiplayer in Godot; the kill-spree economy.
-- [Art direction](topics/art-direction.md) — High-poly stylized look: what it means, a phone polygon/LOD budget, Sketchfab sourcing, and the device stress test that manages the risk.
+- [Art direction](topics/art-direction.md) — High-poly stylized look with toon shading: style rules, phone polygon/LOD budget, Sketchfab sourcing, and stress-test measurements (PC baseline; phone run pending).
 - [UI and audio direction](topics/ui-and-audio-direction.md) — Keeping the classic feel with original assets: UI and sound patterns, how the map uses sound, and where to source replacements.
 
 ### Legal and IP
@@ -36,6 +36,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Decisions — meter charge rule and kill-spree economy](sources/2026-11-08-decisions-charge-rule-and-spree.md) — Owner's tuning direction, the prototype's rates, and the measured 87.2 s fill.
 - [Decision — transformed-hero bounty as risk/reward](sources/2026-11-08-decision-transformed-bounty.md) — Bounty kept, reframed from comeback lever to risk/reward; prototype 300 gold ×1.75 in form.
 - [Decision — high-poly stylized visual style](sources/2026-11-08-decision-visual-style.md) — Owner's style decision plus recommended style rules, phone budget, sourcing tips and stress-test plan.
+- [Toon shading decision and first stress-test benchmark](sources/2026-11-08-toon-shading-and-stress-benchmark.md) — Toon chosen; 6 × 40k-triangle stress scene; PC baseline shows LODs and shadow cost.
 
 ## Admin
 - [Log](log.md) — what changed and when

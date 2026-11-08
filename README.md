@@ -46,8 +46,9 @@ Workflow details are in [CLAUDE.md](CLAUDE.md).
 - [x] Analyse the reference transformation mechanic; decide the trigger: **charge meter**
 - [x] Greybox prototype in Godot: charge meter, timed form, kill-spree economy ([Prototype/](Prototype/README.md))
 - [x] Tune the transformation meter: ~90 s fill, aggression rewarded (measured 87.2 s)
-- [x] Choose a visual style: **high-poly stylized** ([art direction](Wiki/topics/art-direction.md))
-- [ ] Stress-test high-poly heroes on a target phone
+- [x] Choose a visual style: **high-poly stylized, toon shaded** ([art direction](Wiki/topics/art-direction.md))
+- [x] Build the stress-test scene and a PC baseline (506 FPS at the game camera)
+- [ ] Run the stress test on a target phone
 - [ ] Offline prototype with 2–3 original heroes
 - [ ] Local multiplayer
 
