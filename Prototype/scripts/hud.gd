@@ -57,6 +57,17 @@ func _ready() -> void:
 	_button.pressed.connect(func(): hero.try_transform())
 	add_child(_button)
 
+	var stress := Button.new()
+	stress.text = "STRESS TEST"
+	stress.anchor_left = 1.0
+	stress.anchor_right = 1.0
+	stress.offset_left = -220
+	stress.offset_top = 24
+	stress.offset_right = -24
+	stress.offset_bottom = 84
+	stress.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/stress_test.tscn"))
+	add_child(stress)
+
 
 func _process(_delta: float) -> void:
 	if not hero:

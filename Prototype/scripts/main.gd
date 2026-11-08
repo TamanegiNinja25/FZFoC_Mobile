@@ -52,9 +52,7 @@ func _build_world() -> void:
 	var plane := PlaneMesh.new()
 	plane.size = Vector2(40, 40)
 	ground.mesh = plane
-	var ground_material := StandardMaterial3D.new()
-	ground_material.albedo_color = Color(0.32, 0.36, 0.3)
-	ground.material_override = ground_material
+	ground.material_override = Toon.material(Color(0.32, 0.36, 0.3), 0.0)
 	add_child(ground)
 
 	var sun := DirectionalLight3D.new()

@@ -32,9 +32,7 @@ func _ready() -> void:
 	mesh.size = Vector3(1.0, 2.0, 1.0)
 	body.mesh = mesh
 	body.position.y = 1.0
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.8, 0.25, 0.25)
-	body.material_override = material
+	body.material_override = Toon.material(Color(0.8, 0.25, 0.25))
 	add_child(body)
 
 	_label = Label3D.new()

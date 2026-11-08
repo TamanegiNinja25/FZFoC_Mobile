@@ -15,10 +15,37 @@ Open `Prototype/project.godot` in Godot 4.7 and press **F5**.
 
 Touch movement comes later; the TRANSFORM button is already sized for a thumb.
 
+## Look
+All materials use the shared toon material in `scripts/toon.gd`: banded light, toon highlights and a rim light (decision 2026-11-08, see [Art direction](../Wiki/topics/art-direction.md)).
+
+## Stress test (phone performance)
+Press **STRESS TEST** in the game, or open `scenes/stress_test.tscn` and press F6. It shows 6 heroes at **40,320 triangles** each (Godot generates 10 LOD levels), toon shading, particle effects and shadows, from the game camera.
+
+On-screen toggles: LOD on/off, effects, shadows, 6/12 heroes, game/close camera, back. The top-left readout shows FPS, average and worst frame time, triangles and draw calls actually rendered, the device, GPU, and a verdict (60 FPS smooth / 30 FPS playable / too slow).
+
+**Benchmark mode** runs four configurations for 3 s each, prints results and quits:
+```
+Godot_v4.7.2-stable_win64_console.exe --path Prototype --disable-vsync res://scenes/stress_test.tscn -- --benchmark
+```
+
+PC baseline (2026-11-08, AMD Radeon integrated graphics, ASUS Vivobook laptop — **not a phone**):
+
+| Configuration | FPS | Avg frame | Triangles rendered |
+|---|---|---|---|
+| 6 heroes, game camera, LOD on | 506 | 1.98 ms | 18k |
+| 6 heroes, close camera | 433 | 2.31 ms | 25k |
+| 6 heroes, LOD off (worst case) | 396 | 2.52 ms | 971k |
+| 12 heroes, LOD off | 326 | 3.07 ms | 1,941k |
+
+- At the game camera, LODs cut ~240k hero triangles to ~18k rendered. A capsule simplifies easily; real sculpted models will reduce less.
+- Shadows multiply geometry cost about 4× (971k rendered from 242k): Godot's default sun shadow draws 4 cascades.
+- To test on a phone, export the project to Android or iOS from Godot (Project → Export) and press STRESS TEST on the device.
+
 ## Test
 ```
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/smoke_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/meter_balance_test.gd
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/stress_scene_test.gd
 ```
 The balance test measures how long the meter takes to fill against one dummy. Last result: **87.2 s** (target 90 ± 15 s), 5 kills, no deaths.
 
@@ -58,6 +85,9 @@ The meter is locked while transformed and restarts from zero afterwards.
 - `scripts/hero.gd` — movement, auto-attack, health and shield, form state
 - `scripts/transform_meter.gd` — the meter
 - `scripts/dummy.gd` — training dummy
-- `scripts/hud.gd` — bars, status line, transform button
+- `scripts/hud.gd` — bars, status line, transform and stress-test buttons
+- `scripts/toon.gd` — shared toon material
+- `scripts/stress_test.gd` + `scenes/stress_test.tscn` — phone stress test and benchmark mode
 - `tests/smoke_test.gd` — headless check of the meter → form → revert loop
 - `tests/meter_balance_test.gd` — measures fill time, idle drain and spree rewards
+- `tests/stress_scene_test.gd` — checks the stress scene is built to budget (triangles, LODs, toon, toggles)

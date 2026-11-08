@@ -60,7 +60,7 @@ var _invulnerable_time := 0.0
 var _attack_cooldown := 0.0
 var _dead_time := 0.0
 var _spawn_point := Vector3.ZERO
-var _material := StandardMaterial3D.new()
+var _material := Toon.material(NORMAL_COLOR)
 var _body: MeshInstance3D
 
 
