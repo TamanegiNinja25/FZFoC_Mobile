@@ -22,6 +22,7 @@ func _ready() -> void:
 		return
 	_build_backdrop()
 	_build_ui()
+	Sfx.play_music("menu")
 
 
 func _process(delta: float) -> void:

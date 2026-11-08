@@ -16,6 +16,7 @@ func _ready() -> void:
 		get_tree().change_scene_to_file.call_deferred("res://scenes/stress_test.tscn")
 		return
 	Controls.register()
+	get_node("/root/Sfx").play_music("battle", -10.0)
 	_build_world()
 	GameSettings.apply_to_scene(get_viewport(), _sun)
 	GameSettings.changed.connect(func(): GameSettings.apply_to_scene(get_viewport(), _sun))

@@ -333,10 +333,81 @@ def make_item_icons():
         save_png(os.path.join(ROOT, "icons", "items", item + ".png"), downsample(img, ss))
 
 
+# ---------------------------------------------------------------- music
+MUSIC_RATE = 22050
+
+
+def save_music(name, signal):
+    os.makedirs(os.path.join(ROOT, "music"), exist_ok=True)
+    peak = np.max(np.abs(signal)) or 1
+    data = (signal / peak * 0.8 * 32767).astype(np.int16)
+    with wave.open(os.path.join(ROOT, "music", name + ".wav"), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(MUSIC_RATE)
+        w.writeframes(data.tobytes())
+
+
+def note(n):
+    """MIDI note number → Hz."""
+    return 440.0 * 2 ** ((n - 69) / 12)
+
+
+def pad(freqs, seconds, attack=0.8):
+    t = np.arange(int(MUSIC_RATE * seconds)) / MUSIC_RATE
+    tone = sum(np.sin(2 * np.pi * f * t) + 0.3 * np.sin(2 * np.pi * f * 2.003 * t) for f in freqs)
+    shape = np.minimum(t / attack, 1) * np.minimum((seconds - t) / attack, 1)
+    return tone * shape
+
+
+def make_music():
+    # Menu: slow minor progression (Am – F – C – G), 4 s per chord, soft bells on top.
+    chords = [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]]
+    menu = np.concatenate([pad([note(n) for n in c], 4.0) for c in chords])
+    bells = np.zeros_like(menu)
+    melody = [76, 72, 69, 72, 77, 72, 69, 67]
+    for k, n in enumerate(melody):
+        start = int(k * 2.0 * MUSIC_RATE)
+        t = np.arange(int(1.6 * MUSIC_RATE)) / MUSIC_RATE
+        tone = (np.sin(2 * np.pi * note(n) * t) + 0.4 * np.sin(2 * np.pi * note(n) * 2.76 * t)) * np.exp(-t / 0.5)
+        bells[start:start + t.size] += tone[: bells.size - start] * 0.35
+    save_music("menu", menu + bells)
+
+    # Battle: 110 BPM war drums over a pulsing bass and a low drone, 8 bars.
+    beat = 60.0 / 110.0
+    total = int(beat * 32 * MUSIC_RATE)
+    t = np.arange(total) / MUSIC_RATE
+    battle = 0.35 * (np.sin(2 * np.pi * note(33) * t) + 0.5 * np.sin(2 * np.pi * note(40) * t))  # drone
+    def hit(at, freq, decay, gain, noise=0.0):
+        i = int(at * MUSIC_RATE)
+        tt = np.arange(int(0.5 * MUSIC_RATE)) / MUSIC_RATE
+        f = freq * (1 + 1.5 * np.exp(-tt / 0.03))
+        s = np.sin(2 * np.pi * np.cumsum(f) / MUSIC_RATE) * np.exp(-tt / decay) * gain
+        if noise:
+            s += rng.normal(size=tt.size) * np.exp(-tt / 0.05) * noise
+        end = min(total, i + tt.size)
+        battle[i:end] += s[: end - i]
+    for b in range(32):
+        hit(b * beat, 55, 0.25, 1.4)                          # war drum on every beat
+        if b % 4 == 2:
+            hit(b * beat, 180, 0.08, 0.5, noise=0.8)           # rim crack on beat 3
+        if b % 2 == 1:
+            hit(b * beat + beat / 2, 70, 0.12, 0.6)            # off-beat tom
+    bass_line = [45, 45, 48, 43]
+    for b in range(32):
+        n = bass_line[(b // 8) % 4]
+        i = int(b * beat * MUSIC_RATE)
+        tt = np.arange(int(beat * 0.9 * MUSIC_RATE)) / MUSIC_RATE
+        s = np.sign(np.sin(2 * np.pi * note(n) * tt)) * 0.12 * np.exp(-tt / 0.25)
+        battle[i:i + tt.size] += s[: total - i]
+    save_music("battle", battle)
+
+
 if __name__ == "__main__":
     make_icons()
     make_item_icons()
     make_sounds()
-    for d in ("icon", "icons/items", "sfx"):
+    make_music()
+    for d in ("icon", "icons/items", "sfx", "music"):
         for f in sorted(os.listdir(os.path.join(ROOT, d))):
             print(f"{d}/{f}: {os.path.getsize(os.path.join(ROOT, d, f)) // 1024} KB")

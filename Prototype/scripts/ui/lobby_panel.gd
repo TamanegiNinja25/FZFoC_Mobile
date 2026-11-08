@@ -13,6 +13,7 @@ var _players := Label.new()
 var _hosts := VBoxContainer.new()
 var _ip := LineEdit.new()
 var _mode := OptionButton.new()
+var _hero := OptionButton.new()
 var _start := Button.new()
 var _pages := {}
 
@@ -42,6 +43,17 @@ func _ready() -> void:
 	_name.custom_minimum_size = Vector2(300, 52)
 	name_row.add_child(_name)
 	_pages.choose.add_child(name_row)
+	var hero_row := HBoxContainer.new()
+	hero_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	var hero_label := Label.new()
+	hero_label.text = "Your hero:"
+	hero_row.add_child(hero_label)
+	for definition in Roster.all():
+		_hero.add_item("%s — %s" % [definition.display_name, definition.role])
+		_hero.set_item_metadata(_hero.item_count - 1, definition.id)
+	_hero.custom_minimum_size = Vector2(300, 52)
+	hero_row.add_child(_hero)
+	_pages.choose.add_child(hero_row)
 	_pages.choose.add_child(_button("Host Game", _host, "confirm"))
 	_pages.choose.add_child(_button("Join Game", _join_page))
 	_pages.choose.add_child(_button("Back", func(): back_requested.emit()))
@@ -131,7 +143,12 @@ func _show(page: String) -> void:
 		_status.text = "One phone hosts; friends on the same Wi-Fi join. No servers or accounts."
 
 
+func _apply_hero_choice() -> void:
+	_net.my_hero = str(_hero.get_item_metadata(_hero.selected))
+
+
 func _host() -> void:
+	_apply_hero_choice()
 	_net.my_name = _name.text.strip_edges() if _name.text.strip_edges() != "" else "Host"
 	var error: String = _net.host()
 	if error != "":
@@ -143,6 +160,7 @@ func _host() -> void:
 
 
 func _join_page() -> void:
+	_apply_hero_choice()
 	_net.my_name = _name.text.strip_edges() if _name.text.strip_edges() != "" else "Friend"
 	_net.start_discovery()
 	_status.text = "Looking for games…"
@@ -171,7 +189,8 @@ func _leave() -> void:
 func _refresh_players() -> void:
 	var names: Array[String] = []
 	for peer_id in _net.players:
-		names.append("• %s%s" % [_net.players[peer_id], "  (host)" if peer_id == 1 else ""])
+		var hero_name: String = Roster.create(_net.heroes.get(peer_id, "vael")).display_name if _net.heroes.has(peer_id) else "…"
+		names.append("• %s — %s%s" % [_net.players[peer_id], hero_name, "  (host)" if peer_id == 1 else ""])
 	var text := "Players:\n" + "\n".join(names) + "\nBots fill the empty slots."
 	_players.text = text
 	_pages.waiting.get_node("Players").text = text

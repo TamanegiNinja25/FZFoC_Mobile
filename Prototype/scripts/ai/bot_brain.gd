@@ -67,7 +67,10 @@ func _decide() -> void:
 	if _retreating:
 		_move_to(home)
 		if skill > 0.5 and _count_enemy_heroes(5.0) > 0:
-			hero.try_skill(1)  # dash away along the retreat path
+			for i in hero.skills.size():
+				if hero.skills[i].ai_escape() and hero.skills[i].is_ready():
+					hero.try_skill(i)  # escape along the retreat path
+					break
 		return
 
 	var target := _choose_target()
@@ -80,15 +83,12 @@ func _decide() -> void:
 	if hero.meter.is_full() and (skill < 0.35 or _count_enemy_heroes(7.0) > 0):
 		hero.try_transform()
 
-	# Bellows Slam / Eruption when something hostile is inside its radius.
-	var slam := hero.skills[0] as SlamSkill
-	if slam and slam.is_ready() and _count_hostiles(slam.power(hero).radius * 0.9) > 0 and randf() < skill_accuracy():
-		hero.try_skill(0)
-
-	# Strong bots dash onto a fleeing, wounded hero.
-	if skill > 0.45 and target is Hero and distance > 4.0 and distance < 8.0 and target.hp / target.max_hp < 0.5:
-		hero.ai_move = _flat_direction(target.global_position)
-		hero.try_skill(1)
+	# Each skill says when it's worth casting; accuracy scales with skill.
+	for i in hero.skills.size():
+		var s: Skill = hero.skills[i]
+		if s.is_ready() and s.ai_should_cast(hero, target, skill) and randf() < skill_accuracy():
+			hero.ai_move = _flat_direction(target.global_position)
+			hero.try_skill(i)
 
 	if distance > hero.attack_range * 0.85:
 		_move_to(target.global_position)

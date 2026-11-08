@@ -31,3 +31,26 @@ func try_cast(hero: Hero) -> bool:
 
 func _cast(_hero: Hero) -> void:
 	pass
+
+
+## Bot hint: should a bot cast this now? `skill` is the bot's 0..1 skill level;
+## bots aim by facing the target before casting.
+func ai_should_cast(_hero: Hero, _target: Node3D, _skill: float) -> bool:
+	return false
+
+
+## Bot hint: can this skill carry the hero away from danger (used when retreating)?
+func ai_escape() -> bool:
+	return false
+
+
+static func hostiles_within(hero: Hero, radius: float) -> Array[Node3D]:
+	var found: Array[Node3D] = []
+	for node in hero.get_tree().get_nodes_in_group("units"):
+		if hero.is_hostile(node) and node.is_alive() and hero.global_position.distance_to(node.global_position) <= radius:
+			found.append(node)
+	return found
+
+
+static func distance_to(hero: Hero, target: Node3D) -> float:
+	return hero.global_position.distance_to(target.global_position) if target else INF

@@ -166,6 +166,8 @@ func _fx(index: int, kind: String, data: Array) -> void:
 		"slam":
 			if h.model.has_method("play_slam"):
 				h.model.play_slam(data[0], data[1])
+		"boulder":
+			Projectile.launch(h, data[0], BoulderHurlSkill.SPEED, BoulderHurlSkill.RANGE, 0.0, true)
 		"sfx":
 			var sfx := get_node_or_null("/root/Sfx")
 			if sfx:

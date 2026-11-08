@@ -15,3 +15,13 @@ func _init() -> void:
 func _cast(hero: Hero) -> void:
 	hero.start_dash(hero.aim_direction() * DISTANCE / DURATION, DURATION)
 	hero.play_sfx("dash")
+
+
+## Strong bots dash onto a wounded, fleeing hero.
+func ai_should_cast(hero: Hero, target: Node3D, skill: float) -> bool:
+	var d := distance_to(hero, target)
+	return skill > 0.45 and target is Hero and d > 4.0 and d < 8.0 and target.hp / target.max_hp < 0.5
+
+
+func ai_escape() -> bool:
+	return true

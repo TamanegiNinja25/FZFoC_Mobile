@@ -31,7 +31,7 @@ func _process(_delta: float) -> bool:
 		10:
 			var select: HeroSelect = _menu._hero_select
 			var cards: Array = select._cards.get_children().filter(func(c): return not c.is_queued_for_deletion())
-			_check(cards.size() == 1 and cards[0].disabled and "Coming soon" in cards[0].text, "Speed category shows a locked 'coming soon' slot")
+			_check(cards.size() == 1 and not cards[0].disabled and cards[0].text.begins_with("Ryn"), "Speed category shows Ryn")
 			select._show_category("Bruiser")
 		12:
 			var select: HeroSelect = _menu._hero_select

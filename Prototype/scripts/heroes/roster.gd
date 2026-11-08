@@ -6,11 +6,17 @@ extends RefCounted
 const ROLES := ["Bruiser", "Speed", "Giant"]
 
 ## Planned slots shown as "coming soon": [role, placeholder label].
-const PLANNED := [["Speed", "Speed hero"], ["Giant", "Giant hero"]]
+const PLANNED := []
 
 
 static func all() -> Array[HeroDef]:
-	return [Vael.new()]
+	return [Vael.new(), Ryn.new(), Barrow.new()]
+
+
+## Bots get heroes by slot, so a match mixes the roster the same way on every device.
+static func bot_hero(slot: int) -> String:
+	var ids := ["vael", "ryn", "barrow"]
+	return ids[slot % ids.size()]
 
 
 static func create(hero_id: String) -> HeroDef:

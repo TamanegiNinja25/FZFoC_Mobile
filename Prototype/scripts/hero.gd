@@ -74,6 +74,10 @@ var _hot_time := 0.0
 var _hot_rate := 0.0
 ## Network client: this hero only displays the host's state.
 var puppet := false
+var _haste_time := 0.0
+var _haste_mult := 1.0
+var _slow_time := 0.0
+var _slow_mult := 1.0
 ## Network: the peer controlling this hero (0 = bot or offline).
 var owner_peer := 0
 var model: Node3D
@@ -145,6 +149,8 @@ func _physics_process(delta: float) -> void:
 	if _hot_time > 0.0:
 		_hot_time -= delta
 		heal(_hot_rate * delta)
+	_haste_time = maxf(_haste_time - delta, 0.0)
+	_slow_time = maxf(_slow_time - delta, 0.0)
 	_tick_form(delta)
 	_tick_economy(delta)
 	if hp < max_hp:
@@ -162,7 +168,7 @@ func _physics_process(delta: float) -> void:
 		velocity = _dash_velocity
 	else:
 		var direction := _move_input()
-		var speed := move_speed * (form_speed_mult if in_form else 1.0)
+		var speed := move_speed * (form_speed_mult if in_form else 1.0) * (_slow_mult if _slow_time > 0.0 else 1.0)
 		velocity = direction * speed
 		if direction.length() > 0.1:
 			_face(direction)
@@ -299,6 +305,27 @@ func recompute_stats() -> void:
 		hp += max_hp - old_max
 	hp = minf(hp, max_hp)
 	health_changed.emit(hp, max_hp, shield)
+
+
+## Attack-speed buff, e.g. apply_haste(1.6, 4.0) = 60% faster attacks for 4 s.
+func apply_haste(multiplier: float, duration: float) -> void:
+	_haste_mult = multiplier
+	_haste_time = duration
+
+
+## Movement slow, e.g. apply_slow(0.6, 2.0) = 40% slower for 2 s.
+func apply_slow(multiplier: float, duration: float) -> void:
+	if _slow_time <= 0.0 or multiplier < _slow_mult:
+		_slow_mult = multiplier
+	_slow_time = maxf(_slow_time, duration)
+
+
+func is_hasted() -> bool:
+	return _haste_time > 0.0
+
+
+func is_slowed() -> bool:
+	return _slow_time > 0.0
 
 
 func heal(amount: float) -> void:
@@ -439,7 +466,7 @@ func _end_form() -> void:
 
 
 func _attack(target: Node3D) -> void:
-	_attack_cooldown = attack_interval
+	_attack_cooldown = attack_interval / (_haste_mult if _haste_time > 0.0 else 1.0)
 	deal_damage(target, attack_damage)
 	if is_player:
 		play_sfx("hit", -10.0)

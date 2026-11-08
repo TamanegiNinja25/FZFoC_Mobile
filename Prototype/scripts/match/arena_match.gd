@@ -50,6 +50,7 @@ func _ready() -> void:
 	GameSettings.changed.connect(func(): GameSettings.apply_to_scene(get_viewport(), _sun))
 	_spawn_teams()
 	_spawn_camps()
+	Sfx.play_music("battle")
 
 	hud = Hud.new()
 	add_child(hud)
@@ -223,7 +224,13 @@ func _spawn_teams() -> void:
 			h.owner_peer = owners[team][i]
 			h.is_player = (h.owner_peer == my_id) if online else (team == 0 and i == 0)
 			h.puppet = not is_authority
-			h.definition = Roster.create(Session.hero_id if (h.is_player and not online) else "vael")
+			var slot := team * 3 + i
+			if online and h.owner_peer != 0:
+				h.definition = Roster.create(Net.heroes.get(h.owner_peer, "vael"))
+			elif not online and h.is_player:
+				h.definition = Roster.create(Session.hero_id)
+			else:
+				h.definition = Roster.create(Roster.bot_hero(slot))
 			h.respawn_time = RESPAWN_TIME
 			h.name = "Hero%d" % (team * 3 + i)
 			h.position = BASES[team] + Vector3(0, 0, (i - 1) * 3.0)

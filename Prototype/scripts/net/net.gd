@@ -19,6 +19,9 @@ enum Mode { VERSUS, COOP }
 
 ## peer id → display name, kept in sync by the host.
 var players := {}
+## peer id → hero id chosen by that player.
+var heroes := {}
+var my_hero := "vael"
 ## host ip → {name, players}
 var hosts := {}
 var mode := Mode.VERSUS
@@ -60,6 +63,7 @@ func host() -> String:
 		return "Couldn't host (port %d busy?)" % GAME_PORT
 	multiplayer.multiplayer_peer = peer
 	players = {1: my_name}
+	heroes = {1: my_hero}
 	_announce = PacketPeerUDP.new()
 	_announce.set_broadcast_enabled(true)
 	players_changed.emit()
@@ -111,11 +115,12 @@ func start_match() -> void:
 		teams[peer_id] = 0 if mode == Mode.COOP else index % 2
 		index += 1
 	_announce_stop()
-	_begin_match.rpc(teams)
+	_begin_match.rpc(teams, heroes)
 
 
 @rpc("authority", "call_local", "reliable")
-func _begin_match(teams: Dictionary) -> void:
+func _begin_match(teams: Dictionary, hero_choices: Dictionary) -> void:
+	heroes = hero_choices
 	match_starting.emit(teams)
 
 
@@ -153,14 +158,15 @@ func _sorted_peers() -> Array:
 
 
 func _on_connected() -> void:
-	_register.rpc_id(1, my_name)
+	_register.rpc_id(1, my_name, my_hero)
 
 
 @rpc("any_peer", "reliable")
-func _register(player_name: String) -> void:
+func _register(player_name: String, hero_id: String) -> void:
 	if not is_host():
 		return
 	players[multiplayer.get_remote_sender_id()] = player_name
+	heroes[multiplayer.get_remote_sender_id()] = hero_id
 	_sync_players.rpc(players)
 	players_changed.emit()
 
@@ -178,5 +184,6 @@ func _on_peer_connected(_id: int) -> void:
 func _on_peer_disconnected(id: int) -> void:
 	if is_host():
 		players.erase(id)
+		heroes.erase(id)
 		_sync_players.rpc(players)
 		players_changed.emit()

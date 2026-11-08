@@ -25,6 +25,34 @@ func _ready() -> void:
 	get_tree().node_added.connect(_on_node_added)
 
 
+var _music := AudioStreamPlayer.new()
+var _music_name := ""
+
+
+## Loops a music track (assets/music) on the Music bus, fading between tracks.
+func play_music(track: String, volume_db := -6.0) -> void:
+	if track == _music_name:
+		return
+	_music_name = track
+	var stream := load("res://assets/music/%s.wav" % track) as AudioStreamWAV
+	if stream == null:
+		return
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_begin = 0
+	stream.loop_end = int(stream.get_length() * stream.mix_rate)
+	if _music.get_parent() == null:
+		_music.bus = "Music"
+		add_child(_music)
+	var tween := create_tween()
+	if _music.playing:
+		tween.tween_property(_music, "volume_db", -40.0, 0.4)
+	tween.tween_callback(func():
+		_music.stream = stream
+		_music.volume_db = -40.0
+		_music.play())
+	tween.tween_property(_music, "volume_db", volume_db, 0.8)
+
+
 func play(sound: String, volume_db := 0.0, pitch := 1.0) -> void:
 	if not _streams.has(sound):
 		return
