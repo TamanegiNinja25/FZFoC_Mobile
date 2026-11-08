@@ -140,7 +140,7 @@ This folder is the git repository `TamanegiNinja25/FZFoC_Mobile` (public, branch
 
 - **Commit after every workflow** that changes files — ingest, guided ingest, each first-build pass, filing back an answer, health check, cleanup. One workflow, one commit.
 - **Before committing:**
-  1. Run the link check — no broken links.
+  1. Run the link check over `Wiki/` (excluding `_history/`) and `README.md` — no broken links. Example links inside `CLAUDE.md` are illustrations, not real links.
   2. Scan staged files for personal or sensitive data: local file paths, real names, email addresses, keys, tokens, passwords. If you find any, remove it or stop and tell the user. Never commit it.
   3. Confirm `git status` shows only files inside this folder, and no files `.gitignore` is meant to block.
 - **Commit message:** `<workflow>: <short summary>` on the first line (e.g. `ingest: add sketchfab assets source, new assets-and-licensing topic`), then bullets matching the `log.md` entry, then any attribution trailer the environment requires.
