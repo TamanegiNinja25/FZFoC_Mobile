@@ -135,6 +135,9 @@ Nobody is there to answer questions during a scheduled run.
 - Always finish with a `log.md` entry, a short summary file in `Outputs/`, and a commit (see Version control).
 - Schedules and their tasks: to be defined.
 
+## Project agents
+- **mechanics-analyst** (`.claude/agents/mechanics-analyst.md`) — studies reference games and maps, with REA tools when installed, and writes clean-room mechanic specs to `Outputs/`. Treat its specs like any output: they aren't sources. If the user moves a spec into `RAW/`, ingest it normally.
+
 ## Version control
 This folder is the git repository `TamanegiNinja25/FZFoC_Mobile` (public, branch `main`). Git history is the second record of change, alongside `log.md`.
 
