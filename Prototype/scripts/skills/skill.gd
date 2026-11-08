@@ -25,7 +25,7 @@ func try_cast(hero: Hero) -> bool:
 	if not is_ready():
 		return false
 	_cast(hero)
-	time_left = cooldown
+	time_left = cooldown * (1.0 - hero.cooldown_reduction)
 	return true
 
 

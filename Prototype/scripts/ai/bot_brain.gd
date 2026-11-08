@@ -54,6 +54,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _decide() -> void:
+	if hero.in_shop_range:
+		_shop()
 	var hp_ratio := hero.hp / hero.max_hp
 	var home: Vector3 = arena.fountain_position(hero.team)
 
@@ -92,6 +94,15 @@ func _decide() -> void:
 		_move_to(target.global_position)
 	else:
 		hero.ai_move = Vector3.ZERO  # in range: the auto-attack does the work
+
+
+## Buys the next affordable item of the bot build (one per visit decision).
+func _shop() -> void:
+	for item_id in ItemCatalog.BOT_BUILD:
+		if hero.items.any(func(i): return i.id == item_id):
+			continue
+		hero.buy(item_id)
+		return
 
 
 ## Strong bots focus the weakest enemy hero nearby; weak bots take the nearest.

@@ -23,6 +23,7 @@ func _ready() -> void:
 	hero = Hero.new()
 	hero.name = "Hero"
 	hero.definition = Roster.create(Session.hero_id)
+	hero.in_shop_range = true  # training ground: shop anywhere
 	add_child(hero)
 
 	for spot in [Vector3(4, 0, -3), Vector3(-5, 0, -4), Vector3(0, 0, -8)]:

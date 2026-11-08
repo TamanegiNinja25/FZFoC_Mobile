@@ -16,6 +16,11 @@ extends Control
 
 ## Current direction and strength, length 0..1.
 var output := Vector2.ZERO
+## Controls that sit inside the joystick zone (e.g. the inventory bar); a touch
+## that starts on a visible one belongs to it, not to the stick.
+var blockers: Array[Control] = []
+## Off while a full-screen panel like the shop is open.
+var enabled := true
 
 var _finger := -1
 var _base := Vector2.ZERO
@@ -41,7 +46,7 @@ func _input(event: InputEvent) -> void:
 ## Public entry point so tests can feed touch events directly.
 func handle_input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
-		if event.pressed and _finger == -1 and _in_zone(event.position):
+		if event.pressed and _finger == -1 and enabled and _in_zone(event.position) and not _blocked(event.position):
 			_finger = event.index
 			_base = event.position
 			_move_knob(event.position)
@@ -51,6 +56,13 @@ func handle_input(event: InputEvent) -> void:
 	elif event is InputEventScreenDrag and event.index == _finger:
 		_move_knob(event.position)
 		get_viewport().set_input_as_handled()
+
+
+func _blocked(point: Vector2) -> bool:
+	for control in blockers:
+		if control.is_visible_in_tree() and control.get_global_rect().has_point(point):
+			return true
+	return false
 
 
 func _in_zone(point: Vector2) -> bool:

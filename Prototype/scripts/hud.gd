@@ -17,6 +17,9 @@ var _button := Button.new()
 var _name := Label.new()
 var _skill_buttons: Array[Button] = []
 var _fps := Label.new()
+var _shop_button := Button.new()
+var _inventory: Array[Button] = []
+var shop := ShopPanel.new()
 ## Themed, safe-area-inset container for every HUD control.
 var root := Control.new()
 
@@ -27,6 +30,8 @@ func setup(target: Hero) -> void:
 	hero.form_changed.connect(_on_form_changed)
 	hero.meter.changed.connect(_on_meter_changed)
 	_name.text = "%s — %s" % [hero.definition.display_name, hero.definition.title]
+	hero.items_changed.connect(_refresh_inventory)
+	_refresh_inventory()
 	_on_health_changed(hero.hp, hero.max_hp, hero.shield)
 	_on_meter_changed(hero.meter.charge, hero.meter.max_charge)
 
@@ -117,11 +122,51 @@ func _ready() -> void:
 	pause.pressed.connect(func(): pause_requested.emit())
 	root.add_child(pause)
 
+	# SHOP: usable at the hero's own fountain.
+	_shop_button.text = "SHOP"
+	_shop_button.anchor_left = 1.0
+	_shop_button.anchor_right = 1.0
+	_shop_button.offset_left = -270
+	_shop_button.offset_top = 24
+	_shop_button.offset_right = -126
+	_shop_button.offset_bottom = 104
+	_shop_button.add_theme_font_size_override("font_size", 24)
+	_shop_button.pressed.connect(open_shop)
+	root.add_child(_shop_button)
+
+	# Inventory bar: tap a consumable to use it.
+	var bar := HBoxContainer.new()
+	bar.anchor_left = 0.5
+	bar.anchor_right = 0.5
+	bar.anchor_top = 1.0
+	bar.anchor_bottom = 1.0
+	bar.offset_left = -207
+	bar.offset_right = 207
+	bar.offset_top = -78
+	bar.offset_bottom = -14
+	bar.add_theme_constant_override("separation", 6)
+	root.add_child(bar)
+	for i in ItemCatalog.INVENTORY_SIZE:
+		var slot := Button.new()
+		slot.custom_minimum_size = Vector2(64, 64)
+		slot.expand_icon = true
+		slot.pressed.connect(func(): hero.use_item(i))
+		bar.add_child(slot)
+		_inventory.append(slot)
+	joystick.blockers.append(bar)
+
+	shop.visible = false
+	shop.set_anchors_preset(Control.PRESET_CENTER)
+	shop.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	shop.grow_vertical = Control.GROW_DIRECTION_BOTH
+	shop.closed.connect(close_shop)
+	root.add_child(shop)
+
 	_fps.anchor_left = 1.0
 	_fps.anchor_right = 1.0
-	_fps.offset_left = -300
-	_fps.offset_top = 30
-	_fps.offset_right = -130
+	_fps.offset_left = -440
+	_fps.offset_top = 40
+	_fps.offset_right = -280
 	_fps.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	root.add_child(_fps)
 
@@ -129,6 +174,10 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if not hero:
 		return
+	_shop_button.disabled = not hero.in_shop_range
+	_shop_button.modulate = Color(1.25, 1.1, 0.8) if hero.in_shop_range else Color(1, 1, 1)
+	if shop.visible and not hero.in_shop_range:
+		close_shop()
 	_fps.visible = GameSettings.show_fps
 	if _fps.visible:
 		_fps.text = "%d FPS" % Engine.get_frames_per_second()
@@ -157,6 +206,29 @@ func _process(_delta: float) -> void:
 		_skill_buttons[i].text = label if skill.is_ready() else "%s
 %.1f" % [label, skill.time_left]
 		_skill_buttons[i].disabled = not skill.is_ready() or not hero.is_alive()
+
+
+func open_shop() -> void:
+	if not hero.in_shop_range:
+		return
+	shop.open_for(hero)
+	shop.visible = true
+	joystick.enabled = false
+	UiTheme.pop_in(shop)
+
+
+func close_shop() -> void:
+	shop.visible = false
+	joystick.enabled = true
+
+
+func _refresh_inventory() -> void:
+	for i in _inventory.size():
+		var slot := _inventory[i]
+		var has_item := i < hero.items.size()
+		slot.icon = hero.items[i].icon() if has_item else null
+		slot.disabled = not has_item or not hero.items[i].consumable
+		slot.modulate = Color(1, 1, 1) if has_item else Color(1, 1, 1, 0.45)
 
 
 func _on_health_changed(hp: float, max_hp: float, shield: float) -> void:

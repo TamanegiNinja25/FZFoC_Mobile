@@ -9,6 +9,7 @@ signal form_changed(active: bool)
 signal gold_changed(gold: float, income: float, spree: int)
 ## killer is the Hero that landed the killing blow, or null.
 signal died(killer: Hero)
+signal items_changed
 
 @export var move_speed := 6.0
 @export var max_hp := 1000.0
@@ -58,6 +59,15 @@ var is_player := true
 var ai_move := Vector3.ZERO
 var kills := 0
 var deaths := 0
+## Inventory (up to ItemCatalog.INVENTORY_SIZE). Stats are recomputed from the
+## definition plus every item carried.
+var items: Array[ItemDef] = []
+## Set by the match each frame: true at the hero's own fountain (shop range).
+var in_shop_range := false
+var damage_reduction := 0.0
+var cooldown_reduction := 0.0
+var _hot_time := 0.0
+var _hot_rate := 0.0
 var model: Node3D
 var skills: Array[Skill] = []
 
@@ -108,6 +118,7 @@ func _ready() -> void:
 	meter = TransformMeter.new()
 	meter.name = "TransformMeter"
 	add_child(meter)
+	recompute_stats()
 
 
 func _physics_process(delta: float) -> void:
@@ -118,6 +129,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_invulnerable_time = maxf(_invulnerable_time - delta, 0.0)
+	if _hot_time > 0.0:
+		_hot_time -= delta
+		heal(_hot_rate * delta)
 	_tick_form(delta)
 	_tick_economy(delta)
 	if hp < max_hp:
@@ -174,6 +188,7 @@ func try_transform() -> bool:
 func take_damage(amount: float, attacker: Hero = null) -> Dictionary:
 	if _dead_time > 0.0 or _invulnerable_time > 0.0:
 		return {"dealt": 0.0, "killed": false, "bounty": 0.0}
+	amount *= 1.0 - damage_reduction
 	var absorbed := minf(shield, amount)
 	shield -= absorbed
 	var dealt := minf(hp, amount - absorbed) + absorbed
@@ -185,6 +200,76 @@ func take_damage(amount: float, attacker: Hero = null) -> Dictionary:
 		_die(attacker)
 		return {"dealt": dealt, "killed": true, "bounty": reward}
 	return {"dealt": dealt, "killed": false, "bounty": 0.0}
+
+
+## Buys an item; returns "" on success or the reason it failed.
+func buy(item_id: String) -> String:
+	var item := ItemCatalog.find(item_id)
+	if item == null:
+		return "Unknown item"
+	if not in_shop_range:
+		return "Return to your fountain to shop"
+	if items.size() >= ItemCatalog.INVENTORY_SIZE:
+		return "Inventory full"
+	if gold < item.cost:
+		return "Not enough gold"
+	gold -= item.cost
+	items.append(item)
+	recompute_stats()
+	items_changed.emit()
+	return ""
+
+
+func sell(index: int) -> bool:
+	if index < 0 or index >= items.size() or not in_shop_range:
+		return false
+	gold += floorf(items[index].cost * ItemCatalog.SELL_RATE)
+	items.remove_at(index)
+	recompute_stats()
+	items_changed.emit()
+	return true
+
+
+## Uses a consumable from the inventory (anywhere on the map).
+func use_item(index: int) -> bool:
+	if index < 0 or index >= items.size() or not items[index].consumable or _dead_time > 0.0:
+		return false
+	var item := items[index]
+	match item.use:
+		"heal":
+			_hot_time = 5.0
+			_hot_rate = item.use_amount / 5.0
+		"meter":
+			if meter.locked or meter.is_full():
+				return false
+			meter._add(item.use_amount)
+	items.remove_at(index)
+	recompute_stats()
+	items_changed.emit()
+	play_sfx("confirm", -6.0)
+	return true
+
+
+func recompute_stats() -> void:
+	var total := {}
+	for item in items:
+		for key in item.stats:
+			total[key] = total.get(key, 0.0) + item.stats[key]
+	var old_max := max_hp
+	max_hp = definition.max_hp + total.get("hp", 0.0)
+	attack_damage = definition.attack_damage + total.get("damage", 0.0)
+	attack_interval = definition.attack_interval / (1.0 + total.get("attack_speed", 0.0))
+	move_speed = definition.move_speed * (1.0 + total.get("move_speed", 0.0))
+	hp_regen = definition.hp_regen + total.get("regen", 0.0)
+	damage_reduction = clampf(total.get("armor", 0.0), 0.0, 0.6)
+	cooldown_reduction = clampf(total.get("cooldown", 0.0), 0.0, 0.5)
+	form_duration = definition.form_duration + total.get("form_duration", 0.0)
+	if meter:
+		meter.gain_multiplier = 1.0 + total.get("meter_gain", 0.0)
+	if hp > 0.0 and max_hp > old_max:
+		hp += max_hp - old_max
+	hp = minf(hp, max_hp)
+	health_changed.emit(hp, max_hp, shield)
 
 
 func heal(amount: float) -> void:

@@ -217,9 +217,126 @@ def make_sounds():
     save_wav("defeat", phrase, 0.6)
 
 
+# ---------------------------------------------------------------- item icons
+CATEGORY_COLORS = {
+    "Weapons": (0.55, 0.16, 0.08), "Armor": (0.2, 0.3, 0.45), "Mobility": (0.16, 0.42, 0.2),
+    "Relics": (0.38, 0.2, 0.5), "Consumables": (0.1, 0.4, 0.42),
+}
+STEEL = (0.82, 0.84, 0.88, 1)
+WOODC = (0.5, 0.33, 0.18, 1)
+LIQUID = (1.0, 0.42, 0.15, 1)
+
+
+def circle_sdf(x, y, cx, cy, r):
+    return np.hypot(x - cx, y - cy) - r
+
+
+def tri_sdf(x, y, a, b, c):
+    """Signed distance to a triangle (negative inside)."""
+    def edge(p0, p1):
+        ex, ey = p1[0] - p0[0], p1[1] - p0[1]
+        px, py = x - p0[0], y - p0[1]
+        t = np.clip((px * ex + py * ey) / (ex * ex + ey * ey), 0, 1)
+        return np.hypot(px - t * ex, py - t * ey), ex * py - ey * px
+    d0, s0 = edge(a, b)
+    d1, s1 = edge(b, c)
+    d2, s2 = edge(c, a)
+    d = np.minimum(np.minimum(d0, d1), d2)
+    inside = ((s0 >= 0) & (s1 >= 0) & (s2 >= 0)) | ((s0 <= 0) & (s1 <= 0) & (s2 <= 0))
+    return np.where(inside, -d, d)
+
+
+def glyph(img, x, y, e, item):
+    deg = np.deg2rad
+    if item == "tempered_blade":
+        over(img, STEEL, soft(rect_sdf(x, y, 0.05, -0.12, 0.09, 0.5, deg(45)), e))
+        over(img, GOLD, soft(rect_sdf(x, y, -0.22, 0.22, 0.3, 0.06, deg(-45)), e))
+        over(img, WOODC, soft(rect_sdf(x, y, -0.36, 0.36, 0.06, 0.16, deg(45)), e))
+    elif item == "quickening_gauntlets":
+        over(img, STEEL, soft(rect_sdf(x, y, 0, 0.12, 0.32, 0.32, 0) - 0.08, e))
+        for fx in (-0.24, -0.08, 0.08, 0.24):
+            over(img, STEEL, soft(rect_sdf(x, y, fx, -0.32, 0.06, 0.16, 0) - 0.02, e))
+        over(img, GOLD, soft(rect_sdf(x, y, 0, 0.42, 0.36, 0.06, 0), e))
+    elif item == "forgebreaker_maul":
+        over(img, WOODC, soft(rect_sdf(x, y, -0.1, 0.12, 0.06, 0.55, deg(35)), e))
+        over(img, STEEL, soft(rect_sdf(x, y, 0.14, -0.26, 0.36, 0.2, deg(35)) - 0.03, e))
+        over(img, LIQUID, soft(rect_sdf(x, y, 0.14, -0.26, 0.18, 0.06, deg(35)), e))
+    elif item == "riveted_mail":
+        over(img, STEEL, soft(rect_sdf(x, y, 0, 0.05, 0.42, 0.5, 0) - 0.06, e))
+        for rx in (-0.2, 0.0, 0.2):
+            for ry in (-0.2, 0.05, 0.3):
+                over(img, (0.35, 0.37, 0.42, 1), soft(circle_sdf(x, y, rx, ry, 0.05), e))
+    elif item == "bulwark_plate":
+        top = rect_sdf(x, y, 0, -0.18, 0.4, 0.3, 0) - 0.06
+        point = tri_sdf(x, y, (-0.46, 0.1), (0.46, 0.1), (0, 0.62))
+        over(img, STEEL, soft(np.minimum(top, point), e))
+        over(img, GOLD, soft(rect_sdf(x, y, 0, 0.02, 0.05, 0.5, 0), e))
+        over(img, GOLD, soft(rect_sdf(x, y, 0, -0.12, 0.38, 0.05, 0), e))
+    elif item == "emberheart_amulet":
+        over(img, GOLD, soft(np.abs(circle_sdf(x, y, 0, -0.35, 0.22)) - 0.03, e))
+        over(img, GOLD, soft(circle_sdf(x, y, 0, 0.15, 0.36), e))
+        over(img, LIQUID, soft(circle_sdf(x, y, 0, 0.15, 0.24), e))
+    elif item in ("wayfarers_treads", "windstep_greaves"):
+        over(img, WOODC if item == "wayfarers_treads" else STEEL, soft(np.minimum(
+            rect_sdf(x, y, -0.08, -0.12, 0.16, 0.38, 0), rect_sdf(x, y, 0.1, 0.3, 0.34, 0.14, 0)) - 0.04, e))
+        if item == "windstep_greaves":
+            for i, wy in enumerate((-0.35, -0.18, -0.01)):
+                over(img, (0.9, 1, 0.95, 1), soft(streak_sdf(x, y, -0.62, wy, -0.3, wy - 0.08, 0.01, 0.03), e))
+    elif item == "kindling_rune":
+        over(img, (0.85, 0.8, 1.0, 1), soft(rect_sdf(x, y, 0, 0, 0.38, 0.38, deg(45)), e))
+        over(img, (0.38, 0.2, 0.5, 1), soft(rect_sdf(x, y, 0, 0, 0.26, 0.26, deg(45)), e))
+        over(img, LIQUID, soft(tri_sdf(x, y, (0, -0.22), (0.14, 0.16), (-0.14, 0.16)), e))
+    elif item == "everflame_sigil":
+        over(img, LIQUID, soft(np.minimum(circle_sdf(x, y, 0, 0.18, 0.3), tri_sdf(x, y, (-0.3, 0.12), (0.3, 0.12), (0, -0.55))), e))
+        over(img, (1, 0.85, 0.4, 1), soft(np.minimum(circle_sdf(x, y, 0, 0.24, 0.15), tri_sdf(x, y, (-0.15, 0.2), (0.15, 0.2), (0, -0.2))), e))
+    elif item == "sages_hourglass":
+        over(img, (0.9, 0.85, 0.7, 1), soft(np.minimum(tri_sdf(x, y, (-0.32, -0.45), (0.32, -0.45), (0, 0)),
+                                                     tri_sdf(x, y, (-0.32, 0.45), (0.32, 0.45), (0, 0))), e))
+        over(img, GOLD, soft(rect_sdf(x, y, 0, -0.5, 0.4, 0.05, 0), e))
+        over(img, GOLD, soft(rect_sdf(x, y, 0, 0.5, 0.4, 0.05, 0), e))
+        over(img, LIQUID, soft(tri_sdf(x, y, (-0.2, 0.4), (0.2, 0.4), (0, 0.15)), e))
+    elif item == "ember_draught":
+        over(img, (0.85, 0.9, 0.95, 1), soft(np.minimum(circle_sdf(x, y, 0, 0.15, 0.36), rect_sdf(x, y, 0, -0.32, 0.1, 0.16, 0)), e))
+        over(img, LIQUID, soft(np.maximum(circle_sdf(x, y, 0, 0.15, 0.3), -(y - 0.05)), e))
+        over(img, WOODC, soft(rect_sdf(x, y, 0, -0.5, 0.12, 0.05, 0), e))
+    elif item == "spark_flask":
+        over(img, (0.85, 0.9, 0.95, 1), soft(np.minimum(tri_sdf(x, y, (-0.36, 0.45), (0.36, 0.45), (0, -0.15)), rect_sdf(x, y, 0, -0.3, 0.09, 0.2, 0)), e))
+        over(img, (1, 0.9, 0.3, 1), soft(tri_sdf(x, y, (-0.26, 0.38), (0.26, 0.38), (0, 0.05)), e))
+
+
+ITEMS = {
+    "tempered_blade": "Weapons", "quickening_gauntlets": "Weapons", "forgebreaker_maul": "Weapons",
+    "riveted_mail": "Armor", "bulwark_plate": "Armor", "emberheart_amulet": "Armor",
+    "wayfarers_treads": "Mobility", "windstep_greaves": "Mobility",
+    "kindling_rune": "Relics", "everflame_sigil": "Relics", "sages_hourglass": "Relics",
+    "ember_draught": "Consumables", "spark_flask": "Consumables",
+}
+
+
+def make_item_icons():
+    ss, size = 4, 128
+    x, y = grid(size, ss)
+    e = 2.0 / (size * ss) * 2
+    for item, category in ITEMS.items():
+        img = np.zeros(x.shape + (4,), np.float32)
+        bg = CATEGORY_COLORS[category]
+        tile = rect_sdf(x, y, 0, 0, 0.82, 0.82, 0) - 0.1
+        shade = np.clip(1.1 - np.hypot(x, y + 0.3) * 0.6, 0.4, 1.1)
+        over(img, (bg[0] * 0.5, bg[1] * 0.5, bg[2] * 0.5, 1), soft(tile, e))
+        tint = np.zeros_like(img)
+        tint[..., :3] = np.array(bg) * shade[..., None]
+        tint[..., 3] = 1
+        a = soft(tile + 0.06, e)
+        img[..., :3] = img[..., :3] * (1 - a[..., None]) + tint[..., :3] * a[..., None]
+        glyph(img, x * 1.25, y * 1.25, e * 1.25, item)
+        over(img, GOLD, soft(np.abs(tile) - 0.035, e))
+        save_png(os.path.join(ROOT, "icons", "items", item + ".png"), downsample(img, ss))
+
+
 if __name__ == "__main__":
     make_icons()
+    make_item_icons()
     make_sounds()
-    for d in ("icon", "sfx"):
+    for d in ("icon", "icons/items", "sfx"):
         for f in sorted(os.listdir(os.path.join(ROOT, d))):
             print(f"{d}/{f}: {os.path.getsize(os.path.join(ROOT, d, f)) // 1024} KB")

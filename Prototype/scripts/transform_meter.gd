@@ -30,6 +30,8 @@ enum Source { DEALT, TAKEN, KILL, PASSIVE }
 @export var out_of_combat_after := 5.0
 
 var charge := 0.0
+## Item bonus on charge gained (not on drain), e.g. 1.25 with a Kindling Rune.
+var gain_multiplier := 1.0
 ## While the hero is transformed the meter neither fills nor drains.
 var locked := false
 
@@ -74,6 +76,8 @@ func _add(points: float) -> void:
 	if locked or points == 0.0:
 		return
 	var was_full := is_full()
+	if points > 0.0:
+		points *= gain_multiplier
 	charge = clampf(charge + points, 0.0, max_charge)
 	changed.emit(charge, max_charge)
 	if is_full() and not was_full:

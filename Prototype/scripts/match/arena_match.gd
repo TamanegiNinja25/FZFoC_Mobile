@@ -94,7 +94,8 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	for h in heroes:
-		if h.is_alive() and h.global_position.distance_to(BASES[h.team]) <= FOUNTAIN_RADIUS:
+		h.in_shop_range = h.is_alive() and h.global_position.distance_to(BASES[h.team]) <= FOUNTAIN_RADIUS
+		if h.in_shop_range:
 			h.heal(FOUNTAIN_HEAL * delta)
 
 
