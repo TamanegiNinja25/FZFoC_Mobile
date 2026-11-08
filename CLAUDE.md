@@ -132,5 +132,18 @@ Write the report to `Outputs/YYYY-MM-DD-health-check.md`, add the findings to `b
 ## Scheduled (unattended) runs
 Nobody is there to answer questions during a scheduled run.
 - Never stop to ask. Anything that needs approval goes to `backlog.md`.
-- Always finish with a `log.md` entry and a short summary file in `Outputs/`.
+- Always finish with a `log.md` entry, a short summary file in `Outputs/`, and a commit (see Version control).
 - Schedules and their tasks: to be defined.
+
+## Version control
+This folder is the git repository `TamanegiNinja25/FZFoC_Mobile` (public, branch `main`). Git history is the second record of change, alongside `log.md`.
+
+- **Commit after every workflow** that changes files — ingest, guided ingest, each first-build pass, filing back an answer, health check, cleanup. One workflow, one commit.
+- **Before committing:**
+  1. Run the link check — no broken links.
+  2. Scan staged files for personal or sensitive data: local file paths, real names, email addresses, keys, tokens, passwords. If you find any, remove it or stop and tell the user. Never commit it.
+  3. Confirm `git status` shows only files inside this folder, and no files `.gitignore` is meant to block.
+- **Commit message:** `<workflow>: <short summary>` on the first line (e.g. `ingest: add sketchfab assets source, new assets-and-licensing topic`), then bullets matching the `log.md` entry, then any attribution trailer the environment requires.
+- **Never** force-push, rewrite or amend pushed history, or delete branches.
+- **Push automatically after every commit** (`git push origin main`), in every mode, including scheduled runs. The user has authorised this standing permission. If a push fails, don't retry with force: log the failure in `log.md` and tell the user (or note it in the run's `Outputs/` summary).
+
