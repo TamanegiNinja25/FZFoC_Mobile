@@ -8,6 +8,7 @@ const DURATION := 0.18
 
 func _init() -> void:
 	skill_name = "Ember Dash"
+	description = "Burst 5 units in the stick direction."
 	cooldown = 8.0
 
 

@@ -14,7 +14,9 @@ const INPUTS := {
 
 var hero: Hero
 var hud: Hud
+var pause_menu: PauseMenu
 var camera: Camera3D
+var _sun: DirectionalLight3D
 
 
 func _ready() -> void:
@@ -24,12 +26,13 @@ func _ready() -> void:
 		get_tree().change_scene_to_file.call_deferred("res://scenes/stress_test.tscn")
 		return
 	_register_inputs()
-	Platform.apply_render_scale(get_viewport())
 	_build_world()
+	GameSettings.apply_to_scene(get_viewport(), _sun)
+	GameSettings.changed.connect(func(): GameSettings.apply_to_scene(get_viewport(), _sun))
 
 	hero = Hero.new()
 	hero.name = "Hero"
-	hero.definition = Vael.new()
+	hero.definition = Roster.create(Session.hero_id)
 	add_child(hero)
 
 	for spot in [Vector3(4, 0, -3), Vector3(-5, 0, -4), Vector3(0, 0, -8)]:
@@ -40,6 +43,10 @@ func _ready() -> void:
 	hud = Hud.new()
 	add_child(hud)
 	hud.setup(hero)
+
+	pause_menu = PauseMenu.new()
+	add_child(pause_menu)
+	hud.pause_requested.connect(pause_menu.open)
 
 
 func _process(_delta: float) -> void:
@@ -67,10 +74,9 @@ func _build_world() -> void:
 	ground.material_override = Toon.material(Color(0.32, 0.36, 0.3), 0.0)
 	add_child(ground)
 
-	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-55, 30, 0)
-	Platform.apply_sun_shadows(sun)
-	add_child(sun)
+	_sun = DirectionalLight3D.new()
+	_sun.rotation_degrees = Vector3(-55, 30, 0)
+	add_child(_sun)
 
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR

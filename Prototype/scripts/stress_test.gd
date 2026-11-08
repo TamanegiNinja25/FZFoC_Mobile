@@ -322,7 +322,7 @@ func _toggle_camera() -> void:
 
 
 func _back() -> void:
-	get_tree().change_scene_to_file("res://scenes/main.tscn")
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 
 
 func _update_stats() -> void:

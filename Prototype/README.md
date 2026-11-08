@@ -5,7 +5,14 @@ Greybox Godot 4.7 project testing one question: **does a charge meter make trans
 Design basis: [Hero transformations](../Wiki/topics/hero-transformations.md#design-direction-for-fzfoc-mobile) and the decision to use a meter ([record](../Wiki/sources/2026-11-08-decisions-meter-and-godot.md)).
 
 ## Run
-Open `Prototype/project.godot` in Godot 4.7 and press **F5**.
+Open `Prototype/project.godot` in Godot 4.7 and press **F5**. The game opens on the **main menu**.
+
+### Menus (Phase 1)
+- **Main menu:** Single Player · Play with Friends · Settings · Quit, over a dark ember-lit scene with Kindled Vael. Stone panels, gold-trimmed buttons and parchment text are an original take on the classic fantasy-RTS look (`scripts/ui/ui_theme.gd`); no assets from any existing game.
+- **Single Player → Choose Your Hero:** category tabs (All / Bruiser / Speed / Giant), hero cards with planned heroes shown locked, a scrolling detail panel (role, skills, transformation), Back / Start Match. Bots arrive in Phase 2; for now the match is the training arena.
+- **Play with Friends:** explains local Wi-Fi play; Host / Join arrive in Phase 4.
+- **Settings:** Audio (master, music, sound effects) and Video (3D resolution 75/90/100%, shadows off/2/4 cascades, 30/60 FPS cap, FPS counter; stress test from the main menu). Saved to `user://settings.cfg`; phone defaults are 90% and 2 cascades.
+- **In game:** the **II** button (or Android back) pauses: Resume · Settings · Quit to Menu · Quit Game.
 
 | Control | Action |
 |---|---|
@@ -111,6 +118,7 @@ Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/stress_scene_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/hero_kit_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/touch_test.gd
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/menu_flow_test.gd
 ```
 The balance test measures how long the meter takes to fill against one dummy. Last result: **87.2 s** (target 90 ± 15 s), 5 kills, no deaths.
 
@@ -161,5 +169,9 @@ The meter is locked while transformed and restarts from zero afterwards.
 - `tests/smoke_test.gd` — headless check of the meter → form → revert loop
 - `tests/meter_balance_test.gd` — measures fill time, idle drain and spree rewards
 - `tests/stress_scene_test.gd` — checks the stress scene is built to budget (triangles, LODs, toon, toggles)
+- `scripts/ui/` — `main_menu.gd`, `hero_select.gd`, `settings_panel.gd`, `pause_menu.gd`, `ui_theme.gd`, `game_settings.gd` (autoload)
+- `scripts/session.gd` (autoload) — mode and hero chosen in the menus; `scripts/heroes/roster.gd` — every hero plus planned slots by category
+- `scenes/menu.tscn` — main scene
+- `tests/menu_flow_test.gd` — menu order, hero select by category, start match, pause/resume, settings persistence (10 checks)
 - `tests/hero_kit_test.gd` — Vael's kit: slam range and cooldown, dash distance, Kindled growth, Eruption reach and damage (15 checks)
 - `tests/touch_test.gd` — simulated finger: zone, drag direction, hero moves and stops; render scale

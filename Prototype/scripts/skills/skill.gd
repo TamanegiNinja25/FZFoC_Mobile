@@ -3,6 +3,7 @@ extends RefCounted
 ## A hero skill with a cooldown. Subclasses implement _cast().
 
 var skill_name := ""
+var description := ""
 var cooldown := 6.0
 var time_left := 0.0
 

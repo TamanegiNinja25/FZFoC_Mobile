@@ -12,6 +12,8 @@ func _init() -> void:
 	display_name = "Vael"
 	title = "the Kiln Knight"
 	form_name = "Kindled"
+	role = "Bruiser"
+	description = "An iron knight whose armour is a living kiln. Hammer and shield; hard to kill, strongest in the thick of a fight."
 
 	max_hp = 1000.0
 	hp_regen = 5.0

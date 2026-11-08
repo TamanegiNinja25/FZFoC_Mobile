@@ -7,6 +7,9 @@ extends Resource
 @export var display_name := ""
 @export var title := ""
 @export var form_name := ""
+## Category on the hero select screen: "Bruiser", "Speed" or "Giant".
+@export var role := ""
+@export_multiline var description := ""
 
 @export_group("Stats")
 @export var max_hp := 1000.0

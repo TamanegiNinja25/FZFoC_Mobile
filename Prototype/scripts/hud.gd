@@ -1,5 +1,7 @@
 class_name Hud
 extends CanvasLayer
+
+signal pause_requested
 ## Hero name, health, shield, meter and form countdown, plus thumb-sized
 ## transform and skill buttons arranged around the right thumb.
 
@@ -14,6 +16,7 @@ var _economy := Label.new()
 var _button := Button.new()
 var _name := Label.new()
 var _skill_buttons: Array[Button] = []
+var _fps := Label.new()
 
 
 func setup(target: Hero) -> void:
@@ -84,21 +87,33 @@ func _ready() -> void:
 		add_child(skill_button)
 		_skill_buttons.append(skill_button)
 
-	var stress := Button.new()
-	stress.text = "STRESS TEST"
-	stress.anchor_left = 1.0
-	stress.anchor_right = 1.0
-	stress.offset_left = -220
-	stress.offset_top = 24
-	stress.offset_right = -24
-	stress.offset_bottom = 84
-	stress.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/stress_test.tscn"))
-	add_child(stress)
+	var pause := Button.new()
+	pause.text = "II"
+	pause.anchor_left = 1.0
+	pause.anchor_right = 1.0
+	pause.offset_left = -112
+	pause.offset_top = 24
+	pause.offset_right = -24
+	pause.offset_bottom = 104
+	pause.add_theme_font_size_override("font_size", 32)
+	pause.pressed.connect(func(): pause_requested.emit())
+	add_child(pause)
+
+	_fps.anchor_left = 1.0
+	_fps.anchor_right = 1.0
+	_fps.offset_left = -300
+	_fps.offset_top = 30
+	_fps.offset_right = -130
+	_fps.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	add_child(_fps)
 
 
 func _process(_delta: float) -> void:
 	if not hero:
 		return
+	_fps.visible = GameSettings.show_fps
+	if _fps.visible:
+		_fps.text = "%d FPS" % Engine.get_frames_per_second()
 	if hero.in_form:
 		_status.text = "%s  %.1f s" % [hero.definition.form_name.to_upper(), hero.form_time_left]
 	elif not hero.is_alive():

@@ -9,6 +9,7 @@ const BASE_DAMAGE := 120.0
 
 func _init() -> void:
 	skill_name = "Bellows Slam"
+	description = "Hit every enemy within 3 for 120. Kindled: Eruption — 4.5 radius, 180 damage."
 	cooldown = 6.0
 
 
