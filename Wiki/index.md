@@ -6,7 +6,7 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 15 sources · 9 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
+**Status:** 16 sources · 9 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
 
 **Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md)) · phones use 2 shadow cascades ([record](sources/2026-11-08-decision-phone-shadow-cascades.md)) and 90% 3D resolution; floating touch joystick ([record](sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md))
 
@@ -44,6 +44,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Hero design — Vael, the Kiln Knight](sources/2026-11-08-hero-design-vael.md) — First original hero: concept, kit, Kindled transformation, prototype build and phone readability check.
 - [Vael's Eruption — empowered skill design](sources/2026-11-08-vael-eruption.md) — Radius ×1.5, damage ×1.2 (180 effective while Kindled); area favoured; verified end to end.
 - [Game build plan and Phase 1](sources/2026-11-08-game-build-plan-and-phase-1.md) — Full-game request, the original-content scope line, five phases, and Phase 1 (menus, settings, hero select, pause) verified on the phone.
+- [UI polish and Phase 2](sources/2026-11-08-ui-polish-and-phase-2.md) — Animations, original sounds and icon, smoother Vael; the 3v3 arena with adaptive AI; locked 60 FPS after fixing primitive detail and stale settings.
 
 ## Admin
 - [Log](log.md) — what changed and when

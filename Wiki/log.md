@@ -6,6 +6,12 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-08 — Ingest (implementation + measurement)
+- Ingested 1 new RAW file: `2026-11-08-ui-polish-and-phase-2.md` — UI polish and Phase 2 (prototype commits 62a8cb1, 5cf87b7).
+- Created source note [2026-11-08-ui-polish-and-phase-2](sources/2026-11-08-ui-polish-and-phase-2.md).
+- [Hero arena genre](topics/hero-arena-genre.md): single player built, adaptive AI. [Art direction](topics/art-direction.md): primitive-detail and stale-settings lessons, arena 60 FPS. [UI and audio direction](topics/ui-and-audio-direction.md): polish, original sounds and icon. [Roster](topics/roster.md): polished Vael. [Copyright vs game mechanics](topics/copyright-vs-game-mechanics.md): model reverse-engineering declined.
+- [Backlog](backlog.md): Phase 2 done; difficulty and fairness questions. [Index](index.md) and README roadmap updated.
+
 ## 2026-11-08 — Ingest (plan + implementation)
 - Ingested 1 new RAW file: `2026-11-08-game-build-plan-and-phase-1.md` — the owner's full-game request, the scope line (original content only), the five-phase plan and Phase 1 (prototype commit b874151).
 - Created source note [game-build-plan-and-phase-1](sources/2026-11-08-game-build-plan-and-phase-1.md).

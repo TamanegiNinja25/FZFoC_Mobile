@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Legal and IP
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction, 2026-11-08-spec-hero-transformations, 2026-11-08-game-build-plan-and-phase-1]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-ui-and-audio-direction, 2026-11-08-spec-hero-transformations, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2]
 updated: 2026-11-08
 ---
 # Copyright vs game mechanics
@@ -29,6 +29,8 @@ Keep the mechanics and replace everything protected: original characters, art an
 
 ## Applied to the game build
 When the owner asked for the full game "with the very same" characters, skills, icons, map and UI as the map and Frozen Throne, the build kept the mechanics and the classic feel but uses original characters, skills, icons, items, map and UI art; "FZFoC" stays a working title ([src](../sources/2026-11-08-game-build-plan-and-phase-1.md)).
+
+- Reverse-engineering the map's models to "make them original" was also declined: converting or tracing someone else's model produces a derivative copy with the same legal problem. The project's own models were polished instead, and the icon and sounds are generated from code ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
 
 ## Applied to UI and sound
 The same line applies to presentation: the map's UI art, voices and clips can't be reused, but their *patterns* and mood can be rebuilt with original assets. Style isn't protected; specific recordings, images and melodies are ([src](../sources/2026-11-08-ui-and-audio-direction.md)). See [UI and audio direction](ui-and-audio-direction.md).

@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1]
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2]
 updated: 2026-11-08
 ---
 # Hero arena genre
@@ -32,7 +32,9 @@ Changes the source recommends ([src](../sources/2026-11-08-fight-of-characters-m
 
 ## Modes
 The planned game has two modes, reached from the main menu ([src](../sources/2026-11-08-game-build-plan-and-phase-1.md)):
-- **Single Player:** 3v3 against adaptive AI bots on an original arena map (Phase 2).
+- **Single Player (built, Phase 2):** 3v3 on an original arena — two bases with healing fountains, a central lane, pillars for cover, neutral camps; first to 15 kills or the leader after 8:00 ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
+  - **Adaptive AI:** bots use the player's controls; one skill value changes only their decisions (reaction 0.7 → 0.15 s, retreating, focus fire, accuracy 30 → 95%, form timing, dash finishing). Enemy skill rises 0.1 per kill the player's team leads (0.15–0.95); allies stay at 0.55; stats never change ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
+  - Killing a hero pays the killer its bounty, so the transformed-hero bounty now matters in play ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
 - **Play with Friends:** host/join over local Wi-Fi with Godot's built-in multiplayer (Phase 4).
 - Item shop with categories follows in Phase 3; heroes 2–3, icons and audio in Phase 5.
 

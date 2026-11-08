@@ -53,7 +53,8 @@ Workflow details are in [CLAUDE.md](CLAUDE.md).
 - [x] Touch controls: floating joystick, verified on the phone
 - [x] First original hero: **Vael, the Kiln Knight**, with the Kindled transformation and Eruption ([roster](Wiki/topics/roster.md))
 - [x] Game build Phase 1: main menu, settings, hero select by category, in-game pause menu
-- [ ] Phase 2: single player 3v3 vs adaptive AI on an original arena map
+- [x] UI polish: animations, original sounds and app icon, safe-area layout
+- [x] Phase 2: single player 3v3 vs adaptive AI on an original arena map (60 FPS on the NOTE 30)
 - [ ] Phase 3: item shop with categories
 - [ ] Phase 4: play with friends over local Wi-Fi
 - [ ] Phase 5: heroes 2 and 3, original icons, audio

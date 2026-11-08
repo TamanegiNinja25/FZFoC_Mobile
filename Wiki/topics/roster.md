@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction]
+sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction, 2026-11-08-ui-polish-and-phase-2]
 updated: 2026-11-08
 ---
 # Roster
@@ -33,6 +33,7 @@ Values from the design ([src](../sources/2026-11-08-hero-design-vael.md)) and it
 - **Kindled visual:** the model grows with a springy overshoot, the armour scorches, the visor and kiln door flare, embers stream off ([src](../sources/2026-11-08-hero-design-vael.md)).
 - **Why a bruiser first:** the archetype is the easiest to read and reuses the auto-attack ([src](../sources/2026-11-08-hero-design-vael.md)); the reference map's forms fell into speed, bruiser and giant archetypes ([src](../sources/2026-11-08-spec-hero-transformations.md)).
 - **Base stats** equal the tuned prototype hero, so the ~90 s meter fill holds ([src](../sources/2026-11-08-hero-design-vael.md)).
+- **Polished model:** rounded pauldrons, barrel hammer, round shield with a team-coloured emblem, a belt; glow added on top-visible shoulder vents and a helm crest, applying the phone finding below ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
 - **Phone check:** the silhouette reads at the game camera, but the chest glow faces away from it; glow belongs on top-facing surfaces such as shoulders, back vents and helm crest ([src](../sources/2026-11-08-hero-design-vael.md)).
 - **Sound:** Vael needs cast shouts, select/order lines and a big Kindled sound moment *(inference from the audio direction)* ([src](../sources/2026-11-08-ui-and-audio-direction.md)).
 
