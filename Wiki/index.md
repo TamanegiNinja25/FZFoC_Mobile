@@ -6,9 +6,9 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 9 sources · 8 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
+**Status:** 10 sources · 8 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
 
-**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md))
+**Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md)) · phones use 2 shadow cascades ([record](sources/2026-11-08-decision-phone-shadow-cascades.md))
 
 ## Topics
 
@@ -37,6 +37,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Decision — transformed-hero bounty as risk/reward](sources/2026-11-08-decision-transformed-bounty.md) — Bounty kept, reframed from comeback lever to risk/reward; prototype 300 gold ×1.75 in form.
 - [Decision — high-poly stylized visual style](sources/2026-11-08-decision-visual-style.md) — Owner's style decision plus recommended style rules, phone budget, sourcing tips and stress-test plan.
 - [Toon shading decision and first stress-test benchmark](sources/2026-11-08-toon-shading-and-stress-benchmark.md) — Toon chosen; 6 × 40k-triangle stress scene; PC baseline shows LODs and shadow cost.
+- [Decision — 2 shadow cascades on phones](sources/2026-11-08-decision-phone-shadow-cascades.md) — Phones 2 cascades, desktop 4; PC benchmark: shadow geometry halved, +12% FPS worst case.
 
 ## Admin
 - [Log](log.md) — what changed and when

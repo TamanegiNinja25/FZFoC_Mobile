@@ -1,7 +1,7 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark]
+sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades]
 updated: 2026-11-08
 ---
 # Art direction
@@ -57,12 +57,21 @@ The stress-test scene exists in the prototype: 6 heroes × 40,320 triangles with
 
 - **LODs carry the budget at the game camera:** ≈240k hero triangles render as ≈18k. The smooth placeholder flatters this; sculpted models will reduce less ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)).
 - **Shadows cost ≈4× geometry** (4 shadow cascades by default); fewer cascades is an easy phone saving ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)).
-- **Still needed:** a run on the target phone ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md)).
+- **2026-11-08 — Decision: 2 shadow cascades on phones**, 4 on desktop ([src](../sources/2026-11-08-decision-phone-shadow-cascades.md)). Measured on the same PC:
+
+| Configuration | 4 cascades | 2 cascades |
+|---|---|---|
+| 6 heroes, game camera, LOD on | 18k triangles | 9k triangles |
+| 6 heroes, LOD off | 971k, 419 FPS | 486k, 469 FPS (+12%) |
+| 12 heroes, LOD off | — | 971k, 407 FPS |
+
+  2 cascades halve shadow geometry; 12 heroes on 2 cascades cost about what 6 did on 4 ([src](../sources/2026-11-08-decision-phone-shadow-cascades.md)).
+- **Still needed:** a run on the target phone ([src](../sources/2026-11-08-decision-phone-shadow-cascades.md)).
 
 ## Open questions
 - ~~Toon/ramp shading or simplified PBR?~~ Decided: toon ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md))
 - Which phone is the target device? ([src](../sources/2026-11-08-decision-visual-style.md))
-- How many shadow cascades for phones? ([src](../sources/2026-11-08-toon-shading-and-stress-benchmark.md))
+- ~~How many shadow cascades for phones?~~ Decided: 2 ([src](../sources/2026-11-08-decision-phone-shadow-cascades.md))
 
 ## Related
 - [Assets and licensing](assets-and-licensing.md)

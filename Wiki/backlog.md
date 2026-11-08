@@ -39,7 +39,7 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 
 - ~~Which 1–2 visual styles should the game commit to?~~ Decided 2026-11-08: high-poly stylized ([source](sources/2026-11-08-decision-visual-style.md))
 - ~~Toon/ramp shading or simplified PBR?~~ Decided 2026-11-08: toon ([source](sources/2026-11-08-toon-shading-and-stress-benchmark.md))
-- Which phone is the stress-test target? How many shadow cascades on phones? ([source](sources/2026-11-08-toon-shading-and-stress-benchmark.md))
+- Which phone is the stress-test target? (~~Cascades~~ decided: 2 on phones — [source](sources/2026-11-08-decision-phone-shadow-cascades.md))
 - ~~Godot or Unity for the project?~~ Decided 2026-11-08: Godot ([source](sources/2026-11-08-decisions-meter-and-godot.md))
 
 - Who records the voices — friends, the user, or a hired actor? ([source](sources/2026-11-08-ui-and-audio-direction.md))

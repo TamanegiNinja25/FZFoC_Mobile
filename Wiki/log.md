@@ -7,6 +7,12 @@ updated: 2026-11-08
 Newest entry first.
 
 ## 2026-11-08 — Ingest (decision + measurement)
+- Ingested 1 new RAW file: `2026-11-08-decision-phone-shadow-cascades.md` — 2 cascades on phones, with the 4-vs-2 benchmark (prototype commit 01d37fe).
+- Created source note [decision-phone-shadow-cascades](sources/2026-11-08-decision-phone-shadow-cascades.md).
+- [Art direction](topics/art-direction.md): cascade decision and comparison table in Measurements; cascade question closed.
+- [Backlog](backlog.md) and [index](index.md) updated. Phone run still pending: no device visible to adb, export templates not installed.
+
+## 2026-11-08 — Ingest (decision + measurement)
 - Ingested 1 new RAW file: `2026-11-08-toon-shading-and-stress-benchmark.md` — the owner's toon shading decision and the first PC benchmark of the stress-test scene (prototype commit 24c064c).
 - Created source note [toon-shading-and-stress-benchmark](sources/2026-11-08-toon-shading-and-stress-benchmark.md).
 - [Art direction](topics/art-direction.md): toon decision; new Measurements section (PC baseline, LOD and shadow findings); shading question closed, shadow-cascade question added.
