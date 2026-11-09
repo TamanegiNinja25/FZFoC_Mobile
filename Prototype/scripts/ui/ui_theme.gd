@@ -36,6 +36,7 @@ static func build() -> Theme:
 		theme.set_stylebox("normal", type, normal)
 		theme.set_stylebox("hover", type, hover)
 		theme.set_stylebox("pressed", type, pressed)
+		theme.set_stylebox("hover_pressed", type, pressed)  # a selected toggle under the mouse
 		theme.set_stylebox("disabled", type, disabled)
 		theme.set_stylebox("focus", type, StyleBoxEmpty.new())
 		theme.set_color("font_color", type, PARCHMENT)
