@@ -6,6 +6,11 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Release v0.8.2 (signing fix)
+- The v0.8.1 build failed while decoding the signing secret, so no v0.8.1 release exists; the tag stays.
+- The release workflow now strips whitespace from the pasted secret and checks it's a keystore with the expected alias. On failure it names the problem in an annotation; on success it posts the certificate's public SHA-256 fingerprint.
+- v0.8.2 has the same game content as v0.8.0.
+
 ## 2026-11-09 — Release v0.8.1
 - The owner added the `DEBUG_KEYSTORE_BASE64` secret. v0.8.1 has the same content as v0.8.0, built again so it's signed with the shared key and future releases install as updates. The built-in browser couldn't open GitHub to re-run the v0.8.0 job, so a new tag was used instead.
 

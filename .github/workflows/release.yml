@@ -53,7 +53,17 @@ jobs:
         run: |
           ks="$RUNNER_TEMP/debug.keystore"
           if [ -n "$DEBUG_KEYSTORE_BASE64" ]; then
-            echo "$DEBUG_KEYSTORE_BASE64" | base64 -d > "$ks"
+            # Pasted secrets often pick up line breaks or spaces: drop all whitespace first.
+            if ! printf '%s' "$DEBUG_KEYSTORE_BASE64" | tr -d ' \t\r\n' | base64 -d > "$ks" 2>/dev/null; then
+              echo "::error::DEBUG_KEYSTORE_BASE64 is not valid base64 ($(printf '%s' "$DEBUG_KEYSTORE_BASE64" | wc -c) characters). Copy the keystore again and replace the secret."
+              exit 1
+            fi
+            if ! keytool -list -keystore "$ks" -storepass android -alias androiddebugkey > /dev/null 2>&1; then
+              echo "::error::DEBUG_KEYSTORE_BASE64 decodes ($(wc -c < "$ks") bytes) but isn't a keystore with alias androiddebugkey and password android."
+              exit 1
+            fi
+            # The certificate fingerprint is public; it lets the owner confirm which key signed the release.
+            echo "::notice::Signing with the shared key, SHA-256 $(keytool -list -v -keystore "$ks" -storepass android -alias androiddebugkey | grep -m1 'SHA256:' | awk '{print $2}')"
           else
             echo "::warning::DEBUG_KEYSTORE_BASE64 is not set; signing with a throwaway key (players must uninstall before updating)."
             keytool -genkeypair -keystore "$ks" -storepass android -alias androiddebugkey -keypass android \
