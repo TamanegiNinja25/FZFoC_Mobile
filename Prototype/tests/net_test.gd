@@ -97,7 +97,7 @@ func _process(delta: float) -> bool:
 			if _arena.kills[1] >= 1 and me.global_position.x > _mark.x + 3.0:
 				_check(true, "own hero moved via the host's snapshots (Δx %.1f)" % (me.global_position.x - _mark.x))
 				_check(true, "score reached the client (Blue %d — %d Red)" % [_arena.kills[0], _arena.kills[1]])
-				_check(_arena.kill_target == 50, "the host's Classic rules reached the client")
+				_check(_arena.kill_target == 100 and _arena.duels_enabled, "the host's Classic rules (100 kills, duels on) reached the client")
 				_check(me.level >= 3, "hero level syncs to the client (level %d)" % me.level)
 				var mirrored := get_nodes_in_group("creeps").filter(func(c): return c.puppet)
 				_check(mirrored.size() >= 3 and mirrored.any(func(c): return c.is_colossus),

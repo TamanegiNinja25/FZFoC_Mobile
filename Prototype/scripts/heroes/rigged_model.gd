@@ -22,6 +22,9 @@ var height := 2.2
 ## Team colour (set by Hero) and the colour of the form aura.
 var accent := Color(0.3, 0.55, 1.0)
 var glow_color := Color(1.0, 0.7, 0.3)
+## Colour multiplied over the model's texture, so one character body can
+## dress several heroes (white = the original colours).
+var tint := Color.WHITE
 
 var _instance: Node3D
 var _player: AnimationPlayer
@@ -39,6 +42,14 @@ static func make(path: String, attack: String, cast: String, parts: Array, glow:
 	model.keep_parts = parts
 	model.glow_color = glow
 	model.attach = extra
+	return model
+
+
+## The same, recoloured and resized: one KayKit body dressing another hero.
+static func dressed(path: String, attack: String, cast: String, parts: Array, glow: Color, tint_: Color, height_ := 2.2, extra: Array = []) -> RiggedModel:
+	var model := make(path, attack, cast, parts, glow, extra)
+	model.tint = tint_
+	model.height = height_
 	return model
 
 
@@ -60,6 +71,13 @@ func _ready() -> void:
 				slot.add_child(weapon)
 	for mesh in _instance.find_children("*", "MeshInstance3D", true, false):
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		if tint != Color.WHITE:
+			for surface in mesh.mesh.get_surface_count():
+				var base := mesh.get_active_material(surface) as BaseMaterial3D
+				if base:
+					var tinted := base.duplicate() as BaseMaterial3D
+					tinted.albedo_color = base.albedo_color * tint
+					mesh.set_surface_override_material(surface, tinted)
 	var players := _instance.find_children("*", "AnimationPlayer", true, false)
 	if players.size() > 0:
 		_player = players[0]

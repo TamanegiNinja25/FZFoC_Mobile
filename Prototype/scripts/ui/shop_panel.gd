@@ -122,7 +122,7 @@ func _process(_delta: float) -> void:
 	if visible and hero:
 		_gold.text = "%d gold" % floori(hero.gold)
 		var item := ItemCatalog.find(selected_id)
-		var full := item != null and not item.is_tome() and hero.items.size() >= ItemCatalog.INVENTORY_SIZE
+		var full := item != null and not item.is_tome() and ((item.bag and hero.bag_unlocked) or (not item.bag and not hero.has_room_for(item)))
 		var wrong_hero := item != null and item.hero_only != "" and item.hero_only != hero.definition.id
 		_buy.disabled = item == null or not item.buyable or wrong_hero or hero.gold < item.cost or full or not hero.in_shop_range
 		if item and not item.buyable:

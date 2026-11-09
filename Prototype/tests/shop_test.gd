@@ -65,7 +65,7 @@ func _catalogue() -> void:
 	_check(categories.keys().size() == 8 and categories.values().all(func(n): return n >= 2),
 			"8 categories, each with ≥2 items: %s" % str(categories))
 	_check(categories.Stats == 7 and categories.Exclusive == 8 and categories.Artifacts == 7, "7 tomes, 8 exclusive items (one per hero), 7 artifacts")
-	_check(ItemCatalog.in_category("Relics").size() == 3, "category filter works (3 relics)")
+	_check(ItemCatalog.in_category("Relics").size() == 4, "category filter works (4 relics, with the satchel)")
 
 
 func _buying() -> void:

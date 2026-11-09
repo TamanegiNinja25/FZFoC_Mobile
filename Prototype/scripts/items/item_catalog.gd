@@ -51,14 +51,18 @@ static func _build() -> Array[ItemDef]:
 		ItemDef.make("ember_draught", "Ember Draught", "Consumables", 1000, "Tap to heal 400 HP over 5 s.", {}, "heal", 400.0),
 		ItemDef.make("spark_flask", "Spark Flask", "Consumables", 2000, "Tap to charge the meter by 25.", {}, "meter", 25.0),
 		# Utility items, after the reference map's mixed shop (recall tome, throwing dagger, cloak, capture ball).
-		ItemDef.make("homeward_scroll", "Homeward Scroll", "Consumables", 1000, "Tap: after 2 s standing still, return to your fountain.", {}, "recall", 2.0),
+		ItemDef.make("homeward_scroll", "Homeward Scroll", "Consumables", 1000, "Tap: after 2 s standing still, return to your recall point (set it with MARK) or your fountain.", {}, "recall", 2.0),
 		ItemDef.make("throwing_knives", "Throwing Knives", "Consumables", 300, "Tap: hit the nearest enemy within 8 for 250.", {}, "knife", 250.0),
 		ItemDef.make("shadow_cloak", "Shadow Cloak", "Consumables", 500, "Tap: unseen by enemies for 5 s, until you attack or cast.", {}, "cloak", 5.0),
-		ItemDef.make("capture_orb", "Capture Orb", "Consumables", 1000, "Tap next to a creep below half health (not a boss) to catch it. Tap the full orb to release it as your ally for 60 s.", {}, "capture", 4.0),
+		ItemDef.make("capture_orb", "Capture Orb", "Consumables", 1000, "Tap next to a creep below half health (not a boss) to catch it. It stays yours: tap the full orb to call it out or back.", {}, "capture", 4.0),
 	]
-	var full_orb := ItemDef.make("capture_orb_full", "Capture Orb (full)", "Consumables", 1000, "A creep is inside. Tap to release it as your ally for 60 s.", {}, "release", 60.0)
+	var full_orb := ItemDef.make("capture_orb_full", "Capture Orb (full)", "Consumables", 1000, "Your captured creep. Tap to call it out to fight for you, tap again to call it back. Selling the orb sets it free.", {}, "release", 0.0)
 	full_orb.buyable = false
 	items.append(full_orb)
+	# The map's storage unit: six more slots for items you carry but don't use.
+	var satchel := ItemDef.make("satchel_of_holding", "Satchel of Holding", "Relics", 2500, "Opens a 6-slot bag. Items resting in the bag give no stats: tap BAG, then tap an item to move it.")
+	satchel.bag = true
+	items.append(satchel)
 	# Stat shop — the reference map's tomes and prices, used up on purchase.
 	for spec in [["tome_str_2", "Tome of Might +2", 250, {"str": 2}], ["tome_agi_2", "Tome of Grace +2", 200, {"agi": 2}],
 			["tome_str_5", "Tome of Might +5", 600, {"str": 5}], ["tome_agi_5", "Tome of Grace +5", 500, {"agi": 5}],

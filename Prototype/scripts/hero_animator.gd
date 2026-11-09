@@ -44,6 +44,12 @@ func setup(target: Node3D, target_model: Node3D) -> void:
 	_build_aura()
 
 
+## A new model for the same hero (stat-threshold evolution).
+func retarget(new_model: Node3D) -> void:
+	model = new_model
+	model.rotation.y = target_yaw
+
+
 func _rigged() -> bool:
 	return model != null and model.has_method("play_anim")
 

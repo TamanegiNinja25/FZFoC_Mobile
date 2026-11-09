@@ -18,7 +18,7 @@ func _initialize() -> void:
 	_scene = load("res://scenes/main.tscn").instantiate()
 	root.add_child(_scene)
 	current_scene = _scene
-	_steps = [_progression, _form_stages, _shop_rules, _status_effects, _start_arena, _waves, _wave_cap, _wave_90, _bosses,
+	_steps = [_progression, _form_stages, _shop_rules, _status_effects, _inventory_systems, _evolution, _start_arena, _creep_rooms, _waves, _wave_cap, _wave_90, _bosses,
 		_boss_respawned, _duel_start, _duel_fight, _duel_kill, _duel_over, _attack_order, _colossus, _classic, _no_duels, _done]
 
 
@@ -116,6 +116,76 @@ func _status_effects() -> void:
 	_hero._root_time = 0.0
 
 
+## Potion stacking, the storage satchel, the recall point and the capture orb
+## that keeps its creature — all from the reference map.
+func _inventory_systems() -> void:
+	var h: Hero = _scene.hero
+	h.items.clear()
+	h.charges.clear()
+	h.in_shop_range = true
+	h.gold = 100000.0
+	h.buy("ember_draught")
+	h.buy("ember_draught")
+	_check(h.items.size() == 1 and h.charges[0] == 2, "a second potion stacks into the same slot (2 charges)")
+	h.buy("ember_draught")
+	_check(h.items.size() == 2, "a third potion takes a new slot (stacks hold 2)")
+	h.use_item(0)
+	_check(h.charges[0] == 1 and h.items.size() == 2, "using a stacked potion spends one charge")
+	h.items.clear()
+	h.charges.clear()
+	h.buy("satchel_of_holding")
+	_check(h.bag_unlocked and h.items.is_empty(), "the satchel opens the bag without taking a slot")
+	for i in 6:
+		h.buy("riveted_mail")
+	var hp_full := h.max_hp
+	_check(h.buy("riveted_mail") == "" and h.bag.size() == 1 and h.max_hp == hp_full, "with the inventory full, a purchase goes to the bag and gives no stats")
+	h.stash(0)
+	_check(h.items.size() == 5 and h.bag.size() == 2 and h.max_hp < hp_full, "stashing an item moves it to the bag (its stats rest)")
+	h.unstash(0)
+	_check(h.items.size() == 6 and h.max_hp == hp_full, "taking it out of the bag restores its stats")
+	h.items.clear()
+	h.charges.clear()
+	h.bag.clear()
+	h.bag_charges.clear()
+	h.recompute_stats()
+	var mark := h.global_position + Vector3(5, 0, 3)
+	h.global_position = mark
+	h.mark_recall_point()
+	h.global_position = Vector3.ZERO
+	h._recall()
+	_check(h.global_position.distance_to(mark) < 0.01, "the recall scroll returns to the marked point")
+	h.recall_point = Vector3.INF
+	h.captured_key = "ngno"
+	h.items.append(ItemCatalog.find("capture_orb_full"))
+	h.use_item(0)
+	_check(h.pet != null and h.pet.is_alive() and h.items.size() == 1, "the full orb calls the captured creep out and stays")
+	_check(h.pet.lifetime == 0.0, "the captured creep stays until it dies (no timer)")
+	h.use_item(0)
+	_check(h.pet == null and h.captured_key == "ngno", "tapping again calls it back into the orb")
+	h.use_item(0)
+	h.pet._die(null)
+	_check(h.captured_key == "" and h.items[0].id == "capture_orb", "when it dies the orb is empty again")
+	h.items.clear()
+	h.charges.clear()
+	h.recompute_stats()
+
+
+## The map's stat-threshold evolution: reaching the attributes swaps the hero
+## for good, keeping level and items.
+func _evolution() -> void:
+	var h: Hero = _scene.hero
+	var level := h.level
+	h.items.append(ItemCatalog.find("riveted_mail"))
+	h.definition.evolve_at = {"str": 1.0}
+	h.definition.evolve_into = func(): return Roster.create("hask")
+	h.recompute_stats()
+	_check(h.evolved and h.definition.display_name == "Hask" and h.level == level and h.items.size() == 1,
+			"reaching the stat threshold evolves the hero, keeping level and items")
+	_check(h.skills.size() == 4 and h.model != null and h.model.is_inside_tree(), "the evolved hero has the new kit and look")
+	h.items.clear()
+	h.charges.clear()
+
+
 # ------------------------------------------------------------ the arena world
 func _start_arena() -> void:
 	_scene.queue_free()
@@ -146,11 +216,42 @@ func _start_arena() -> void:
 	_hero.level = 1
 	_hero.skill_points = 1
 	_hero.learn_skill(0)
+	_scene.camera.make_current()  # the training scene's camera is still current this frame
 	_hero.try_skill(0)
 	var callouts := _scene.find_children("*", "Label3D", true, false).filter(func(l): return l.visible and l.text.ends_with(" !!"))
 	_check(callouts.any(func(l): return l.text.begins_with(_hero.skills[0].display_name(_hero))), "casting floats \"Skill name !!\" over the hero")
 	_scene.events.timers[30] = 0.01
 	_wait = 0.2
+
+
+## The map's private creep rooms: a pad by the south wall, creeps on entry up
+## to 20 of a type, and a pad back.
+func _creep_rooms() -> void:
+	var rooms: CreepRooms = _scene.rooms
+	var before := get_nodes_in_group("creeps").size()
+	_hero.global_position = CreepRooms.ROOMS[0][0]
+	rooms._physics_process(0.016)
+	_check(CreepRooms.room_at(_hero.global_position) == 0, "stepping on a pad takes the player into a creep room")
+	_check(get_nodes_in_group("creeps").size() - before == 4, "entering the room spawns its 4 creeps")
+	for i in 30:
+		rooms.spawn(0)
+	_check(rooms.spawn(0) == 0, "a room stops at 20 of each creep type (Can't spawn any more creeps)")
+	var bot: Hero = _scene.heroes[1]
+	bot.global_position = CreepRooms.ROOMS[1][0]
+	rooms._physics_process(0.016)
+	_check(CreepRooms.room_at(bot.global_position) == -1, "bots ignore the pads")
+	rooms._cooldown.clear()
+	_hero.global_position = CreepRooms.exit_pad(0)
+	rooms._physics_process(0.016)
+	_check(CreepRooms.room_at(_hero.global_position) == -1 and _hero.global_position.z < _scene.HALF_FIELD.y,
+			"the room's pad leads back to the field")
+	for unit in rooms._units[0]:
+		unit.queue_free()  # keep the wave checks that follow exact
+	rooms._units[0].clear()
+	rooms._cooldown.clear()
+	_hero.global_position = _scene.BASES[0]
+	bot.global_position = _scene.BASES[0] + Vector3(0, 0, 3)
+	_wait = 0.1
 
 
 func _waves() -> void:

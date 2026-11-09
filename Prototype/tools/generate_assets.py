@@ -327,6 +327,12 @@ def glyph(img, x, y, e, item):
         over(img, (0.28, 0.24, 0.4, 1), soft(np.minimum(tri_sdf(x, y, (-0.5, 0.55), (0.5, 0.55), (0, -0.4)), circle_sdf(x, y, 0, -0.35, 0.2)), e))
         over(img, (0.6, 0.5, 0.9, 1), soft(rect_sdf(x, y, 0, -0.35, 0.12, 0.03, 0), e))
         return
+    if item == "satchel_of_holding":
+        over(img, (0.55, 0.38, 0.22, 1), soft(rect_sdf(x, y, 0, 0.12, 0.44, 0.36, 0) - 0.06, e))
+        over(img, (0.45, 0.3, 0.17, 1), soft(rect_sdf(x, y, 0, -0.12, 0.44, 0.14, 0) - 0.05, e))
+        over(img, (0.4, 0.27, 0.15, 1), soft(np.abs(circle_sdf(x, y, 0, -0.32, 0.22)) - 0.04, e) * (y < -0.3))
+        over(img, GOLD, soft(rect_sdf(x, y, 0, 0.0, 0.08, 0.07, 0), e))
+        return
     if item in ("capture_orb", "capture_orb_full"):
         over(img, (0.85, 0.85, 0.88, 1), soft(circle_sdf(x, y, 0, 0, 0.42), e))
         over(img, (0.6, 0.4, 1.0, 1) if item == "capture_orb_full" else (0.75, 0.2, 0.25, 1), soft(np.maximum(circle_sdf(x, y, 0, 0, 0.42), y), e))
@@ -417,7 +423,7 @@ ITEMS = {
     "emberstring_bow": "Exclusive", "gravebloom_censer": "Exclusive", "moonless_hilt": "Exclusive",
     "thunderhead_crown": "Exclusive", "wardens_bulwark": "Exclusive",
     "homeward_scroll": "Consumables", "throwing_knives": "Consumables", "shadow_cloak": "Consumables",
-    "capture_orb": "Consumables", "capture_orb_full": "Consumables",
+    "capture_orb": "Consumables", "capture_orb_full": "Consumables", "satchel_of_holding": "Relics",
     **{artifact: "Artifacts" for artifact in ARTIFACT_PARTS},
 }
 

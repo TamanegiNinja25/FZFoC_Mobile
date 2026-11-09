@@ -28,6 +28,8 @@ extends Resource
 @export var hero_only := ""
 ## Artifacts are made at the combining circle, never bought.
 @export var buyable := true
+## The storage satchel: bought once, it opens 6 bag slots (no inventory slot).
+@export var bag := false
 
 
 static func make(id_: String, name_: String, category_: String, cost_: int, description_: String, stats_ := {}, use_ := "", amount := 0.0) -> ItemDef:

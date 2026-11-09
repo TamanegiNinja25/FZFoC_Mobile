@@ -60,6 +60,7 @@ var pause_menu: PauseMenu
 var camera: Camera3D
 var duel: Duel
 var events: MapEvents
+var rooms: CreepRooms
 
 ## Duel state, from the Duel node on the host or snapshots on clients.
 var duel_phase := "idle"
@@ -95,6 +96,11 @@ func _ready() -> void:
 	GameSettings.apply_to_scene(get_viewport(), _sun)
 	GameSettings.changed.connect(func(): GameSettings.apply_to_scene(get_viewport(), _sun))
 	_spawn_teams()
+	rooms = CreepRooms.new()
+	rooms.name = "CreepRooms"
+	rooms.arena = self
+	rooms.authority = is_authority
+	add_child(rooms)
 	if is_authority:
 		events = MapEvents.new()
 		events.name = "MapEvents"
@@ -177,8 +183,9 @@ func _update_camera(delta: float) -> void:
 		target = DUEL_CENTER + CAMERA_OFFSET
 	elif hero:
 		target = hero.global_position + CAMERA_OFFSET
-		target.x = clampf(target.x, -CAMERA_LIMIT.x, CAMERA_LIMIT.x)
-		target.z = clampf(target.z, -CAMERA_LIMIT.y + CAMERA_OFFSET.z, CAMERA_LIMIT.y + CAMERA_OFFSET.z)
+		if CreepRooms.room_at(hero.global_position) == -1:  # rooms sit off the field: follow freely
+			target.x = clampf(target.x, -CAMERA_LIMIT.x, CAMERA_LIMIT.x)
+			target.z = clampf(target.z, -CAMERA_LIMIT.y + CAMERA_OFFSET.z, CAMERA_LIMIT.y + CAMERA_OFFSET.z)
 	else:
 		return
 	var jump := camera.global_position.distance_to(target) > 30.0

@@ -28,6 +28,18 @@ const TYPES := {
 	"edoc": {"name": "Wildclaw Shaman", "level": 7, "hp": 3000, "damage": 60, "interval": 1.5, "range": 2.0, "bounty": 200, "size": 1.25, "color": Color(0.32, 0.45, 0.3), "shape": "beast"},
 }
 
+## Private creep rooms (CreepRooms): the map's room units — levels and HP from
+## the map, damage on this game's scale, original names.
+const ROOM_TYPES := {
+	"room_whelp": {"name": "Cinder Whelp", "level": 5, "hp": 1000, "damage": 45, "interval": 1.5, "range": 1.8, "bounty": 120, "size": 0.9, "color": Color(0.85, 0.4, 0.2), "shape": "beast"},
+	"room_hound": {"name": "Scorch Hound", "level": 7, "hp": 1300, "damage": 60, "interval": 1.2, "range": 1.8, "bounty": 170, "size": 1.0, "color": Color(0.75, 0.3, 0.15), "shape": "beast"},
+	"room_hound2": {"name": "Ash Stalker", "level": 7, "hp": 1300, "damage": 60, "interval": 1.2, "range": 1.8, "bounty": 170, "size": 1.0, "color": Color(0.45, 0.4, 0.4), "shape": "beast"},
+	"room_wraith": {"name": "Flame Wraith", "level": 10, "hp": 1500, "damage": 80, "interval": 1.0, "range": 5.5, "bounty": 250, "size": 1.0, "color": Color(1.0, 0.55, 0.25), "shape": "caster"},
+	"room_fiend": {"name": "Ember Fiend", "level": 10, "hp": 1500, "damage": 80, "interval": 1.0, "range": 2.0, "bounty": 250, "size": 1.05, "color": Color(0.95, 0.35, 0.15), "shape": "golem"},
+	"room_warden": {"name": "Dread Warden", "level": 15, "hp": 5000, "damage": 130, "interval": 1.5, "range": 2.2, "bounty": 500, "size": 1.35, "color": Color(0.45, 0.3, 0.55), "shape": "brute"},
+	"room_revenant": {"name": "Elder Revenant", "level": 20, "hp": 10000, "damage": 220, "interval": 0.8, "range": 2.2, "bounty": 900, "size": 1.5, "color": Color(0.7, 0.72, 0.65), "shape": "brute"},
+}
+
 ## Boss chains: the reference map's HP per stage; the next boss appears 10 s
 ## after the last one falls. Names are original.
 const CHAINS := {
@@ -45,6 +57,8 @@ const SUMMONS := {
 	"golem": {"name": "Forge Golem", "level": 4, "hp": 900, "damage": 45, "interval": 1.2, "range": 2.0, "bounty": 50, "size": 1.0, "color": Color(0.9, 0.45, 0.15), "shape": "golem"},
 	"wisp": {"name": "Grave Wisp", "level": 2, "hp": 380, "damage": 24, "interval": 1.1, "range": 5.0, "bounty": 25, "size": 0.6, "color": Color(0.55, 1.0, 0.7), "shape": "caster"},
 	"skeleton": {"name": "Barrow-Dead", "level": 3, "hp": 650, "damage": 38, "interval": 1.2, "range": 1.9, "bounty": 30, "size": 0.85, "color": Color(0.82, 0.8, 0.7), "shape": "brute"},
+	"rune": {"name": "Rune Guardian", "level": 4, "hp": 850, "damage": 42, "interval": 1.3, "range": 2.0, "bounty": 40, "size": 1.0, "color": Color(0.6, 0.65, 0.75), "shape": "golem"},
+	"bog": {"name": "Bog Spawn", "level": 3, "hp": 520, "damage": 30, "interval": 1.2, "range": 1.8, "bounty": 30, "size": 0.8, "color": Color(0.4, 0.6, 0.3), "shape": "beast"},
 	"captured": {"name": "Captured creep", "level": 3, "hp": 800, "damage": 30, "interval": 1.4, "range": 2.0, "bounty": 30, "size": 0.9, "color": Color(0.7, 0.6, 1.0), "shape": "beast"},
 }
 
@@ -53,6 +67,8 @@ const SUMMONS := {
 static func lookup(key: String) -> Dictionary:
 	if TYPES.has(key):
 		return TYPES[key]
+	if ROOM_TYPES.has(key):
+		return ROOM_TYPES[key]
 	if key == "colossus":
 		return COLOSSUS
 	if key.begins_with("summon:"):

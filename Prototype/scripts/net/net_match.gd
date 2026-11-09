@@ -70,9 +70,17 @@ func _pack() -> Dictionary:
 				h.in_form, h.form_time_left, h.is_alive(), h.gold, h.meter.charge, h.kills, h.deaths,
 				cooldowns, item_ids, h.spree, h.in_shop_range,
 				h.level, h.xp, h.skill_points, ranks, [h.tome_attributes.str, h.tome_attributes.agi, h.tome_attributes.int],
-				h.frozen, h.is_stunned(), h.damage_dealt, h.damage_taken, h.is_rooted(), h.left_game, h.form_stage])
+				h.frozen, h.is_stunned(), h.damage_dealt, h.damage_taken, h.is_rooted(), h.left_game, h.form_stage,
+					h.evolved, PackedInt32Array(h.charges), _ids(h.bag), PackedInt32Array(h.bag_charges), h.bag_unlocked])
 	return {"heroes": heroes, "kills": arena.kills, "time": arena.time_left if arena.time_left != INF else -1.0,
 		"duel": [arena.duel_phase, arena.duel_text, arena.duel_in]}
+
+
+static func _ids(list: Array[ItemDef]) -> PackedStringArray:
+	var ids := PackedStringArray()
+	for item in list:
+		ids.append(item.id)
+	return ids
 
 
 ## [ids, keys, floats (x, z, hp, max hp, team per unit)].
@@ -110,6 +118,9 @@ func _client_action(kind: String, arg: Variant) -> void:
 		"buy": h.buy(str(arg))
 		"sell": h.sell(int(arg))
 		"use": h.use_item(int(arg))
+		"stash": h.stash(int(arg))
+		"unstash": h.unstash(int(arg))
+		"mark": h.mark_recall_point()
 
 
 func _hero_of(peer_id: int) -> Hero:
@@ -198,11 +209,25 @@ func _snapshot(state: Dictionary) -> void:
 		for k in mini(s[13].size(), h.skills.size()):
 			h.skills[k].time_left = s[13][k]
 		var ids: PackedStringArray = s[14]
-		if ids.size() != h.items.size() or not _same_items(h, ids):
+		var bag_ids: PackedStringArray = s[31]
+		var counts: Array[int] = []
+		counts.assign(s[30])
+		var bag_counts: Array[int] = []
+		bag_counts.assign(s[32])
+		if ids.size() != h.items.size() or not _same_items(h, ids) or counts != h.charges \
+				or bag_ids != _ids(h.bag) or bag_counts != h.bag_charges or s[33] != h.bag_unlocked:
 			h.items.clear()
 			for item_id in ids:
 				h.items.append(ItemCatalog.find(item_id))
+			h.charges = counts
+			h.bag.clear()
+			for item_id in bag_ids:
+				h.bag.append(ItemCatalog.find(item_id))
+			h.bag_charges = bag_counts
+			h.bag_unlocked = s[33]
 			h.items_changed.emit()
+		if s[29] and not h.evolved:
+			h.evolve()
 		h.spree = s[15]
 		h.in_shop_range = s[16]
 		var leveled: bool = s[17] != h.level
@@ -285,6 +310,9 @@ func _fx(index: int, kind: String, data: Array) -> void:
 		"hurt":
 			if h.is_player:
 				FloatText.spawn(arena, h.global_position, data[0], FloatText.TAKEN)
+		"note":
+			if h.is_player:
+				arena._announce(data[0], Color(0.75, 0.85, 1.0))
 		"sfx":
 			var sfx := get_node_or_null("/root/Sfx")
 			if sfx:

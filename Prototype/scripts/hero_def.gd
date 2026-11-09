@@ -64,6 +64,13 @@ func attribute_gain(key: String) -> float:
 	return {"str": strength_gain, "agi": agility_gain, "int": intelligence_gain}.get(key, 0.0)
 
 
+## Stat-threshold evolution (the reference map's hero who changes for good at
+## 250 strength and 250 agility): when every attribute in `evolve_at` is reached,
+## the hero becomes the HeroDef `evolve_into` returns — keeping level, XP,
+## attributes, items and skill ranks, with the new kit and look.
+@export var evolve_at := {}
+var evolve_into: Callable
+
 ## Data-built heroes (NewHeroes) supply builders instead of subclassing.
 var model_builder: Callable
 var skills_builder: Callable

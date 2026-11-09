@@ -16,6 +16,8 @@ signal died(killer: Hero)
 signal items_changed
 signal leveled_up(level: int)
 signal skills_changed
+## Stat-threshold evolution: the hero became a new HeroDef.
+signal definition_changed
 ## Network: a puppet's actions go to the host instead of running locally.
 signal action_requested(kind: String, arg: Variant)
 ## Network: effects (sounds, slam rings) the host relays to clients.
@@ -136,8 +138,23 @@ var _guard := 0.0
 ## Shadow Cloak: enemies can't see (target) the hero until it attacks or casts.
 var _hidden_time := 0.0
 var _auto_form_cooldown := 0.0
-## Capture Orb: the creep type caught inside a full orb.
+## Capture Orb: the creep type caught inside a full orb, and the creep while
+## it's out fighting (it stays yours until it dies, like the map's capture ball).
 var captured_key := ""
+var pet: Creep
+var _pet_hp_ratio := 1.0
+## Charges per inventory slot: potions, flasks and knives stack two to a slot.
+var charges: Array[int] = []
+const STACK_MAX := 2
+## Satchel of Holding: six bag slots whose items rest (no stats) until moved back.
+var bag_unlocked := false
+var bag: Array[ItemDef] = []
+var bag_charges: Array[int] = []
+const BAG_SIZE := 6
+## Where the recall scroll returns to (Vector3.INF: the fountain).
+var recall_point := Vector3.INF
+## Stat-threshold evolution has happened.
+var evolved := false
 ## Network: the peer controlling this hero (0 = bot or offline).
 var owner_peer := 0
 var model: Node3D
@@ -416,11 +433,18 @@ func buy(item_id: String) -> String:
 		return "Only %s can wield this" % item.hero_only.capitalize()
 	if not in_shop_range:
 		return "Return to your fountain to shop"
-	if not item.is_tome() and items.size() >= ItemCatalog.INVENTORY_SIZE:
+	if item.bag and bag_unlocked:
+		return "You already carry a satchel"
+	if not item.is_tome() and not item.bag and not has_room_for(item):
 		return "Inventory full"
 	if gold < item.cost:
 		return "Not enough gold"
 	gold -= item.cost
+	if item.bag:
+		bag_unlocked = true
+		play_sfx("coins", -4.0)
+		items_changed.emit()
+		return ""
 	if item.is_tome():
 		for key in item.tome:
 			tome_attributes[key] += item.tome[key]
@@ -430,10 +454,105 @@ func buy(item_id: String) -> String:
 		play_sfx("confirm", -4.0)
 		skills_changed.emit()
 		return ""
-	items.append(item)
+	_add_item(item)
 	recompute_stats()
 	items_changed.emit()
 	return ""
+
+
+## Potions, flasks and knives stack two to a slot, as charged items do in the map.
+static func stackable(item: ItemDef) -> bool:
+	return item.consumable and item.use in ["heal", "meter", "knife"]
+
+
+## Keeps `charges` the same length as `items` (code that appends to `items`
+## directly gets one charge per item).
+func _fix_charges() -> void:
+	while charges.size() < items.size():
+		charges.append(1)
+	if charges.size() > items.size():
+		charges.resize(items.size())
+
+
+func has_room_for(item: ItemDef) -> bool:
+	_fix_charges()
+	if stackable(item):
+		for i in items.size():
+			if items[i].id == item.id and charges[i] < STACK_MAX:
+				return true
+	return items.size() < ItemCatalog.INVENTORY_SIZE or (bag_unlocked and bag.size() < BAG_SIZE)
+
+
+## Into a matching stack, a free slot, or the bag (in that order).
+func _add_item(item: ItemDef) -> bool:
+	_fix_charges()
+	if stackable(item):
+		for i in items.size():
+			if items[i].id == item.id and charges[i] < STACK_MAX:
+				charges[i] += 1
+				return true
+	if items.size() < ItemCatalog.INVENTORY_SIZE:
+		items.append(item)
+		charges.append(1)
+		return true
+	if bag_unlocked and bag.size() < BAG_SIZE:
+		bag.append(item)
+		bag_charges.append(1)
+		return true
+	return false
+
+
+func _remove_item(index: int) -> void:
+	_fix_charges()
+	items.remove_at(index)
+	charges.remove_at(index)
+
+
+func charges_at(index: int) -> int:
+	return charges[index] if index < charges.size() else 1
+
+
+## Moves an inventory item into the bag (it stops giving stats).
+func stash(index: int) -> bool:
+	if puppet:
+		action_requested.emit("stash", index)
+		return true
+	if not bag_unlocked or index < 0 or index >= items.size() or bag.size() >= BAG_SIZE:
+		return false
+	_fix_charges()
+	bag.append(items[index])
+	bag_charges.append(charges_at(index))
+	_remove_item(index)
+	recompute_stats()
+	items_changed.emit()
+	return true
+
+
+## Moves a bag item back into the inventory.
+func unstash(index: int) -> bool:
+	if puppet:
+		action_requested.emit("unstash", index)
+		return true
+	if index < 0 or index >= bag.size() or items.size() >= ItemCatalog.INVENTORY_SIZE:
+		return false
+	items.append(bag[index])
+	charges.append(bag_charges[index])
+	bag.remove_at(index)
+	bag_charges.remove_at(index)
+	recompute_stats()
+	items_changed.emit()
+	return true
+
+
+## The map's "save point": the recall scroll now returns here.
+func mark_recall_point() -> void:
+	if puppet:
+		action_requested.emit("mark", null)
+		return
+	recall_point = global_position
+	vfx("ring", [global_position, 1.6, Color(0.6, 0.8, 1.0, 0.9)])
+	vfx("callout", [global_position, "Recall point set", Color(0.6, 0.85, 1.0)])
+	play_sfx("confirm", -6.0)
 
 
 func sell(index: int) -> bool:
@@ -442,8 +561,10 @@ func sell(index: int) -> bool:
 		return true
 	if index < 0 or index >= items.size() or not in_shop_range:
 		return false
-	gold += floorf(items[index].cost * ItemCatalog.SELL_RATE)
-	items.remove_at(index)
+	gold += floorf(items[index].cost * ItemCatalog.SELL_RATE) * charges_at(index)
+	if items[index].id == "capture_orb_full":
+		_free_pet()
+	_remove_item(index)
 	recompute_stats()
 	items_changed.emit()
 	return true
@@ -464,8 +585,9 @@ func try_combine() -> String:
 		picked.sort()
 		picked.reverse()
 		for i in picked:
-			items.remove_at(i)
+			_remove_item(i)
 		items.append(ItemCatalog.find(recipe[0]))
+		charges.append(1)
 		recompute_stats()
 		items_changed.emit()
 		play_sfx("transform", -6.0)
@@ -498,6 +620,7 @@ func use_item(index: int) -> bool:
 	if index < 0 or index >= items.size() or not items[index].consumable or _dead_time > 0.0:
 		return false
 	var item := items[index]
+	_fix_charges()
 	match item.use:
 		"heal":
 			_hot_time = 5.0
@@ -523,6 +646,7 @@ func use_item(index: int) -> bool:
 			if prey == null:
 				return false
 			captured_key = prey.key
+			_pet_hp_ratio = 1.0
 			vfx("beam", [global_position, prey.global_position, Color(0.75, 0.6, 1.0), 0.2])
 			prey._die(null)
 			items[index] = ItemCatalog.find("capture_orb_full")
@@ -533,10 +657,12 @@ func use_item(index: int) -> bool:
 		"release":
 			if captured_key == "":
 				return false
-			var ally := Creep.summon_key(self, captured_key, global_position + aim_direction() * 2.0, item.use_amount)
-			vfx("column", [ally.global_position, Color(0.75, 0.6, 1.0), 4.0])
-			captured_key = ""
-	items.remove_at(index)
+			_toggle_pet()
+			return true  # the orb stays: tap again to call the creep back
+	if charges_at(index) > 1:
+		charges[index] -= 1
+	else:
+		_remove_item(index)
 	recompute_stats()
 	items_changed.emit()
 	play_sfx("confirm", -6.0)
@@ -633,9 +759,48 @@ func share_kill_xp(at: Vector3, victim_level: int, victim_is_hero: bool) -> void
 		ally.add_xp(base / receivers.size() * factor * ally.xp_rate)
 
 
+## Calls the captured creep out of the orb, or back into it (keeping its health).
+func _toggle_pet() -> void:
+	var creature: String = CreepTypes.lookup(captured_key).name
+	if pet and is_instance_valid(pet) and pet.is_alive():
+		_pet_hp_ratio = clampf(pet.hp / pet.max_hp, 0.05, 1.0)
+		vfx("column", [pet.global_position, Color(0.75, 0.6, 1.0), 3.0])
+		pet.died.disconnect(_on_pet_died)
+		pet.queue_free()
+		pet = null
+		vfx("callout", [global_position, "Return, %s !!" % creature, Color(0.8, 0.65, 1.0)])
+	else:
+		pet = Creep.summon_key(self, captured_key, global_position + aim_direction() * 2.0, 0.0)
+		pet.hp = pet.max_hp * _pet_hp_ratio
+		pet.died.connect(_on_pet_died)
+		vfx("column", [pet.global_position, Color(0.75, 0.6, 1.0), 4.0])
+		vfx("callout", [global_position, "Go, %s !!" % creature, Color(0.8, 0.65, 1.0)])
+	play_sfx("confirm", -6.0)
+
+
+## The captured creep died: the orb is empty again, ready for a new catch.
+func _on_pet_died(_killer: Hero) -> void:
+	pet = null
+	captured_key = ""
+	_pet_hp_ratio = 1.0
+	for i in items.size():
+		if items[i].id == "capture_orb_full":
+			items[i] = ItemCatalog.find("capture_orb")
+	items_changed.emit()
+
+
+## Selling the full orb sets the creature free (it leaves the field).
+func _free_pet() -> void:
+	if pet and is_instance_valid(pet):
+		pet.died.disconnect(_on_pet_died)
+		pet.queue_free()
+	pet = null
+	captured_key = ""
+
+
 func _recall() -> void:
 	if is_alive() and is_inside_tree():
-		global_position = _spawn_point
+		global_position = recall_point if recall_point != Vector3.INF else _spawn_point
 		velocity = Vector3.ZERO
 		vfx("column", [global_position, Color(0.6, 0.8, 1.0), 4.0])
 
@@ -682,6 +847,60 @@ func recompute_stats() -> void:
 	if _level_label:
 		_level_label.text = str(level)
 	health_changed.emit(hp, max_hp, shield)
+	_check_evolution()
+
+
+func _check_evolution() -> void:
+	if evolved or puppet or definition.evolve_at.is_empty() or not definition.evolve_into.is_valid():
+		return
+	for key in definition.evolve_at:
+		if attribute(key) < definition.evolve_at[key]:
+			return
+	evolve()
+
+
+## Becomes the evolved hero for good: same level, XP, attributes, items and
+## skill ranks; the new kit, stats and look.
+func evolve() -> void:
+	if evolved or not definition.evolve_into.is_valid():
+		return
+	evolved = true
+	var old := definition
+	var next: HeroDef = old.evolve_into.call()
+	# The attribute base carries over, so levels, tomes and items keep their value.
+	next.strength = old.strength
+	next.agility = old.agility
+	next.intelligence = old.intelligence
+	next.strength_gain = old.strength_gain
+	next.agility_gain = old.agility_gain
+	next.intelligence_gain = old.intelligence_gain
+	next.exclusive_item = old.exclusive_item
+	next.id = old.id
+	var ranks: Array = skills.map(func(s): return s.rank)
+	if in_form:
+		_end_form()
+	definition = next
+	_apply_definition()
+	skills = definition.create_skills()
+	for i in mini(ranks.size(), skills.size()):
+		skills[i].rank = mini(ranks[i], skills[i].max_rank)
+	var old_model := model
+	model = definition.create_model()
+	model.name = "Model"
+	if "accent" in model:
+		model.accent = TEAM_COLORS[team]
+	add_child(model)
+	old_model.queue_free()
+	if animator:
+		animator.retarget(model)
+	recompute_stats()
+	hp = max_hp
+	vfx("column", [global_position, Color(1.0, 0.9, 0.5), 8.0])
+	vfx("burst", [global_position, Color(1.0, 0.85, 0.4), 32, 9.0])
+	vfx("callout", [global_position, "%s — %s !!" % [definition.display_name, definition.title], Color(1.0, 0.85, 0.4)])
+	play_sfx("transform", 4.0)
+	definition_changed.emit()
+	skills_changed.emit()
 
 
 # -------------------------------------------------------------------- effects

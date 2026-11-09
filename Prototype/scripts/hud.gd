@@ -33,6 +33,10 @@ var _badges: Array[Button] = []
 var _fps := Label.new()
 var _shop_button := Button.new()
 var _inventory: Array[Button] = []
+var _bag_button := Button.new()
+var _mark_button := Button.new()
+## The inventory bar shows the bag instead of the inventory.
+var _bag_view := false
 var shop := ShopPanel.new()
 ## Themed, safe-area-inset container for every HUD control.
 var root := Control.new()
@@ -45,6 +49,7 @@ func setup(target: Hero) -> void:
 	hero.meter.changed.connect(_on_meter_changed)
 	_name.text = "%s — %s" % [hero.definition.display_name, hero.definition.title]
 	hero.items_changed.connect(_refresh_inventory)
+	hero.definition_changed.connect(_on_definition_changed)
 	hero.leveled_up.connect(func(_l): _pulse(_level))
 	for i in mini(hero.skills.size(), _skill_buttons.size()):
 		_skill_buttons[i].icon = hero.skills[i].icon()
@@ -196,10 +201,33 @@ func _ready() -> void:
 		var slot := Button.new()
 		slot.custom_minimum_size = Vector2(64, 64)
 		slot.expand_icon = true
-		slot.pressed.connect(func(): hero.use_item(i))
+		slot.add_theme_font_size_override("font_size", 18)
+		slot.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		slot.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+		slot.pressed.connect(_on_slot.bind(i))
 		bar.add_child(slot)
 		_inventory.append(slot)
 	joystick.blockers.append(bar)
+	# BAG (Satchel of Holding) switches the bar to the bag; MARK sets the recall point.
+	for spec in [[_bag_button, "BAG", -300], [_mark_button, "MARK", 214]]:
+		var extra: Button = spec[0]
+		extra.text = spec[1]
+		extra.anchor_left = 0.5
+		extra.anchor_right = 0.5
+		extra.anchor_top = 1.0
+		extra.anchor_bottom = 1.0
+		extra.offset_left = spec[2]
+		extra.offset_right = spec[2] + 86
+		extra.offset_top = -78
+		extra.offset_bottom = -14
+		extra.add_theme_font_size_override("font_size", 18)
+		root.add_child(extra)
+		joystick.blockers.append(extra)
+	_bag_button.toggle_mode = true
+	_bag_button.toggled.connect(func(on: bool):
+		_bag_view = on
+		_refresh_inventory())
+	_mark_button.pressed.connect(func(): hero.mark_recall_point())
 
 	shop.visible = false
 	shop.set_anchors_preset(Control.PRESET_CENTER)
@@ -321,13 +349,40 @@ func _pulse(control: Control) -> void:
 	control.create_tween().tween_property(control, "scale", Vector2.ONE, 0.35)
 
 
+## Inventory view: tap a consumable to use it, or (with a satchel) any other
+## item to put it in the bag. Bag view: tap an item to take it out.
+func _on_slot(i: int) -> void:
+	if _bag_view:
+		hero.unstash(i)
+	elif i < hero.items.size() and hero.items[i].consumable:
+		hero.use_item(i)
+	elif hero.bag_unlocked:
+		hero.stash(i)
+
+
 func _refresh_inventory() -> void:
+	_bag_button.visible = hero.bag_unlocked
+	if not hero.bag_unlocked:
+		_bag_view = false
+	_bag_button.text = "BACK" if _bag_view else "BAG"
+	var list: Array[ItemDef] = hero.bag if _bag_view else hero.items
 	for i in _inventory.size():
 		var slot := _inventory[i]
-		var has_item := i < hero.items.size()
-		slot.icon = hero.items[i].icon() if has_item else null
-		slot.disabled = not has_item or not hero.items[i].consumable
-		slot.modulate = Color(1, 1, 1) if has_item else Color(1, 1, 1, 0.45)
+		var has_item := i < list.size()
+		slot.icon = list[i].icon() if has_item else null
+		var count: int = (hero.bag_charges[i] if _bag_view else hero.charges_at(i)) if has_item else 1
+		slot.text = "×%d" % count if count > 1 else ""
+		slot.tooltip_text = list[i].display_name if has_item else ""
+		slot.disabled = not has_item or not (_bag_view or list[i].consumable or hero.bag_unlocked)
+		slot.modulate = (Color(0.85, 0.95, 1.0) if _bag_view else Color(1, 1, 1)) if has_item else Color(1, 1, 1, 0.45)
+
+
+## Evolution: new name, new skill icons.
+func _on_definition_changed() -> void:
+	_name.text = "%s — %s" % [hero.definition.display_name, hero.definition.title]
+	for i in mini(hero.skills.size(), _skill_buttons.size()):
+		_skill_buttons[i].icon = hero.skills[i].icon()
+	_pulse(_name)
 
 
 func _on_health_changed(hp: float, max_hp: float, shield: float) -> void:
