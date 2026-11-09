@@ -135,6 +135,7 @@ Every third-party asset is **CC0** and credited in [`assets/thirdparty/CREDITS.m
   - cynicmusic's *Town Theme RPG* (menu) and *Battle Theme A* (battle).
   - Generated sounds fill the rest and act as fallbacks.
 - **UI:** Kenney RPG UI pack buttons and panels as 9-slice skins, tinted to the stone-and-gold palette.
+- **Phone (Infinix NOTE 30, 2026-11-09):** a 4v4 Classic match with the rigged heroes and the scenery ran for about three minutes, up to 436 units, at 42–56 FPS (average 47), with no script errors. That matches v0.7.0's 46–51 FPS with primitive heroes, so the new models and scenery don't cost frame rate. GPU was 15–21 ms with 115–218 draw calls.
 - **Size:** `tools/glb_strip.py in.glb out.glb Anim1 Anim2 …` drops unused animations from a GLB (KayKit characters go from about 4 MB to about 1 MB).
 
 ### Original assets

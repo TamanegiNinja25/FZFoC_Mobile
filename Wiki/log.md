@@ -6,6 +6,9 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Prototype: Phase 8 phone check
+- On the Infinix NOTE 30, a 4v4 Classic match with rigged heroes and scenery ran about three minutes: up to 436 units, 42–56 FPS (average 47), GPU 15–21 ms, 115–218 draw calls, no script errors. That matches v0.7.0 (46–51 FPS), so the new models and scenery cost no frame rate. Backlog item closed; result added to the Prototype README.
+
 ## 2026-11-09 — Ingest (design + implementation)
 - Ingested `2026-11-09-phase-8-assets-agents-skills.md` (Phase 8); [source note](sources/2026-11-09-phase-8-assets-agents-skills.md) created.
 - [Assets and licensing](topics/assets-and-licensing.md) gains the Phase 8 asset pass: CC0 only, official mirrors because of itch.io's bot check, applicable packs only, credit in CREDITS.md and in game, agent and skill licences.
