@@ -6,6 +6,17 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Question: gaps against the reference map
+- Re-read Fight Of Characters 7.7b E (files byte-identical to the first extraction), including the trigger bodies the first audit only listed, and compared it with v0.8.2. Report: `Outputs/2026-11-09-foc-gap-audit.md`.
+- Still missing:
+  - private creep rooms;
+  - multi-stage forms;
+  - the stat-threshold evolution;
+  - live scoreboard, storage unit, host duel switch, custom recall point, skill-name callouts, potion stacking.
+- Values that differ: Classic 50 vs 100 kills; respawn 6 vs 4 s; passive income.
+- Scale: 8/24 heroes, 32/120 skills, 45/59 items, no voices.
+- Gaps added to the backlog.
+
 ## 2026-11-09 — Release v0.8.2 published and signed
 - The first v0.8.2 build caught a wrong paste (113 characters instead of 3,556). The owner replaced the secret and re-ran the job; it passed and signed with the shared key (SHA-256 `0B:C6:54:D7…04:02`, matching the local keystore).
 - The published APK installed on the test phone as an update over the existing build (version code 700 → 802) without uninstalling, and launched showing v0.8.2.
