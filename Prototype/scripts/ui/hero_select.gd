@@ -12,6 +12,7 @@ var selected_id := ""
 
 var _category := "All"
 var _mode_buttons := {}
+var _duel_button := Button.new()
 var _cards := GridContainer.new()
 var _details := RichTextLabel.new()
 var _start := Button.new()
@@ -46,12 +47,13 @@ func _ready() -> void:
 		(roles if Roster.ROLES.has(category) else tabs).add_child(tab)
 		_tab_buttons[category] = tab
 
-	# Rules: Mobile (15 kills or 8:00) or Classic (50 kills, no time limit).
+	# Rules: Mobile (15 kills or 8:00) or Classic (the map's 100 kills, no
+	# time limit, no passive gold); duels on or off.
 	var modes := HBoxContainer.new()
 	modes.alignment = BoxContainer.ALIGNMENT_CENTER
 	modes.add_theme_constant_override("separation", 10)
 	column.add_child(modes)
-	for spec in [[false, "Mobile — 15 kills · 8:00"], [true, "Classic — 50 kills · no time limit"]]:
+	for spec in [[false, "Mobile — 15 kills · 8:00"], [true, "Classic — 100 kills · no time limit"]]:
 		var mode_button := Button.new()
 		mode_button.text = spec[1]
 		mode_button.toggle_mode = true
@@ -60,8 +62,15 @@ func _ready() -> void:
 		mode_button.pressed.connect(_set_classic.bind(spec[0]))
 		modes.add_child(mode_button)
 		_mode_buttons[spec[0]] = mode_button
+	_duel_button.toggle_mode = true
+	_duel_button.custom_minimum_size = Vector2(200, 48)
+	_duel_button.add_theme_font_size_override("font_size", 18)
+	_duel_button.toggled.connect(_set_duels)
+	modes.add_child(_duel_button)
 	var session := get_node_or_null("/root/Session")
 	_set_classic(session.classic if session else false)
+	_duel_button.button_pressed = session.duels if session else true
+	_set_duels(_duel_button.button_pressed)
 
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -107,6 +116,13 @@ func _ready() -> void:
 
 	_show_category("All")
 	select_hero(Roster.all()[0].id)
+
+
+func _set_duels(on: bool) -> void:
+	var session := get_node_or_null("/root/Session")
+	if session:
+		session.duels = on
+	_duel_button.text = "Duels: On" if on else "Duels: Off"
 
 
 ## Autoloads are looked up at run time: tests compile this script before they exist.

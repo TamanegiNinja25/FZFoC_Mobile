@@ -26,8 +26,10 @@ var my_hero := "vael"
 ## host ip → {name, players}
 var hosts := {}
 var mode := Mode.VERSUS
-## Classic rules (50 kills, no time limit) for the next match; the host decides.
+## Classic rules (100 kills, no time limit, no passive gold) for the next match; the host decides.
 var classic := false
+## Duels on or off for the next match; the host decides.
+var duels := true
 var my_name := "Player"
 
 var _announce: PacketPeerUDP
@@ -118,7 +120,7 @@ func start_match() -> void:
 		teams[peer_id] = 0 if mode == Mode.COOP else index % 2
 		index += 1
 	_announce_stop()
-	_begin_match.rpc(teams, _unique_choices(), classic)
+	_begin_match.rpc(teams, _unique_choices(), {"classic": classic, "duels": duels})
 
 
 ## Each hero once per match: a player who picked a hero already taken (by the
@@ -139,10 +141,13 @@ func _unique_choices() -> Dictionary:
 
 
 @rpc("authority", "call_local", "reliable")
-func _begin_match(teams: Dictionary, hero_choices: Dictionary, classic_rules: bool) -> void:
+func _begin_match(teams: Dictionary, hero_choices: Dictionary, rules: Dictionary) -> void:
 	heroes = hero_choices
-	classic = classic_rules
-	get_node("/root/Session").classic = classic_rules
+	classic = rules.get("classic", false)
+	duels = rules.get("duels", true)
+	var session := get_node("/root/Session")
+	session.classic = classic
+	session.duels = duels
 	match_starting.emit(teams)
 
 

@@ -48,6 +48,12 @@ extends Resource
 @export var form_damage_mult := 1.25
 @export var form_speed_mult := 1.3
 @export var form_scale := 1.4
+## Further stages after the first form, in order (e.g. ["Molten Heart"]): the
+## reference map's chained transformations, up to three stages in all. While
+## transformed, a full meter climbs to the next stage.
+@export var form_stages: Array[String] = []
+## Each stage past the first adds this much to the form's damage multiplier.
+@export var stage_power := 0.2
 
 
 func base_attribute(key: String) -> float:

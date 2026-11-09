@@ -79,6 +79,7 @@ static func morrow() -> HeroDef:
 	d.display_name = "Morrow"
 	d.title = "the Grave Tender"
 	d.form_name = "Lichbloom"
+	d.form_stages = ["Deathbloom"]
 	d.role = "Caster"
 	d.realm = "Stone Barrows"
 	d.ranged = true
@@ -201,6 +202,7 @@ static func tamsin() -> HeroDef:
 	d.display_name = "Tamsin"
 	d.title = "the Storm Caller"
 	d.form_name = "Stormcrown"
+	d.form_stages = ["Thunderhead", "Skyfather's Wrath"]
 	d.role = "Caster"
 	d.realm = "Gale Peaks"
 	d.ranged = true

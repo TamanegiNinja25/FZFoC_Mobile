@@ -82,12 +82,21 @@ func _ready() -> void:
 	_pages.hosting.add_child(_mode)
 	var rules := OptionButton.new()
 	rules.add_item("Mobile — first to 15 kills or 8:00", 0)
-	rules.add_item("Classic — first to 50 kills, no time limit", 1)
+	rules.add_item("Classic — first to 100 kills, no time limit", 1)
 	rules.custom_minimum_size = Vector2(560, 56)
 	rules.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	rules.select(1 if _net.classic else 0)
 	rules.item_selected.connect(func(i: int): _net.classic = i == 1)
 	_pages.hosting.add_child(rules)
+	# The map lets the host switch duels off for the match.
+	var duels := OptionButton.new()
+	duels.add_item("Duels every ~5 minutes", 0)
+	duels.add_item("No duels", 1)
+	duels.custom_minimum_size = Vector2(560, 56)
+	duels.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	duels.select(0 if _net.duels else 1)
+	duels.item_selected.connect(func(i: int): _net.duels = i == 0)
+	_pages.hosting.add_child(duels)
 	_players.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_pages.hosting.add_child(_players)
 	_start.text = "Start Match"

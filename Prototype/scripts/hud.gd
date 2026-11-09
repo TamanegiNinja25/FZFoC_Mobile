@@ -259,7 +259,11 @@ func _process(_delta: float) -> void:
 	elif hero.is_stunned():
 		_status.text = "Stunned!"
 	elif hero.in_form:
-		_status.text = "%s  %.1f s" % [hero.definition.form_name.to_upper(), hero.form_time_left]
+		var stage := "  ·  stage %d/%d" % [hero.form_stage, hero.max_form_stage()] if hero.max_form_stage() > 1 else ""
+		var ascend := ""
+		if hero.can_ascend():
+			ascend = "  ·  ASCEND ready" if hero.meter.is_full() else "  ·  ascend %d%%" % roundi(100.0 * hero.meter.charge / hero.meter.max_charge)
+		_status.text = "%s  %.1f s%s%s" % [hero.stage_name().to_upper(), hero.form_time_left, stage, ascend]
 	elif not hero.is_alive():
 		_status.text = "Respawning…"
 	elif hero.meter.is_full():
@@ -336,8 +340,14 @@ func _on_health_changed(hp: float, max_hp: float, shield: float) -> void:
 func _on_meter_changed(value: float, max_value: float) -> void:
 	_meter_bar.max_value = max_value
 	_meter_bar.value = value
-	_button.disabled = hero.in_form or value < max_value
+	_refresh_transform_button()
 
 
-func _on_form_changed(active: bool) -> void:
-	_button.disabled = active or not hero.meter.is_full()
+func _on_form_changed(_active: bool) -> void:
+	_refresh_transform_button()
+
+
+## TRANSFORM out of form; ASCEND while a further stage waits.
+func _refresh_transform_button() -> void:
+	_button.text = "ASCEND" if hero.can_ascend() else "TRANSFORM"
+	_button.disabled = not hero.meter.is_full() or (hero.in_form and not hero.can_ascend())

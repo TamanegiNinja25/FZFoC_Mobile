@@ -74,6 +74,11 @@ const CREEP_XP_FACTOR := [0.8, 0.7, 0.6, 0.5]
 const HERO_XP := [100, 120, 160, 220, 300]
 ## How far the attack button looks for a target.
 const ACQUIRE_RANGE := 10.0
+## Multi-stage forms: the meter charges this much faster while a further stage waits.
+const STAGE_CHARGE_RATE := 6.0
+## Each further stage grows the hero a little more and raises its bounty.
+const STAGE_SCALE_STEP := 0.15
+const STAGE_BOUNTY_STEP := 0.5
 ## Movement is capped at the map's 522/250 of base speed.
 const MAX_SPEED_MULT := 2.09
 ## Movement eases in and out instead of starting and stopping dead; stopping
@@ -90,6 +95,8 @@ var is_player := true
 var ai_move := Vector3.ZERO
 var kills := 0
 var deaths := 0
+## Network: the player who controlled this hero left the match (scoreboard mark).
+var left_game := false
 ## Damage totals for the HUD and the results screen.
 var damage_dealt := 0.0
 var damage_taken := 0.0
@@ -150,6 +157,8 @@ var _item_attributes := {"str": 0.0, "agi": 0.0, "int": 0.0}
 var hp := 0.0
 var shield := 0.0
 var in_form := false
+## 0 out of form; 1 for the first form, 2–3 for further stages.
+var form_stage := 0
 var form_time_left := 0.0
 var meter: TransformMeter
 var gold := 0.0
@@ -260,7 +269,7 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector3.ZERO
 	else:
 		var direction := _steering()
-		var speed := move_speed * (form_speed_mult if in_form else 1.0) * (_slow_mult if _slow_time > 0.0 else 1.0)
+		var speed := move_speed * (form_speed_mult * (1.0 + 0.05 * maxi(form_stage - 1, 0)) if in_form else 1.0) * (_slow_mult if _slow_time > 0.0 else 1.0)
 		var wanted := direction * speed
 		var rate := ACCELERATION if wanted.length() >= velocity.length() else DECELERATION
 		velocity = velocity.move_toward(wanted, rate * delta)
@@ -291,11 +300,57 @@ func try_transform() -> bool:
 	if puppet:
 		action_requested.emit("transform", null)
 		return false
-	if in_form or _dead_time > 0.0 or frozen or is_stunned() or not meter.is_full():
+	if _dead_time > 0.0 or frozen or is_stunned() or not meter.is_full():
 		return false
+	if in_form:
+		if not can_ascend():
+			return false
+		meter.consume()
+		_ascend()
+		return true
 	meter.consume()
 	_enter_form()
 	return true
+
+
+func max_form_stage() -> int:
+	return 1 + definition.form_stages.size()
+
+
+## Transformed, with a further stage still to climb.
+func can_ascend() -> bool:
+	return in_form and form_stage < max_form_stage()
+
+
+## The current stage's name (the first form's name out of form).
+func stage_name() -> String:
+	return definition.form_name if form_stage <= 1 else definition.form_stages[form_stage - 2]
+
+
+func _stage_mult() -> float:
+	return 1.0 + definition.stage_power * maxi(form_stage - 1, 0)
+
+
+func form_scale_now() -> float:
+	return form_scale + STAGE_SCALE_STEP * maxi(form_stage - 1, 0)
+
+
+func _ascend() -> void:
+	form_stage += 1
+	form_time_left = form_duration
+	_invulnerable_time = form_transition
+	shield = maxf(shield, max_hp * form_shield_ratio)
+	meter.locked = not can_ascend()
+	meter.boost = STAGE_CHARGE_RATE if can_ascend() else 1.0
+	_animate("cast")
+	vfx("column", [global_position, Color(1.0, 0.85, 0.5), 7.0])
+	vfx("ring", [global_position, 4.0, Color(1.0, 0.85, 0.5, 0.9)])
+	vfx("callout", [global_position, stage_name() + " !!", Color(1.0, 0.85, 0.45)])
+	play_sfx("transform", 2.0)
+	if model.has_method("set_form"):
+		model.set_form(true, form_scale_now())
+	form_changed.emit(true)
+	health_changed.emit(hp, max_hp, shield)
 
 
 ## The low-health transformation (HeroDef.auto_form_below): no meter needed.
@@ -306,8 +361,10 @@ func _auto_transform() -> void:
 
 
 func _enter_form() -> void:
-	meter.locked = true
 	in_form = true
+	form_stage = 1
+	meter.locked = not can_ascend()
+	meter.boost = STAGE_CHARGE_RATE if can_ascend() else 1.0
 	_animate("cast")
 	vfx("column", [global_position, animator._aura_material.albedo_color if animator and animator._aura_material else Color(1, 0.7, 0.3), 5.0])
 	form_time_left = form_duration
@@ -757,6 +814,7 @@ func try_skill(index: int) -> bool:
 	if cast:
 		_animate("cast")
 		_hidden_time = 0.0  # casting reveals a cloaked hero
+		vfx("callout", [global_position, skills[index].display_name(self) + " !!", Color.from_hsv(randf(), 0.55, 1.0)])
 	return cast
 
 
@@ -786,7 +844,7 @@ func order_attack() -> void:
 ## kill gold for training dummies — plus shared experience for every kill.
 ## Used by auto-attacks and skills alike.
 func deal_damage(target: Node3D, amount: float) -> void:
-	var result: Dictionary = target.take_damage(amount * (form_damage_mult if in_form else 1.0), self)
+	var result: Dictionary = target.take_damage(amount * (form_damage_mult * _stage_mult() if in_form else 1.0), self)
 	meter.on_damage_dealt(result.dealt)
 	damage_dealt += result.dealt
 	if result.dealt > 0.0:
@@ -891,7 +949,7 @@ func _apply_definition() -> void:
 
 
 func bounty_value() -> float:
-	return bounty * (form_bounty_mult if in_form else 1.0)
+	return bounty * (form_bounty_mult + STAGE_BOUNTY_STEP * maxi(form_stage - 1, 0) if in_form else 1.0)
 
 
 func income_per_second() -> float:
@@ -945,9 +1003,11 @@ func _tick_form(delta: float) -> void:
 
 func _end_form() -> void:
 	in_form = false
+	form_stage = 0
 	form_time_left = 0.0
 	shield = 0.0
 	meter.locked = false
+	meter.boost = 1.0
 	if model.has_method("set_form"):
 		model.set_form(false, form_scale)
 	form_changed.emit(false)

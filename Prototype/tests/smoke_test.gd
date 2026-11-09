@@ -28,7 +28,7 @@ func _process(_delta: float) -> bool:
 				_check(hero.meter.is_full(), "meter reports full")
 				_check(hero.try_transform(), "transform succeeds when full")
 				_check(hero.in_form and hero.shield > 0.0, "form active with shield")
-				_check(hero.meter.charge == 0.0 and hero.meter.locked, "meter consumed and locked")
+				_check(hero.meter.charge == 0.0 and (hero.meter.locked or hero.can_ascend()), "meter consumed (locked, or charging toward the next stage)")
 				_check(hero.bounty_value() > base_bounty, "transformed hero is worth more bounty")
 				_phase = "in_form"
 		"in_form":

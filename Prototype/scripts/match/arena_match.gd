@@ -3,12 +3,15 @@ extends Node3D
 ## 3v3 on an original arena. The player plus two bot allies (blue, west) face
 ## three bots (red, east); online, friends take bot slots. Rules:
 ##   Mobile  — first to 15 kills, or the leader after 8:00;
-##   Classic — first to 50 kills, no time limit.
+##   Classic — the reference map's rules: first to 100 kills, no time limit,
+##             and no passive gold (kills, creeps, bosses and duels pay).
 ## Either way the reference map's world runs: creep waves at 12 camps, two boss
-## chains, the win boss (kill it and your team wins), and a duel every ~5 min.
+## chains, the win boss (kill it and your team wins), and a duel every ~5 min
+## unless the host switched duels off. A scoreboard lists every hero's kills
+## and deaths, as the map's board does.
 
 const MOBILE_KILLS := 15
-const CLASSIC_KILLS := 50
+const CLASSIC_KILLS := 100
 ## Mobile is 3v3; Classic is the reference map's 4v4.
 const MOBILE_TEAM := 3
 const CLASSIC_TEAM := 4
@@ -19,7 +22,8 @@ const BASES := [Vector3(-38, 0, 0), Vector3(38, 0, 0)]
 const HALF_FIELD := Vector2(44, 28)
 const FOUNTAIN_RADIUS := 5.0
 const FOUNTAIN_HEAL := 90.0  # HP per second
-const RESPAWN_TIME := 6.0
+## The reference map revives a fallen hero at base after 4 s.
+const RESPAWN_TIME := 4.0
 ## Combining circles (one by each base); any hero can use either.
 const CIRCLES := [Vector3(-32, 0, -8), Vector3(32, 0, 8)]
 const CIRCLE_RADIUS := 2.2
@@ -40,6 +44,7 @@ const ADAPT_PER_KILL := 0.1
 const ALLY_SKILL := 0.55
 
 var classic := false
+var duels_enabled := true
 var team_size := MOBILE_TEAM
 var kill_target := MOBILE_KILLS
 var time_left := MATCH_TIME
@@ -68,6 +73,9 @@ var is_authority := true  # false on network clients: the host decides everythin
 
 var _sun: DirectionalLight3D
 var _score := Label.new()
+var _board_blue := Label.new()
+var _board_red := Label.new()
+var _board_text := ""
 var _feed := VBoxContainer.new()
 var _banner := Label.new()
 var _result: Control
@@ -78,6 +86,7 @@ func _ready() -> void:
 	online = Net.is_online() and Session.mode == Session.Mode.LOCAL_FRIENDS
 	is_authority = not online or Net.is_host()
 	classic = Session.classic
+	duels_enabled = Session.duels
 	team_size = CLASSIC_TEAM if classic else MOBILE_TEAM
 	kill_target = CLASSIC_KILLS if classic else MOBILE_KILLS
 	time_left = INF if classic else MATCH_TIME
@@ -96,12 +105,13 @@ func _ready() -> void:
 		events.colossus_slain.connect(_on_colossus_slain)
 		events.boss_slain.connect(func(boss_name, killer): announce("%s felled %s" % [hero_label(killer) if killer else "Someone", boss_name], Color(0.85, 0.6, 1.0)))
 		add_child(events)
-		duel = Duel.new()
-		duel.name = "Duel"
-		duel.arena = self
-		duel.center = DUEL_CENTER
-		duel.state_changed.connect(_on_duel_state)
-		add_child(duel)
+		if duels_enabled:
+			duel = Duel.new()
+			duel.name = "Duel"
+			duel.arena = self
+			duel.center = DUEL_CENTER
+			duel.state_changed.connect(_on_duel_state)
+			add_child(duel)
 	Sfx.play_music("battle")
 
 	hud = Hud.new()
@@ -346,6 +356,9 @@ func _spawn_teams() -> void:
 				h.definition = Roster.create(bot_picks[next_bot])
 				next_bot += 1
 			h.respawn_time = RESPAWN_TIME
+			if classic:  # the map has no passive income
+				h.base_income = 0.0
+				h.spree_income_step = 0.0
 			h.name = "Hero%d" % (team * team_size + i)
 			h.position = BASES[team] + Vector3(0, 0, (i - (team_size - 1) / 2.0) * 3.0)
 			add_child(h)
@@ -553,9 +566,23 @@ func _build_match_ui() -> void:
 	board.offset_right = 230
 	board.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(board)
+	var board_column := VBoxContainer.new()
+	board_column.add_theme_constant_override("separation", 2)
+	board.add_child(board_column)
 	_score.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_score.add_theme_font_size_override("font_size", 22)
-	board.add_child(_score)
+	board_column.add_child(_score)
+	# The map's scoreboard: every hero's kills / deaths, team by team.
+	var rows := HBoxContainer.new()
+	rows.add_theme_constant_override("separation", 18)
+	board_column.add_child(rows)
+	for spec in [[_board_blue, Hero.TEAM_COLORS[0]], [_board_red, Hero.TEAM_COLORS[1]]]:
+		var column: Label = spec[0]
+		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		column.add_theme_font_size_override("font_size", 15)
+		column.add_theme_color_override("font_color", (spec[1] as Color).lightened(0.45))
+		rows.add_child(column)
+	_board_red.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 	_feed.anchor_left = 1.0
 	_feed.anchor_right = 1.0
@@ -590,13 +617,30 @@ func _update_score() -> void:
 	if time_left != INF:
 		var t := int(ceil(time_left))
 		clock = "%d:%02d" % [t / 60, t % 60]
-	var duel_line := "DUEL" if duel_active() else "Duel in %d:%02d" % [int(duel_in) / 60, int(duel_in) % 60]
+	var duel_line := "DUEL" if duel_active() else ("Duel in %d:%02d" % [int(duel_in) / 60, int(duel_in) % 60] if duels_enabled else "Duels off")
 	_score.text = "BLUE  %d  ⚔  %d  RED\n%s  ·  first to %d  ·  %s" % [kills[0], kills[1], clock, kill_target, duel_line]
+	_update_board()
 	if duel_text != _last_banner:
 		_last_banner = duel_text
 		_banner.text = duel_text
 		if duel_text != "":
 			_on_banner(duel_text)
+
+
+## Kills / deaths per hero; rebuilt only when something changed.
+func _update_board() -> void:
+	var lines := [PackedStringArray(), PackedStringArray()]
+	for h in heroes:
+		var name_text := hero_label(h)
+		if h.left_game:
+			name_text += " (left)"
+		lines[h.team].append("%s  %d / %d" % [name_text, h.kills, h.deaths])
+	var text := "\n".join(lines[0]) + "|" + "\n".join(lines[1])
+	if text == _board_text:
+		return
+	_board_text = text
+	_board_blue.text = "\n".join(lines[0])
+	_board_red.text = "\n".join(lines[1])
 
 
 ## Banner changes drive the duel's sounds and effects on every device.

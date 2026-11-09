@@ -10,6 +10,7 @@ func _init() -> void:
 	display_name = "Ryn"
 	title = "the Gale Dancer"
 	form_name = "Tempest"
+	form_stages = ["Eye of the Gale"]
 	role = "Speed"
 	description = "A hooded duelist who fights on the wind. Twin blades, blinding speed, little armour."
 	max_hp = 820.0

@@ -18,8 +18,8 @@ func _initialize() -> void:
 	_scene = load("res://scenes/main.tscn").instantiate()
 	root.add_child(_scene)
 	current_scene = _scene
-	_steps = [_progression, _shop_rules, _status_effects, _start_arena, _waves, _wave_cap, _wave_90, _bosses,
-		_boss_respawned, _duel_start, _duel_fight, _duel_kill, _duel_over, _attack_order, _colossus, _classic, _done]
+	_steps = [_progression, _form_stages, _shop_rules, _status_effects, _start_arena, _waves, _wave_cap, _wave_90, _bosses,
+		_boss_respawned, _duel_start, _duel_fight, _duel_kill, _duel_over, _attack_order, _colossus, _classic, _no_duels, _done]
 
 
 func _process(delta: float) -> bool:
@@ -32,6 +32,28 @@ func _process(delta: float) -> bool:
 
 
 # ------------------------------------------------------- hero systems (training)
+## The map's chained forms: while transformed, a full meter climbs a stage.
+func _form_stages() -> void:
+	var h: Hero = _scene.hero
+	_check(h.max_form_stage() == 2, "Vael's form has two stages (Kindled, %s)" % h.definition.form_stages[0])
+	h.meter.charge = h.meter.max_charge
+	h.try_transform()
+	_check(h.in_form and h.form_stage == 1 and h.can_ascend() and not h.meter.locked and h.meter.boost == Hero.STAGE_CHARGE_RATE,
+			"in the first form the meter charges fast toward the next stage")
+	var bounty1 := h.bounty_value()
+	h.meter.charge = h.meter.max_charge
+	_check(h.try_transform() and h.form_stage == 2 and h.stage_name() == h.definition.form_stages[0], "a full meter ascends to stage 2")
+	_check(h.bounty_value() > bounty1 and h._stage_mult() > 1.0 and not h.can_ascend() and h.meter.locked,
+			"stage 2 hits harder, is worth more, and is the last stage")
+	_check(not h.try_transform(), "no stage past the last")
+	h._end_form()
+	h._invulnerable_time = 0.0
+	_check(h.form_stage == 0 and not h.meter.locked and h.meter.boost == 1.0, "the form ends back at stage 0")
+	h.meter.charge = 0.0
+	var tamsin := Roster.create("tamsin")
+	_check(tamsin.form_stages.size() == 2, "Tamsin's form chains through three stages")
+
+
 func _progression() -> void:
 	_hero = _scene.hero
 	_check(Hero.xp_for_level(2) == 200.0 and Hero.xp_for_level(3) == 500.0 and Hero.xp_for_level(50) == 127400.0,
@@ -113,6 +135,20 @@ func _start_arena() -> void:
 	_check(creep is CharacterBody3D and creep.collision_layer == Creep.CREEP_LAYER and (_hero.collision_mask & Creep.CREEP_LAYER) != 0,
 			"units have physics bodies: heroes bump into creeps and bosses")
 	_check(_scene.events.camp_cap == MapEvents.MAP_CAMP_CAP, "map-style pile-ups by default (camps grow to %d)" % MapEvents.MAP_CAMP_CAP)
+	_check(_hero.respawn_time == 4.0, "heroes revive after 4 s, as in the map")
+	_scene._update_score()
+	_check(_scene._board_blue.text.split("\n").size() == 3 and _scene._board_red.text.split("\n").size() == 3 and "0 / 0" in _scene._board_blue.text,
+			"the scoreboard lists every hero's kills / deaths")
+	_hero.left_game = true
+	_scene._update_score()
+	_check("(left)" in _scene._board_blue.text, "a leaver is marked on the scoreboard")
+	_hero.left_game = false
+	_hero.level = 1
+	_hero.skill_points = 1
+	_hero.learn_skill(0)
+	_hero.try_skill(0)
+	var callouts := _scene.find_children("*", "Label3D", true, false).filter(func(l): return l.visible and l.text.ends_with(" !!"))
+	_check(callouts.any(func(l): return l.text.begins_with(_hero.skills[0].display_name(_hero))), "casting floats \"Skill name !!\" over the hero")
 	_scene.events.timers[30] = 0.01
 	_wait = 0.2
 
@@ -255,7 +291,9 @@ func _classic() -> void:
 	_scene = load("res://scenes/arena.tscn").instantiate()
 	root.add_child(_scene)
 	current_scene = _scene
-	_check(_scene.kill_target == 50 and _scene.time_left == INF, "Classic rules: 50 kills, no time limit")
+	_check(_scene.kill_target == 100 and _scene.time_left == INF, "Classic rules: the map's 100 kills, no time limit")
+	_check(_scene.heroes.all(func(h): return h.income_per_second() == 0.0), "Classic has no passive gold, as in the map")
+	_check(_scene.duel != null, "duels run when switched on")
 	var picked: Array = _scene.heroes.map(func(h): return h.definition.id)
 	var unique := {}
 	for id in picked:
@@ -264,6 +302,18 @@ func _classic() -> void:
 	_check(unique.size() == 8, "every hero is picked once (%s)" % ", ".join(picked))
 	_check(_scene.hero.xp_rate == 1.0, "Classic levels at the map's own pace (Mobile ×%.0f)" % _scene.MOBILE_XP_RATE)
 	root.get_node("/root/Session").classic = false
+
+
+func _no_duels() -> void:
+	_scene.queue_free()
+	root.get_node("/root/Session").duels = false
+	_scene = load("res://scenes/arena.tscn").instantiate()
+	root.add_child(_scene)
+	current_scene = _scene
+	_scene._update_score()
+	_check(_scene.duel == null and "Duels off" in _scene._score.text, "the host can switch duels off for the match")
+	_check(_scene.heroes.any(func(h): return h.income_per_second() > 0.0), "Mobile keeps its passive gold")
+	root.get_node("/root/Session").duels = true
 
 
 func _done() -> void:

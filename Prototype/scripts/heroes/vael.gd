@@ -13,6 +13,7 @@ func _init() -> void:
 	display_name = "Vael"
 	title = "the Kiln Knight"
 	form_name = "Kindled"
+	form_stages = ["Molten Heart"]
 	role = "Bruiser"
 	description = "An iron knight whose armour is a living kiln. Sword and shield; hard to kill, strongest in the thick of a fight."
 

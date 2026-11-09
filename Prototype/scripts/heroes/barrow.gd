@@ -10,6 +10,7 @@ func _init() -> void:
 	display_name = "Barrow"
 	title = "the Living Cairn"
 	form_name = "Avalanche"
+	form_stages = ["Mountain's Wrath"]
 	role = "Giant"
 	description = "A giant of stacked boulders woken by old runes. Slow, heavy-handed and nearly impossible to bring down."
 	max_hp = 1320.0

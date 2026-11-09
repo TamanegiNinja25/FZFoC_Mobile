@@ -107,6 +107,8 @@ static func play(world: Node, kind: String, data: Array) -> void:
 			rock(world, data[0], data[1])
 		"column":
 			column(world, data[0], data[1], data[2])
+		"callout":
+			FloatText.callout(world, data[0], data[1], data[2])
 
 
 ## CPU particles: no GPU work at all while off screen, one batched draw on screen.

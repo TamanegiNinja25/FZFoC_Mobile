@@ -70,7 +70,7 @@ func _pack() -> Dictionary:
 				h.in_form, h.form_time_left, h.is_alive(), h.gold, h.meter.charge, h.kills, h.deaths,
 				cooldowns, item_ids, h.spree, h.in_shop_range,
 				h.level, h.xp, h.skill_points, ranks, [h.tome_attributes.str, h.tome_attributes.agi, h.tome_attributes.int],
-				h.frozen, h.is_stunned(), h.damage_dealt, h.damage_taken, h.is_rooted()])
+				h.frozen, h.is_stunned(), h.damage_dealt, h.damage_taken, h.is_rooted(), h.left_game, h.form_stage])
 	return {"heroes": heroes, "kills": arena.kills, "time": arena.time_left if arena.time_left != INF else -1.0,
 		"duel": [arena.duel_phase, arena.duel_text, arena.duel_in]}
 
@@ -149,9 +149,11 @@ func _on_peer_left(peer_id: int) -> void:
 		for ally in arena.heroes:
 			if ally != h and ally.team == h.team:
 				ally.gold += share
+	var label: String = arena.hero_label(h)
 	h.owner_peer = 0
+	h.left_game = true
 	arena.add_bot_brain(h)
-	announce("%s left — a bot takes over%s" % [arena.hero_label(h), " (+%d gold to allies)" % share if share > 0 else ""], Color(0.8, 0.8, 0.8))
+	announce("%s left — a bot takes over%s" % [label, " (+%d gold to allies)" % share if share > 0 else ""], Color(0.8, 0.8, 0.8))
 
 
 # --------------------------------------------------------------- client side
@@ -215,6 +217,12 @@ func _snapshot(state: Dictionary) -> void:
 		h.damage_dealt = s[24]
 		h.damage_taken = s[25]
 		h._root_time = 0.5 if s[26] else 0.0
+		h.left_game = s[27]
+		if h.form_stage != s[28]:
+			h.form_stage = s[28]
+			if h.in_form and h.model.has_method("set_form"):
+				h.model.set_form(true, h.form_scale_now())
+			h.form_changed.emit(h.in_form)
 		if leveled:
 			h.recompute_stats()
 			h.leveled_up.emit(h.level)
