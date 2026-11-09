@@ -6,6 +6,11 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Release v0.8.0
+- Tag `v0.8.0` built and published by GitHub Actions; `FZFoC.apk` is 40 MB.
+- The `DEBUG_KEYSTORE_BASE64` secret isn't set yet, so the build was signed with a throwaway key: it won't install over v0.7.0 or the local build without uninstalling first.
+- Pending (owner): add the secret, then re-run the release job so the APK is re-signed with the shared key.
+
 ## 2026-11-09 — Prototype: Phase 8 phone check
 - On the Infinix NOTE 30, a 4v4 Classic match with rigged heroes and scenery ran about three minutes: up to 436 units, 42–56 FPS (average 47), GPU 15–21 ms, 115–218 draw calls, no script errors. That matches v0.7.0 (46–51 FPS), so the new models and scenery cost no frame rate. Backlog item closed; result added to the Prototype README.
 
