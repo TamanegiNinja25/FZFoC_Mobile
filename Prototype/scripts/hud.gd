@@ -46,6 +46,8 @@ func setup(target: Hero) -> void:
 	_name.text = "%s — %s" % [hero.definition.display_name, hero.definition.title]
 	hero.items_changed.connect(_refresh_inventory)
 	hero.leveled_up.connect(func(_l): _pulse(_level))
+	for i in mini(hero.skills.size(), _skill_buttons.size()):
+		_skill_buttons[i].icon = hero.skills[i].icon()
 	_refresh_inventory()
 	_on_health_changed(hero.hp, hero.max_hp, hero.shield)
 	_on_meter_changed(hero.meter.charge, hero.meter.max_charge)
@@ -119,8 +121,12 @@ func _ready() -> void:
 		var center := ATTACK_CENTER + Vector2(cos(angle), -sin(angle)) * ARC_RADIUS
 		var skill_button := Button.new()
 		_corner(skill_button, Rect2(center - Vector2.ONE * SKILL_SIZE / 2.0, Vector2.ONE * SKILL_SIZE))
-		skill_button.add_theme_font_size_override("font_size", 16)
+		skill_button.add_theme_font_size_override("font_size", 15)
 		skill_button.clip_text = true
+		skill_button.expand_icon = true
+		skill_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		skill_button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		skill_button.add_theme_constant_override("icon_max_width", 66)
 		skill_button.pressed.connect(func(): hero.try_skill(i))
 		root.add_child(skill_button)
 		_skill_buttons.append(skill_button)
@@ -278,15 +284,14 @@ Damage dealt %d   taken %d" % [floori(hero.gold), hero.income_per_second(), spre
 			_badges[i].visible = false
 			continue
 		var skill := hero.skills[i]
-		var label := skill.display_name(hero)
-		if label.length() > 10:
-			label = label.replace(" ", "\n")
+		# The icon shows which skill it is; the text shows its state.
 		if not skill.is_learned():
-			_skill_buttons[i].text = "%s\nLv %d" % [label, skill.next_rank_level()]
+			_skill_buttons[i].text = "Lv %d" % skill.next_rank_level()
 		elif skill.is_ready():
-			_skill_buttons[i].text = "%s\n%s" % [label, skill.rank_pips()]
+			_skill_buttons[i].text = skill.rank_pips()
 		else:
-			_skill_buttons[i].text = "%s\n%.1f" % [label, skill.time_left]
+			_skill_buttons[i].text = "%.1f" % skill.time_left
+		_skill_buttons[i].tooltip_text = skill.display_name(hero)
 		_skill_buttons[i].disabled = not skill.is_ready() or not can_act
 		_skill_buttons[i].modulate = Color(1, 1, 1) if skill.is_learned() else Color(1, 1, 1, 0.55)
 		_badges[i].visible = hero.skill_points > 0 and skill.can_learn(hero)

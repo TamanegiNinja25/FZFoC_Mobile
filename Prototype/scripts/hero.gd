@@ -76,6 +76,10 @@ const HERO_XP := [100, 120, 160, 220, 300]
 const ACQUIRE_RANGE := 10.0
 ## Movement is capped at the map's 522/250 of base speed.
 const MAX_SPEED_MULT := 2.09
+## Movement eases in and out instead of starting and stopping dead; stopping
+## is quicker than starting so the stick still feels tight.
+const ACCELERATION := 55.0
+const DECELERATION := 120.0
 
 ## Which hero this is. Set before adding to the tree; its values override the exports above.
 var definition: HeroDef
@@ -122,6 +126,7 @@ var frozen := false
 ## Network: the peer controlling this hero (0 = bot or offline).
 var owner_peer := 0
 var model: Node3D
+var animator: HeroAnimator
 var skills: Array[Skill] = []
 
 var level := 1
@@ -179,6 +184,10 @@ func _ready() -> void:
 	if "accent" in model:
 		model.accent = TEAM_COLORS[team]
 	add_child(model)
+	animator = HeroAnimator.new()
+	animator.name = "Animator"
+	add_child(animator)
+	animator.setup(self, model)
 	_build_overhead()
 	skills = definition.create_skills()
 
@@ -234,12 +243,16 @@ func _physics_process(delta: float) -> void:
 	if _dash_time > 0.0:
 		_dash_time -= delta
 		velocity = _dash_velocity
+		if _dash_time <= 0.0:
+			velocity = velocity.limit_length(move_speed)  # a dash ends crisply, no coasting
 	elif _root_time > 0.0:
 		velocity = Vector3.ZERO
 	else:
 		var direction := _steering()
 		var speed := move_speed * (form_speed_mult if in_form else 1.0) * (_slow_mult if _slow_time > 0.0 else 1.0)
-		velocity = direction * speed
+		var wanted := direction * speed
+		var rate := ACCELERATION if wanted.length() >= velocity.length() else DECELERATION
+		velocity = velocity.move_toward(wanted, rate * delta)
 		if direction.length() > 0.1:
 			_face(direction)
 	move_and_slide()
@@ -272,6 +285,8 @@ func try_transform() -> bool:
 	meter.consume()
 	meter.locked = true
 	in_form = true
+	_animate("cast")
+	vfx("column", [global_position, animator._aura_material.albedo_color if animator and animator._aura_material else Color(1, 0.7, 0.3), 5.0])
 	form_time_left = form_duration
 	_invulnerable_time = form_transition
 	shield = max_hp * form_shield_ratio
@@ -371,7 +386,8 @@ func try_combine() -> String:
 		recompute_stats()
 		items_changed.emit()
 		play_sfx("transform", -6.0)
-		fx.emit("ring", [global_position, 2.0, Color(1.0, 0.85, 0.4, 0.9)])
+		vfx("ring", [global_position, 2.0, Color(1.0, 0.85, 0.4, 0.9)])
+		vfx("burst", [global_position, Color(1.0, 0.85, 0.4), 30, 6.0])
 		return recipe[0]
 	return ""
 
@@ -435,8 +451,8 @@ func add_xp(amount: float) -> void:
 	if gained_level:
 		recompute_stats()
 		play_sfx("levelup", -2.0)
-		fx.emit("ring", [global_position, 2.2, Color(1.0, 0.9, 0.45, 0.9)])
-		Effects.ring(get_parent(), global_position, 2.2, Color(1.0, 0.9, 0.45, 0.9))
+		vfx("ring", [global_position, 2.2, Color(1.0, 0.9, 0.45, 0.9)])
+		vfx("column", [global_position, Color(1.0, 0.88, 0.4), 4.0])
 		leveled_up.emit(level)
 		skills_changed.emit()
 
@@ -636,7 +652,23 @@ func try_skill(index: int) -> bool:
 		return false
 	if _dead_time > 0.0 or frozen or is_stunned() or index >= skills.size():
 		return false
-	return skills[index].try_cast(self)
+	var cast := skills[index].try_cast(self)
+	if cast:
+		_animate("cast")
+	return cast
+
+
+## Plays an animation here and on network clients.
+func _animate(kind: String) -> void:
+	if animator:
+		animator.play(kind)
+	fx.emit("anim", [kind])
+
+
+## Plays a one-shot effect (see UnitFx.play) here and on network clients.
+func vfx(kind: String, data: Array) -> void:
+	UnitFx.play(get_parent(), kind, data)
+	fx.emit("vfx", [kind, data])
 
 
 ## Attack button: lock onto the nearest enemy (heroes first) and chase it.
@@ -729,12 +761,17 @@ func _steering() -> Vector3:
 	return Vector3.ZERO
 
 
-## Turns the model to face a direction (the model's forward is −Z).
+## Turns the model to face a direction (the model's forward is −Z); the
+## animator eases it round.
 func _face(direction: Vector3) -> void:
 	if Vector2(direction.x, direction.z).length() < 0.001:
 		return
 	_facing = Vector3(direction.x, 0.0, direction.z).normalized()
-	model.rotation.y = atan2(-_facing.x, -_facing.z)
+	var yaw := atan2(-_facing.x, -_facing.z)
+	if animator:
+		animator.target_yaw = yaw
+	else:
+		model.rotation.y = yaw
 
 
 func _apply_definition() -> void:
@@ -817,6 +854,8 @@ func _end_form() -> void:
 
 func _attack(target: Node3D) -> void:
 	_attack_cooldown = attack_interval / (_haste_mult if _haste_time > 0.0 else 1.0)
+	_face(target.global_position - global_position)
+	_animate("attack")
 	deal_damage(target, attack_damage)
 	if is_player:
 		play_sfx("hit", -10.0)
@@ -918,7 +957,11 @@ func _die(killer: Hero = null) -> void:
 	_dots.clear()
 	_chase_target = null
 	_dead_time = respawn_time
-	visible = false
+	velocity = Vector3.ZERO
+	if animator:
+		animator.die()  # topples, then hides the hero
+	else:
+		visible = false
 	died.emit(killer)
 
 
@@ -926,7 +969,10 @@ func _respawn() -> void:
 	hp = max_hp
 	shield = 0.0
 	global_position = _spawn_point
-	visible = true
+	if animator:
+		animator.respawn()
+	else:
+		visible = true
 	health_changed.emit(hp, max_hp, shield)
 
 

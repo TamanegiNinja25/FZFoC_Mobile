@@ -39,6 +39,8 @@ func _strike(hero: Hero) -> void:
 	hero._face(target.global_position - hero.global_position)
 	hero.deal_damage(target, scaled(hero, DAMAGE))
 	hero.play_sfx("hit", -2.0)
+	hero.vfx("slash", [target.global_position, randf() * TAU, 1.6, Color(0.6, 1.0, 1.0, 0.85)])
+	hero.vfx("ghost", [hero.global_position, hero.model.rotation.y, Color(0.4, 1.0, 0.95)])
 
 
 func ai_should_cast(hero: Hero, target: Node3D, _skill: float) -> bool:

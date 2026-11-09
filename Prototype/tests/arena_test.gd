@@ -78,6 +78,7 @@ func _process(delta: float) -> bool:
 
 func _test_fountain() -> void:
 	var player: Node = _arena.hero
+	player.revive_now()  # bots may have just killed it
 	player.global_position = _arena.fountain_position(0)
 	player.hp = 200.0
 

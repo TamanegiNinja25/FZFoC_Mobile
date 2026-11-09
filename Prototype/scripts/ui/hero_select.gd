@@ -158,7 +158,8 @@ func select_hero(hero_id: String) -> void:
 	for skill in definition.create_skills():
 		var ranks := "ultimate, %d ranks from level %d" % [skill.max_rank, skill.required_level] if skill.ultimate \
 				else "%d ranks from level %d" % [skill.max_rank, skill.required_level]
-		lines.append("• [b]%s[/b] (%ds, %s): %s" % [skill.skill_name, skill.cooldown, ranks, skill.description])
+		var picture := "[img=34]%s[/img] " % skill.icon_path() if ResourceLoader.exists(skill.icon_path()) else "• "
+		lines.append("%s[b]%s[/b] (%ds, %s): %s" % [picture, skill.skill_name, skill.cooldown, ranks, skill.description])
 	var exclusive := ItemCatalog.find(definition.exclusive_item)
 	if exclusive:
 		lines.append("")

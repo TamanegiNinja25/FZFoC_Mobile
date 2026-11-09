@@ -10,6 +10,10 @@ extends Node
 
 const AGGRO_RANGE := 16.0
 const FARM_RANGE := 30.0
+## Camps bigger than this are left alone until the bot is level 8.
+const PILE_LIMIT := 12
+## Healthy bots go looking for enemy heroes this far away (about half the map).
+const HUNT_RANGE := 22.0
 
 var hero: Hero
 ## The match: provides fountain_position(team) and center_point().
@@ -157,6 +161,17 @@ func _choose_target() -> Node3D:
 			best_score = score
 	if best:
 		return best
+	# Healthy and not behind on levels: go and find an enemy hero within half
+	# the map, as players hunt in the reference map, instead of farming forever.
+	if hero.hp / hero.max_hp > 0.6 and hero.level >= _enemy_level():
+		for node in get_tree().get_nodes_in_group("heroes"):
+			if hero.is_hostile(node) and node.is_alive() and not node.frozen:
+				var distance := hero.global_position.distance_to(node.global_position)
+				if distance < HUNT_RANGE and distance < best_score:
+					best = node
+					best_score = distance
+		if best:
+			return best
 	for node in get_tree().get_nodes_in_group("units"):
 		if node is Hero or not hero.is_hostile(node) or not node.is_alive() or not _worth_farming(node):
 			continue
@@ -167,10 +182,23 @@ func _choose_target() -> Node3D:
 	return best
 
 
-## Bots leave bosses alone until they're strong enough, and only go for the
-## win boss late in a Classic match.
+func _enemy_level() -> float:
+	var total := 0.0
+	var count := 0
+	for node in get_tree().get_nodes_in_group("heroes"):
+		if hero.is_hostile(node):
+			total += node.level
+			count += 1
+	return total / count if count else 1.0
+
+
+## Bots leave bosses alone until they're strong enough, only go for the win
+## boss late in a Classic match, and skip huge piles until level 8.
 func _worth_farming(node: Node) -> bool:
 	if "frozen" in node and node.frozen:
+		return false
+	if "camp" in node and node.camp >= 0 and hero.level < 8 and "events" in arena and arena.events \
+			and arena.events.camp_size(node.camp) > PILE_LIMIT:
 		return false
 	if not ("is_boss" in node) or not node.is_boss:
 		return true

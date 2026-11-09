@@ -27,6 +27,7 @@ func _cast(hero: Hero) -> void:
 	if hero.model.has_method("play_slam"):
 		hero.model.play_slam(r, hero.in_form)
 	hero.fx.emit("slam", [r, hero.in_form])
+	hero.vfx("burst", [hero.global_position, Color(0.6, 0.52, 0.4), 34, 7.0])
 	hero.play_sfx("slam")
 
 

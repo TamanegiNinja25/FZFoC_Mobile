@@ -40,6 +40,7 @@ func _cast(hero: Hero) -> void:
 	if hero.model.has_method("play_slam"):
 		hero.model.play_slam(p.radius, hero.in_form)
 	hero.fx.emit("slam", [p.radius, hero.in_form])
+	hero.vfx("burst", [hero.global_position, Color(1.0, 0.55, 0.15) if hero.in_form else Color(0.75, 0.68, 0.55), 28, 6.0])
 
 
 func ai_should_cast(hero: Hero, _target: Node3D, _skill: float) -> bool:

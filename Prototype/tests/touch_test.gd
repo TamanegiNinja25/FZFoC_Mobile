@@ -40,8 +40,10 @@ func _process(_delta: float) -> bool:
 			var v := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 			_check(v == Vector2.ZERO and not _joystick.is_active(), "lifting the finger stops input")
 			_start_x = _main.hero.global_position.x
-		60:
-			_check(absf(_main.hero.global_position.x - _start_x) < 0.01, "hero stops after release")
+		55:
+			_start_x = _main.hero.global_position.x  # after the short ease-out
+		70:
+			_check(absf(_main.hero.global_position.x - _start_x) < 0.01, "hero comes to rest after release")
 			for failure in _failures:
 				printerr("FAIL: " + failure)
 			print("TOUCH TEST %s (%d checks failed)" % ["PASSED" if _failures.is_empty() else "FAILED", _failures.size()])

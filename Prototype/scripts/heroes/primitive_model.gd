@@ -3,12 +3,18 @@ extends Node3D
 ## Base for hero models built from smooth primitives with the toon material:
 ## subclasses describe their parts in _build(); this class handles the team
 ## accent, glow parts, form animation and the shockwave effect. Faces −Z.
+## Weapon parts go under `weapon_pivot` (add_weapon_part) so HeroAnimator can
+## swing them: around X for an overhead strike, around Y for a sweep.
 
 var accent := Color(0.3, 0.55, 1.0)
 var body_color := Color(0.5, 0.5, 0.5)
 var form_body_color := Color(0.4, 0.4, 0.4)
 var glow_color := Color(1, 0.5, 0.1)
 var particle_color := Color(1, 1, 1)
+## The pivot weapon parts hang from, and how HeroAnimator swings it ("x" or "y").
+var weapon_pivot := Node3D.new()
+var weapon_pivot_at := Vector3(0, 1.3, 0)
+var swing_axis := "x"
 
 var _glow_materials: Array[StandardMaterial3D] = []
 var _body_material: StandardMaterial3D
@@ -19,6 +25,9 @@ var _tween: Tween
 func _ready() -> void:
 	_setup_colors()
 	_body_material = Toon.material(body_color)
+	weapon_pivot.name = "WeaponPivot"
+	weapon_pivot.position = weapon_pivot_at
+	add_child(weapon_pivot)
 	_build()
 	_particles = _make_particles()
 	add_child(_particles)
@@ -57,6 +66,14 @@ func add_part(mesh: Mesh, at: Vector3, material: Material, scale_ := Vector3.ONE
 	part.rotation_degrees = rotation_deg
 	part.material_override = material
 	add_child(part)
+	return part
+
+
+## Like add_part, but hung from the weapon pivot (`at` is in model space).
+func add_weapon_part(mesh: Mesh, at: Vector3, material: Material, scale_ := Vector3.ONE, rotation_deg := Vector3.ZERO) -> MeshInstance3D:
+	var part := add_part(mesh, at - weapon_pivot_at, material, scale_, rotation_deg)
+	remove_child(part)
+	weapon_pivot.add_child(part)
 	return part
 
 

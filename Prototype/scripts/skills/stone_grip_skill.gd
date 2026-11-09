@@ -31,8 +31,8 @@ func _cast(hero: Hero) -> void:
 		target.apply_dot(scaled(hero, DPS), root_time(), hero)
 	else:
 		hero.deal_damage(target, scaled(hero, DPS) * root_time())
-	Effects.ring(hero.get_parent(), target.global_position, 1.2, Color(0.75, 0.6, 0.35, 0.95))
-	hero.fx.emit("ring", [target.global_position, 1.2, Color(0.75, 0.6, 0.35, 0.95)])
+	hero.vfx("ring", [target.global_position, 1.2, Color(0.75, 0.6, 0.35, 0.95)])
+	hero.vfx("burst", [target.global_position, Color(0.6, 0.5, 0.35), 22, 4.0])
 	hero.play_sfx("slam", -4.0)
 
 

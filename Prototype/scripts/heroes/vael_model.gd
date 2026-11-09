@@ -14,6 +14,11 @@ const EMBER := Color(1.0, 0.45, 0.1)
 
 ## Team colour for the shield emblem; set before the model enters the tree.
 var accent := Color(0.3, 0.55, 1.0)
+## The hammer hangs from this shoulder pivot; HeroAnimator swings it overhead.
+var weapon_pivot := Node3D.new()
+var swing_axis := "x"
+var glow_color := EMBER
+const HAMMER_PIVOT := Vector3(0.8, 1.45, -0.1)
 
 var _glow_materials: Array[StandardMaterial3D] = []
 var _body_material: StandardMaterial3D
@@ -33,8 +38,11 @@ func _ready() -> void:
 	for side in [-1.0, 1.0]:
 		_add(_dome(0.34), Vector3(0.6 * side, 1.5, 0), dark, Vector3(1.0, 0.7, 1.15))  # domed pauldrons
 		_add(_dome(0.1), Vector3(0.6 * side, 1.73, 0.05), _glow(), Vector3(1.6, 0.6, 1.0))  # shoulder vents (top-visible glow)
-	_add(_cylinder(0.06, 1.3), Vector3(0.8, 0.95, -0.1), Toon.material(WOOD))            # hammer handle
-	_add(_cylinder(0.2, 0.62), Vector3(0.8, 1.6, -0.1), dark, Vector3.ONE, Vector3(0, 0, 90))  # barrel hammer head
+	weapon_pivot.name = "WeaponPivot"
+	weapon_pivot.position = HAMMER_PIVOT
+	add_child(weapon_pivot)
+	_add(_cylinder(0.06, 1.3), Vector3(0.8, 0.95, -0.1) - HAMMER_PIVOT, Toon.material(WOOD), Vector3.ONE, Vector3.ZERO, weapon_pivot)  # hammer handle
+	_add(_cylinder(0.2, 0.62), Vector3(0.8, 1.6, -0.1) - HAMMER_PIVOT, dark, Vector3.ONE, Vector3(0, 0, 90), weapon_pivot)  # barrel hammer head
 	_add(_cylinder(0.44, 0.09), Vector3(-0.8, 1.0, -0.05), Toon.material(IRON), Vector3.ONE, Vector3(0, 0, 90))  # round shield
 	_add(_cylinder(0.22, 0.1), Vector3(-0.86, 1.0, -0.05), Toon.material(accent, 0.3), Vector3.ONE, Vector3(0, 0, 90))  # team emblem
 	_embers = _make_embers()
@@ -77,14 +85,14 @@ func play_slam(radius: float, hot: bool) -> void:
 	tween.tween_callback(ring.queue_free)
 
 
-func _add(mesh: Mesh, position_: Vector3, material: Material, scale_ := Vector3.ONE, rotation_deg := Vector3.ZERO) -> void:
+func _add(mesh: Mesh, position_: Vector3, material: Material, scale_ := Vector3.ONE, rotation_deg := Vector3.ZERO, parent: Node3D = null) -> void:
 	var part := MeshInstance3D.new()
 	part.mesh = mesh
 	part.position = position_
 	part.scale = scale_
 	part.rotation_degrees = rotation_deg
 	part.material_override = material
-	add_child(part)
+	(parent if parent else self).add_child(part)
 
 
 func _glow() -> StandardMaterial3D:

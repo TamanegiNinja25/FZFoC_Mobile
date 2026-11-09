@@ -15,6 +15,8 @@ func _init() -> void:
 func _cast(hero: Hero) -> void:
 	hero.apply_haste(MULTIPLIER, DURATION + 0.5 * (rank - 1))
 	hero.play_sfx("dash", 2.0)
+	hero.vfx("column", [hero.global_position, Color(0.4, 1.0, 0.95), 3.0])
+	hero.vfx("burst", [hero.global_position, Color(0.7, 1.0, 1.0), 20, 4.0])
 
 
 func ai_should_cast(hero: Hero, target: Node3D, _skill: float) -> bool:

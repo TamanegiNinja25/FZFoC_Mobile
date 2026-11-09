@@ -5,6 +5,7 @@ extends PrimitiveModel
 
 
 func _setup_colors() -> void:
+	weapon_pivot_at = Vector3(0, 1.5, 0)  # fists slam down from the shoulders
 	body_color = Color(0.48, 0.46, 0.42)
 	form_body_color = Color(0.38, 0.34, 0.3)
 	glow_color = Color(1.0, 0.7, 0.25)
@@ -23,6 +24,6 @@ func _build() -> void:
 	for side in [-1.0, 1.0]:
 		add_part(sphere(0.38), Vector3(0.72 * side, 1.5, 0), dark)                             # shoulder boulders
 		add_part(dome(0.28), Vector3(0.72 * side, 1.78, 0), moss)                              # moss caps (top)
-		add_part(sphere(0.24), Vector3(0.86 * side, 1.08, -0.05), dark)                        # upper arm stone
-		add_part(sphere(0.3), Vector3(0.9 * side, 0.6, -0.1), _body_material)                  # fist
+		add_weapon_part(sphere(0.24), Vector3(0.86 * side, 1.08, -0.05), dark)                 # upper arm stone
+		add_weapon_part(sphere(0.3), Vector3(0.9 * side, 0.6, -0.1), _body_material)           # fist
 		add_part(sphere(0.26), Vector3(0.28 * side, 0.32, 0), dark)                            # legs

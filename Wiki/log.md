@@ -6,6 +6,12 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Prototype: hero animation, effects, skill icons
+- Heroes animate procedurally from their real movement (run cycle, idle, smooth turning, attack swing on a weapon pivot, cast pose, hit flinch, fall on death, rise on respawn, aura in form); movement eases in and out; animation and effects relay to network clients.
+- Effect library (bursts, slash arcs, afterimages, beams, falling rock, light columns) used by every skill, level-ups, transformations and recipes.
+- Original skill icons (`tools/skill_icons.py`) on the HUD's skill buttons and in hero select.
+- Bots hunt enemy heroes within half the map when level-even and skip big piles until level 8; a Mobile bot match now runs ~6.6 min with one duel.
+
 ## 2026-11-09 — Prototype: creep physics, animation, damage numbers, pile-ups
 - Creeps, bosses and summons are physics bodies (heroes bump into them), with walk, attack-lunge, hit and death animation; stun stars and root spikes on units.
 - Floating damage numbers for the player (dealt and taken, sent to clients too) and damage totals in the HUD and results.

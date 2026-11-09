@@ -14,8 +14,12 @@ func _init() -> void:
 
 func _cast(hero: Hero) -> void:
 	var distance := DISTANCE + 0.5 * (rank - 1)
-	hero.start_dash(hero.aim_direction() * distance / DURATION, DURATION)
+	var start := hero.global_position
+	var direction := hero.aim_direction()
+	hero.start_dash(direction * distance / DURATION, DURATION)
 	hero.play_sfx("dash")
+	for i in 3:  # afterimages along the dash
+		hero.vfx("ghost", [start + direction * distance * i / 3.0, hero.model.rotation.y, Color(1.0, 0.55, 0.2)])
 
 
 ## Strong bots dash onto a wounded, fleeing hero.

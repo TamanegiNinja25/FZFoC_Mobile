@@ -66,7 +66,7 @@ func _pack() -> Dictionary:
 		var ranks := PackedInt32Array()
 		for skill in h.skills:
 			ranks.append(skill.rank)
-		heroes.append([h.global_position.x, h.global_position.z, h.model.rotation.y, h.hp, h.max_hp, h.shield,
+		heroes.append([h.global_position.x, h.global_position.z, h.animator.target_yaw, h.hp, h.max_hp, h.shield,
 				h.in_form, h.form_time_left, h.is_alive(), h.gold, h.meter.charge, h.kills, h.deaths,
 				cooldowns, item_ids, h.spree, h.in_shop_range,
 				h.level, h.xp, h.skill_points, ranks, [h.tome_attributes.str, h.tome_attributes.agi, h.tome_attributes.int],
@@ -155,7 +155,7 @@ func _snapshot(state: Dictionary) -> void:
 		if not _targets.has(i) or h.global_position.distance_to(target) > 6.0:
 			h.global_position = target  # first snapshot or respawn: snap
 		_targets[i] = target
-		h.model.rotation.y = s[2]
+		h.animator.target_yaw = s[2]
 		h.max_hp = s[4]
 		h.shield = s[5]
 		if not is_equal_approx(h.hp, s[3]):
@@ -167,8 +167,12 @@ func _snapshot(state: Dictionary) -> void:
 				h.model.set_form(h.in_form, h.form_scale)
 			h.form_changed.emit(h.in_form)
 		h.form_time_left = s[7]
-		h.visible = s[8]
+		var was_alive := h.is_alive()
 		h._dead_time = 0.0 if s[8] else 1.0
+		if was_alive and not s[8]:
+			h.animator.die()
+		elif not was_alive and s[8]:
+			h.animator.respawn()
 		h.gold = s[9]
 		if not is_equal_approx(h.meter.charge, s[10]):
 			h.meter.charge = s[10]
@@ -246,6 +250,10 @@ func _fx(index: int, kind: String, data: Array) -> void:
 			Projectile.launch(h, data[0], BoulderHurlSkill.SPEED, BoulderHurlSkill.RANGE, 0.0, true)
 		"ring":
 			Effects.ring(arena, data[0], data[1], data[2])
+		"vfx":
+			UnitFx.play(arena, data[0], data[1])
+		"anim":
+			h.animator.play(data[0])
 		"dmg":
 			if h.is_player:
 				FloatText.spawn(arena, data[0], data[1], FloatText.DEALT, data[1] >= 150.0)

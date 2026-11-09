@@ -26,8 +26,9 @@ func _cast(hero: Hero) -> void:
 	hero.deal_damage(target, scaled(hero, DAMAGE))
 	if target.has_method("apply_stun"):
 		target.apply_stun(stun_time())
-	Effects.ring(hero.get_parent(), target.global_position, 1.4, Color(1.0, 0.7, 0.3, 0.9))
-	hero.fx.emit("ring", [target.global_position, 1.4, Color(1.0, 0.7, 0.3, 0.9)])
+	hero.vfx("beam", [hero.global_position, target.global_position, Color(1.0, 0.75, 0.3), 0.18])
+	hero.vfx("ring", [target.global_position, 1.4, Color(1.0, 0.7, 0.3, 0.9)])
+	hero.vfx("burst", [target.global_position, Color(1.0, 0.65, 0.2), 18, 5.0])
 	hero.play_sfx("hit", 3.0)
 
 

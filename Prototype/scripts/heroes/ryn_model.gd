@@ -5,6 +5,8 @@ extends PrimitiveModel
 
 
 func _setup_colors() -> void:
+	swing_axis = "y"  # twin blades sweep
+	weapon_pivot_at = Vector3(0, 0.85, 0)
 	body_color = Color(0.22, 0.42, 0.45)
 	form_body_color = Color(0.16, 0.3, 0.36)
 	glow_color = Color(0.35, 1.0, 0.95)
@@ -24,5 +26,5 @@ func _build() -> void:
 	for side in [-1.0, 1.0]:
 		add_part(dome(0.16), Vector3(0.36 * side, 1.38, 0), cloth)                               # shoulder wraps
 		add_part(box(Vector3(0.05, 0.04, 0.32)), Vector3(0.36 * side, 1.47, 0), glow())          # shoulder ribbons (top)
-		add_part(box(Vector3(0.05, 0.03, 0.8)), Vector3(0.5 * side, 0.85, -0.3), steel, Vector3.ONE, Vector3(0, 12 * side, 0))   # blades
-		add_part(box(Vector3(0.08, 0.08, 0.16)), Vector3(0.5 * side, 0.85, 0.12), Toon.material(Color(0.3, 0.2, 0.12)))          # hilts
+		add_weapon_part(box(Vector3(0.05, 0.03, 0.8)), Vector3(0.5 * side, 0.85, -0.3), steel, Vector3.ONE, Vector3(0, 12 * side, 0))   # blades
+		add_weapon_part(box(Vector3(0.08, 0.08, 0.16)), Vector3(0.5 * side, 0.85, 0.12), Toon.material(Color(0.3, 0.2, 0.12)))          # hilts

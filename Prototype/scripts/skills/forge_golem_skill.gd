@@ -15,8 +15,9 @@ func _init() -> void:
 func _cast(hero: Hero) -> void:
 	var spot := hero.global_position + hero.aim_direction() * 2.0
 	Creep.summon(hero, "golem", spot, LIFETIME, 1.0 + 0.4 * (rank - 1))
-	Effects.ring(hero.get_parent(), spot, 2.5, Color(1.0, 0.5, 0.15, 0.9))
-	hero.fx.emit("ring", [spot, 2.5, Color(1.0, 0.5, 0.15, 0.9)])
+	hero.vfx("ring", [spot, 2.5, Color(1.0, 0.5, 0.15, 0.9)])
+	hero.vfx("column", [spot, Color(1.0, 0.5, 0.15), 5.0])
+	hero.vfx("burst", [spot, Color(1.0, 0.45, 0.1), 40, 7.0])
 	hero.play_sfx("transform", -4.0)
 
 

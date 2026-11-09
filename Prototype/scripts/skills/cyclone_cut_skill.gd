@@ -29,6 +29,10 @@ func _cast(hero: Hero) -> void:
 			hero.deal_damage(node, scaled(hero, DAMAGE) * scale)
 	hero.start_dash(direction * DISTANCE * scale / DURATION, DURATION)
 	hero.play_sfx("dash")
+	var yaw := atan2(-direction.x, -direction.z)
+	for i in 4:  # wind afterimages and a slash along the path
+		hero.vfx("ghost", [start + direction * DISTANCE * scale * i / 4.0, yaw, Color(0.4, 1.0, 0.95)])
+	hero.vfx("slash", [start + direction * DISTANCE * scale * 0.5, yaw, 2.6, Color(0.6, 1.0, 1.0, 0.8)])
 
 
 func ai_should_cast(hero: Hero, target: Node3D, _skill: float) -> bool:

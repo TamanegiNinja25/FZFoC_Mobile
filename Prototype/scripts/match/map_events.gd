@@ -108,6 +108,12 @@ func _wake_camps() -> void:
 					creep.wake()
 
 
+func camp_size(index: int) -> int:
+	if index < 0 or index >= _camp_units.size():
+		return 0
+	return _camp_units[index].filter(func(u): return is_instance_valid(u) and u.is_alive()).size()
+
+
 func alive_creeps() -> int:
 	var count := 0
 	for list in _camp_units:

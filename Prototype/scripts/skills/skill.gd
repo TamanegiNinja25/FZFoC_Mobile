@@ -61,6 +61,15 @@ func scaled(hero: Hero, base: float) -> float:
 	return base * (1.0 + 0.35 * (maxi(rank, 1) - 1)) * hero.skill_power + hero.attribute_gained(hero.definition.primary)
 
 
+## The skill's icon (tools/skill_icons.py draws one per skill name).
+func icon_path() -> String:
+	return "res://assets/icons/skills/%s.png" % skill_name.to_snake_case()
+
+
+func icon() -> Texture2D:
+	return load(icon_path()) if ResourceLoader.exists(icon_path()) else null
+
+
 ## Rank as pips for the HUD, e.g. "●●○○○".
 func rank_pips() -> String:
 	return "●".repeat(rank) + "○".repeat(max_rank - rank)

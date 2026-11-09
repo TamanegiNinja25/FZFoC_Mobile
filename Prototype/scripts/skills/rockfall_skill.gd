@@ -22,8 +22,7 @@ func _cast(hero: Hero) -> void:
 	hero._face(direction)
 	var spot := hero.global_position + direction * REACH
 	hero.apply_root(CHANNEL)
-	Effects.ring(hero.get_parent(), spot, RADIUS * 0.5, Color(0.9, 0.75, 0.4, 0.6))
-	hero.fx.emit("ring", [spot, RADIUS * 0.5, Color(0.9, 0.75, 0.4, 0.6)])
+	hero.vfx("ring", [spot, RADIUS * 0.5, Color(0.9, 0.75, 0.4, 0.6)])
 	hero.get_tree().create_timer(CHANNEL, false, true).timeout.connect(_land.bind(hero, spot))
 
 
@@ -35,8 +34,7 @@ func _land(hero: Hero, spot: Vector3) -> void:
 			hero.deal_damage(node, scaled(hero, DAMAGE))
 			if node.has_method("apply_stun"):
 				node.apply_stun(STUN)
-	Effects.ring(hero.get_parent(), spot, RADIUS, Color(1.0, 0.8, 0.4, 0.95))
-	hero.fx.emit("ring", [spot, RADIUS, Color(1.0, 0.8, 0.4, 0.95)])
+	hero.vfx("rock", [spot, RADIUS])
 	hero.play_sfx("slam", 4.0)
 
 

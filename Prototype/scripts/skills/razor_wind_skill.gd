@@ -26,9 +26,9 @@ func _cast(hero: Hero) -> void:
 			hero.deal_damage(node, scaled(hero, DAMAGE))
 			if node.has_method("apply_dot"):
 				node.apply_dot(scaled(hero, BLEED_DPS), BLEED_TIME, hero)
-	var tip := hero.global_position + forward * RANGE * 0.6
-	Effects.ring(hero.get_parent(), tip, 2.2, Color(0.55, 0.95, 1.0, 0.9))
-	hero.fx.emit("ring", [tip, 2.2, Color(0.55, 0.95, 1.0, 0.9)])
+	var yaw := atan2(-forward.x, -forward.z)
+	for reach in [2.5, 4.5, 6.0]:  # three widening blade arcs
+		hero.vfx("slash", [hero.global_position + forward * (reach - 2.0), yaw, reach * 0.6, Color(0.55, 0.95, 1.0, 0.75)])
 	hero.play_sfx("dash", 4.0)
 
 
