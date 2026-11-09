@@ -638,8 +638,9 @@ func _show_result() -> void:
 	column.add_child(heading)
 	var summary := Label.new()
 	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	summary.text = "Blue %d — %d Red  (%s)\nYou: level %d · %d kills · %d deaths · %d gold" % [
-		kills[0], kills[1], "Classic" if classic else "Mobile", hero.level, hero.kills, hero.deaths, hero.gold]
+	summary.text = "Blue %d — %d Red  (%s)\nYou: level %d · %d kills · %d deaths · %d gold\nDamage dealt %d · taken %d" % [
+		kills[0], kills[1], "Classic" if classic else "Mobile", hero.level, hero.kills, hero.deaths, hero.gold,
+		hero.damage_dealt, hero.damage_taken]
 	column.add_child(summary)
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER

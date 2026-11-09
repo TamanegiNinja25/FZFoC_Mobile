@@ -67,6 +67,7 @@ func _video_tab() -> Control:
 	_options(grid, "3D resolution", "render_scale", [[0.75, "75%"], [0.9, "90%"], [1.0, "100%"]])
 	_options(grid, "Shadows", "shadow_cascades", [[0, "Off"], [2, "Medium (2 cascades)"], [4, "High (4 cascades)"]])
 	_options(grid, "Frame rate cap", "fps_cap", [[30, "30 FPS (battery)"], [60, "60 FPS"]])
+	_options(grid, "Creep pile-ups", "creep_limit", [["map", "Map (camps grow to 60)"], ["safe", "Phone-safe (80 in all)"]])
 	var fps := CheckButton.new()
 	fps.text = "Show FPS counter"
 	fps.button_pressed = GameSettings.show_fps
@@ -114,7 +115,7 @@ func _options(grid: GridContainer, label_text: String, key: String, choices: Arr
 	var current: Variant = GameSettings.get(key)
 	for i in choices.size():
 		picker.add_item(choices[i][1], i)
-		if is_equal_approx(float(choices[i][0]), float(current)):
+		if (choices[i][0] is String and choices[i][0] == current) or (not choices[i][0] is String and is_equal_approx(float(choices[i][0]), float(current))):
 			picker.select(i)
 	picker.item_selected.connect(func(i: int): GameSettings.set_and_save(key, choices[i][0]))
 	grid.add_child(picker)

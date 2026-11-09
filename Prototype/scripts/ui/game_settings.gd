@@ -13,6 +13,8 @@ var render_scale := Platform.render_scale()
 var shadow_cascades := Platform.shadow_cascades()
 var fps_cap := 60
 var show_fps := false
+## Creep pile-ups: "map" (as the reference map — camps grow until 60) or "safe" (10 per camp, 80 in all).
+var creep_limit := "map"
 
 
 func _ready() -> void:
@@ -31,6 +33,7 @@ func reset_to_defaults() -> void:
 	shadow_cascades = Platform.shadow_cascades()
 	fps_cap = 60
 	show_fps = false
+	creep_limit = "map"
 	save_settings()
 	apply()
 
@@ -46,6 +49,7 @@ func load_settings() -> void:
 	shadow_cascades = file.get_value("video", "shadow_cascades", shadow_cascades)
 	fps_cap = file.get_value("video", "fps_cap", fps_cap)
 	show_fps = file.get_value("video", "show_fps", show_fps)
+	creep_limit = file.get_value("game", "creep_limit", creep_limit)
 
 
 func save_settings() -> void:
@@ -57,6 +61,7 @@ func save_settings() -> void:
 	file.set_value("video", "shadow_cascades", shadow_cascades)
 	file.set_value("video", "fps_cap", fps_cap)
 	file.set_value("video", "show_fps", show_fps)
+	file.set_value("game", "creep_limit", creep_limit)
 	file.save(PATH)
 
 

@@ -70,7 +70,7 @@ func _pack() -> Dictionary:
 				h.in_form, h.form_time_left, h.is_alive(), h.gold, h.meter.charge, h.kills, h.deaths,
 				cooldowns, item_ids, h.spree, h.in_shop_range,
 				h.level, h.xp, h.skill_points, ranks, [h.tome_attributes.str, h.tome_attributes.agi, h.tome_attributes.int],
-				h.frozen, h.is_stunned()])
+				h.frozen, h.is_stunned(), h.damage_dealt, h.damage_taken, h.is_rooted()])
 	return {"heroes": heroes, "kills": arena.kills, "time": arena.time_left if arena.time_left != INF else -1.0,
 		"duel": [arena.duel_phase, arena.duel_text, arena.duel_in]}
 
@@ -194,6 +194,9 @@ func _snapshot(state: Dictionary) -> void:
 		h.tome_attributes = {"str": s[21][0], "agi": s[21][1], "int": s[21][2]}
 		h.frozen = s[22]
 		h._stun_time = 0.5 if s[23] else 0.0
+		h.damage_dealt = s[24]
+		h.damage_taken = s[25]
+		h._root_time = 0.5 if s[26] else 0.0
 		if leveled:
 			h.recompute_stats()
 			h.leveled_up.emit(h.level)
@@ -243,6 +246,12 @@ func _fx(index: int, kind: String, data: Array) -> void:
 			Projectile.launch(h, data[0], BoulderHurlSkill.SPEED, BoulderHurlSkill.RANGE, 0.0, true)
 		"ring":
 			Effects.ring(arena, data[0], data[1], data[2])
+		"dmg":
+			if h.is_player:
+				FloatText.spawn(arena, data[0], data[1], FloatText.DEALT, data[1] >= 150.0)
+		"hurt":
+			if h.is_player:
+				FloatText.spawn(arena, h.global_position, data[0], FloatText.TAKEN)
 		"sfx":
 			var sfx := get_node_or_null("/root/Sfx")
 			if sfx:

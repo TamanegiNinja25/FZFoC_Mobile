@@ -109,6 +109,10 @@ func _start_arena() -> void:
 	var bosses := get_nodes_in_group("creeps").filter(func(c): return c.is_boss and not c.is_colossus)
 	_check(bosses.size() == 2 and bosses.all(func(c): return c.max_hp == 500.0), "two boss chains start with a 500 HP boss")
 	_check(_scene.events.colossus.max_hp == 100000.0, "the win boss has 100,000 HP")
+	var creep: Node = _scene.events.colossus
+	_check(creep is CharacterBody3D and creep.collision_layer == Creep.CREEP_LAYER and (_hero.collision_mask & Creep.CREEP_LAYER) != 0,
+			"units have physics bodies: heroes bump into creeps and bosses")
+	_check(_scene.events.camp_cap == MapEvents.MAP_CAMP_CAP, "map-style pile-ups by default (camps grow to %d)" % MapEvents.MAP_CAMP_CAP)
 	_scene.events.timers[30] = 0.01
 	_wait = 0.2
 
@@ -120,7 +124,7 @@ func _waves() -> void:
 
 
 func _wave_cap() -> void:
-	_check(_scene.events.alive_creeps() == MapEvents.TOTAL_CAP, "60 s wave adds 68, capped at %d alive (%d)" % [MapEvents.TOTAL_CAP, _scene.events.alive_creeps()])
+	_check(_scene.events.alive_creeps() == 110, "60 s wave adds 68 on top: 110 creeps piling up, as in the map (%d)" % _scene.events.alive_creeps())
 	for creep in get_nodes_in_group("creeps"):
 		if not creep.is_boss:
 			creep._die(null)
@@ -142,6 +146,7 @@ func _bosses() -> void:
 	_hero.global_position = boss.global_position + Vector3(0, 0, 3)
 	_hero.deal_damage(boss, 99999.0)
 	_check(not boss.is_alive() and _hero.gold - gold_before >= 499.0, "a boss kill pays its bounty")
+	_check(_hero.damage_dealt >= 500.0, "damage dealt is counted (%d)" % _hero.damage_dealt)
 	_check(_scene.events.boss_stage("a") == 1, "chain A moves to stage 2")
 	_hero.global_position = _scene.fountain_position(0)
 	Engine.time_scale = 10.0

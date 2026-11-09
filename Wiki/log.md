@@ -6,6 +6,12 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Prototype: creep physics, animation, damage numbers, pile-ups
+- Creeps, bosses and summons are physics bodies (heroes bump into them), with walk, attack-lunge, hit and death animation; stun stars and root spikes on units.
+- Floating damage numbers for the player (dealt and taken, sent to clients too) and damage totals in the HUD and results.
+- Map-style pile-ups by default (camps grow to 60); a Phone-safe setting keeps 10 per camp / 80 total. Sleeping camps cost nothing until a hero comes near; ~400 units measured at 1.5–1.8 ms script and 4–8 ms physics on the laptop.
+- Record and ingest to follow at the end of this batch (hero visuals, content, balance, join by IP).
+
 ## 2026-11-08 — Phone check
 - Owner tested the v0.6.0 release on their phone: no issues, performance stable even with high creep counts. README, prototype README and backlog updated; the creep caps (10 per camp, 80 total) stay as they are.
 

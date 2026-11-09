@@ -1,15 +1,21 @@
 class_name Creep
-extends Node3D
+extends CharacterBody3D
 ## A non-hero unit: wave creep, boss, the win boss, or a hero's summon.
 ## Creeps guard their camp: they attack heroes who come close or hit them,
 ## chase up to a leash, then walk home. Summons fight for their hero's team.
-## No physics body — distance checks only — so dozens stay cheap on a phone.
+## A physics body, like a Warcraft III unit: creeps block heroes and each other,
+## so unfarmed camps pile up. Idle creeps don't move the physics at all, and
+## look for targets only 4×/s, so big piles stay cheap. Movement and attacks
+## are animated (walk bob and lean, lunge, hit punch, tip-over death).
 ## On network clients a creep is a `puppet` the host's snapshots move.
 
 signal died(killer: Hero)
 
 const ACQUIRE_RANGE := 5.0
 const LEASH := 9.0
+
+## Physics layers: 1 = world and heroes, 3 = creeps and summons.
+const CREEP_LAYER := 4
 
 ## Neutral creeps are team -1; summons take their hero's team.
 var team := -1
@@ -47,6 +53,20 @@ var _dead := false
 var _bar: Node3D
 var _bar_fill: Node3D
 var _body: Node3D
+var _size := 1.0
+## Animation state (visual only, runs on every device).
+var _last_pos := Vector3.ZERO
+var _speed := 0.0
+var _walk_phase := 0.0
+var _lunge := 0.0
+var _punch := 0.0
+var _stars: Node3D
+## Sleeping: a camp creep at home, healthy and without a target turns its
+## physics off; MapEvents wakes its camp when a hero comes near, and any hit,
+## stun, root or bleed wakes it at once. Bosses just think 4×/s while idle.
+var _idle_clock := 0.0
+## The camp this creep belongs to (-1: bosses and summons).
+var camp := -1
 
 static var _mesh_cache := {}
 static var _material_cache := {}
@@ -101,7 +121,28 @@ func _ready() -> void:
 	add_to_group("creeps")
 	if home == Vector3.ZERO:
 		home = global_position
+	_size = CreepTypes.lookup(key).size
+	var shape := CollisionShape3D.new()
+	var capsule := CapsuleShape3D.new()
+	capsule.radius = 0.38 * _size
+	capsule.height = maxf(1.6 * _size, capsule.radius * 2.0 + 0.1)
+	shape.shape = capsule
+	shape.position.y = capsule.height / 2.0
+	add_child(shape)
+	# Puppets on clients are moved by snapshots, so they stay out of the physics.
+	collision_layer = 0 if puppet else CREEP_LAYER
+	collision_mask = 0 if puppet else 1 | CREEP_LAYER
+	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
+	_last_pos = global_position
+	_idle_clock = randf() * 0.25  # spread sleeping creeps' thinking across frames
 	_build_visual()
+	# Only creeps on screen run their animation.
+	var notifier := VisibleOnScreenNotifier3D.new()
+	notifier.aabb = AABB(Vector3(-1, 0, -1) * _size, Vector3(2, 3, 2) * _size)
+	notifier.screen_entered.connect(func(): set_process(true))
+	notifier.screen_exited.connect(func(): set_process(false))
+	add_child(notifier)
+	set_process(false)
 
 
 func _physics_process(delta: float) -> void:
@@ -111,6 +152,15 @@ func _physics_process(delta: float) -> void:
 		return
 	if _dead or frozen:
 		return
+	_idle_clock += delta
+	if _is_sleeping():
+		if camp >= 0:
+			set_physics_process(false)  # MapEvents wakes the camp when a hero comes near
+			return
+		if _idle_clock < 0.25:
+			return
+		delta = _idle_clock
+	_idle_clock = 0.0
 	if lifetime > 0.0:
 		lifetime -= delta
 		if lifetime <= 0.0 or not is_instance_valid(owner_hero):
@@ -145,6 +195,12 @@ func _physics_process(delta: float) -> void:
 		_hit(_target)
 
 
+func _is_sleeping() -> bool:
+	if _target != null or owner_hero != null or not _dots.is_empty() or _stun_time > 0.0 or hp < max_hp:
+		return false
+	return Vector2(home.x - global_position.x, home.z - global_position.z).length() <= 0.4
+
+
 ## Picks or drops a target. Creeps keep to their leash; summons hunt near their hero.
 func _think() -> void:
 	if _target and (not is_instance_valid(_target) or not _target.is_alive() or not is_hostile(_target)):
@@ -172,24 +228,53 @@ func _think() -> void:
 				_target = node
 
 
-func _step(offset: Vector3, delta: float) -> void:
+func _step(offset: Vector3, _delta: float) -> void:
 	if _root_time > 0.0:
 		return
 	var direction := offset.normalized()
-	global_position += direction * move_speed * delta
-	if _body:
-		_body.rotation.y = atan2(-direction.x, -direction.z)
+	velocity = direction * move_speed
+	move_and_slide()
+	global_position.y = 0.0
+	_turn_toward(direction)
+
+
+func _turn_toward(direction: Vector3) -> void:
+	if _body and Vector2(direction.x, direction.z).length() > 0.01:
+		_body.rotation.y = lerp_angle(_body.rotation.y, atan2(-direction.x, -direction.z), 0.35)
+
+
+## Visual animation from how the unit actually moved, so it works for puppets too.
+func _process(delta: float) -> void:
+	if _body == null or _dead:
+		return
+	var moved := global_position - _last_pos
+	moved.y = 0.0
+	_last_pos = global_position
+	_speed = lerpf(_speed, moved.length() / maxf(delta, 0.0001), minf(delta * 10.0, 1.0))
+	var walking := _speed > 0.4 and not frozen
+	if walking:
+		_walk_phase += delta * (6.0 + _speed * 1.5) / _size
+	_lunge = maxf(_lunge - delta * 5.0, 0.0)
+	_punch = maxf(_punch - delta * 6.0, 0.0)
+	var bob := absf(sin(_walk_phase)) * 0.12 * _size if walking else sin(Time.get_ticks_msec() * 0.003 + net_id) * 0.02 * _size
+	var lunge := sin(_lunge * PI)  # 0 → 1 → 0 over the lunge
+	_body.position = Vector3(0, bob, 0) + Vector3(0, 0, -0.35 * _size * lunge).rotated(Vector3.UP, _body.rotation.y)
+	_body.rotation.x = (-0.12 if walking else 0.0) - 0.35 * lunge
+	_body.rotation.z = sin(_walk_phase) * 0.06 if walking else 0.0
+	_body.scale = Vector3.ONE * (1.0 + 0.12 * _punch)
+	if _stars:
+		_stars.visible = _stun_time > 0.0
+		if _stars.visible:
+			_stars.rotation.y += delta * 5.0
 
 
 func _hit(target: Node3D) -> void:
+	_turn_toward(target.global_position - global_position)
+	_lunge = 1.0
 	if owner_hero and is_instance_valid(owner_hero):
 		owner_hero.deal_damage(target, damage)  # the hero gets the kill and the gold
 	else:
 		target.take_damage(damage, self)
-	if _body:
-		var tween := _body.create_tween()
-		tween.tween_property(_body, "position:y", 0.25, 0.08)
-		tween.tween_property(_body, "position:y", 0.0, 0.12)
 
 
 func _try_slam() -> void:
@@ -216,11 +301,18 @@ func is_alive() -> bool:
 
 
 ## Returns {dealt, killed, bounty}. Being hit makes a creep turn on its attacker.
+func wake() -> void:
+	if not puppet and not _dead:
+		set_physics_process(true)
+
+
 func take_damage(amount: float, attacker: Node = null) -> Dictionary:
+	wake()
 	if _dead or frozen:
 		return {"dealt": 0.0, "killed": false, "bounty": 0.0}
 	var dealt := minf(amount, hp)
 	hp -= dealt
+	_punch = 1.0
 	_update_bar()
 	if attacker and is_instance_valid(attacker) and attacker is Node3D and is_hostile(attacker) and _target == null:
 		_target = attacker
@@ -236,16 +328,21 @@ func heal(amount: float) -> void:
 
 
 func apply_stun(duration: float) -> void:
+	wake()
 	if not _dead and not is_colossus:
 		_stun_time = maxf(_stun_time, duration)
+		if _stars == null:
+			_stars = UnitFx.stun_stars(self, 2.4 * _size)
 
 
 func apply_root(duration: float) -> void:
+	wake()
 	if not _dead and not is_colossus:
 		_root_time = maxf(_root_time, duration)
 
 
 func apply_dot(dps: float, duration: float, source: Hero) -> void:
+	wake()
 	if not _dead:
 		_dots.append([dps, duration, source])
 
@@ -285,14 +382,26 @@ func apply_snapshot(x: float, z: float, new_hp: float, new_max: float) -> void:
 	_net_target = target
 	max_hp = new_max
 	if not is_equal_approx(hp, new_hp):
+		if new_hp < hp:
+			_punch = 1.0
 		hp = new_hp
 		_update_bar()
 
 
+## Death: topple over and sink, then go.
 func _vanish() -> void:
 	remove_from_group("units")
+	remove_from_group("creeps")
+	remove_from_group("summons")
+	collision_layer = 0
+	collision_mask = 0
+	if _bar:
+		_bar.visible = false
 	var tween := create_tween()
-	tween.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.3)
+	if _body:
+		tween.tween_property(_body, "rotation:x", -PI / 2.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.tween_property(_body, "position:y", -0.6 * _size, 0.5).set_delay(0.15)
+	tween.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.25)
 	tween.tween_callback(queue_free)
 
 

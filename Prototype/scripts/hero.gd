@@ -86,6 +86,16 @@ var is_player := true
 var ai_move := Vector3.ZERO
 var kills := 0
 var deaths := 0
+## Damage totals for the HUD and the results screen.
+var damage_dealt := 0.0
+var damage_taken := 0.0
+## Damage numbers are gathered for a moment and shown (or sent) as one number.
+var _numbers_out := 0.0
+var _numbers_in := 0.0
+var _numbers_at := Vector3.ZERO
+var _numbers_clock := 0.0
+var _stars: Node3D
+var _roots: Node3D
 ## Inventory (up to ItemCatalog.INVENTORY_SIZE). Stats are recomputed from the
 ## definition, attributes and every item carried.
 var items: Array[ItemDef] = []
@@ -162,6 +172,7 @@ func _ready() -> void:
 	shape.shape = capsule
 	shape.position.y = 1.0
 	add_child(shape)
+	collision_mask = 1 | Creep.CREEP_LAYER
 
 	model = definition.create_model()
 	model.name = "Model"
@@ -211,6 +222,7 @@ func _physics_process(delta: float) -> void:
 
 	for skill in skills:
 		skill.tick(delta)
+	_flush_numbers(delta)
 
 	if is_stunned():
 		velocity = Vector3.ZERO
@@ -237,6 +249,8 @@ func _physics_process(delta: float) -> void:
 		var target := _attack_target()
 		if target:
 			_attack(target)
+		else:
+			_attack_cooldown = 0.1  # nothing in range: look again in 0.1 s, not every tick
 
 
 func _poll_actions() -> void:
@@ -278,6 +292,8 @@ func take_damage(amount: float, attacker: Node = null) -> Dictionary:
 	shield -= absorbed
 	var dealt := minf(hp, amount - absorbed) + absorbed
 	hp -= amount - absorbed
+	damage_taken += dealt
+	_numbers_in += dealt
 	meter.on_damage_taken(amount)
 	health_changed.emit(hp, max_hp, shield)
 	if hp <= 0.0:
@@ -550,6 +566,19 @@ func apply_root(duration: float) -> void:
 		_root_time = maxf(_root_time, duration)
 
 
+## Stun stars and root spikes, on every device (clients learn stuns from snapshots).
+func _process(delta: float) -> void:
+	if _stun_time > 0.0 and _stars == null:
+		_stars = UnitFx.stun_stars(self, 2.7)
+	if _stars:
+		_stars.visible = _stun_time > 0.0 and visible
+		_stars.rotation.y += delta * 5.0
+	if _root_time > 0.0 and _roots == null:
+		_roots = UnitFx.root_spikes(self)
+	if _roots:
+		_roots.visible = _root_time > 0.0 and visible
+
+
 func apply_dot(dps: float, duration: float, source: Hero) -> void:
 	if is_alive() and not frozen:
 		_dots.append([dps, duration, source])
@@ -625,6 +654,10 @@ func order_attack() -> void:
 func deal_damage(target: Node3D, amount: float) -> void:
 	var result: Dictionary = target.take_damage(amount * (form_damage_mult if in_form else 1.0), self)
 	meter.on_damage_dealt(result.dealt)
+	damage_dealt += result.dealt
+	if result.dealt > 0.0:
+		_numbers_out += result.dealt
+		_numbers_at = target.global_position
 	if not result.killed:
 		return
 	meter.on_kill()
@@ -639,6 +672,25 @@ func deal_damage(target: Node3D, amount: float) -> void:
 	else:
 		_register_kill(kill_gold)
 		share_kill_xp(target.global_position, 1, false)
+
+
+## Every 0.15 s: one number for the damage dealt and one for damage taken.
+## The local player's hero shows them; the host also sends them to the owner.
+func _flush_numbers(delta: float) -> void:
+	_numbers_clock += delta
+	if _numbers_clock < 0.15:
+		return
+	_numbers_clock = 0.0
+	if _numbers_out >= 1.0:
+		fx.emit("dmg", [_numbers_at, _numbers_out])
+		if is_player:
+			FloatText.spawn(get_parent(), _numbers_at, _numbers_out, FloatText.DEALT, _numbers_out >= 150.0)
+	if _numbers_in >= 1.0:
+		fx.emit("hurt", [_numbers_in])
+		if is_player:
+			FloatText.spawn(get_parent(), global_position, _numbers_in, FloatText.TAKEN)
+	_numbers_out = 0.0
+	_numbers_in = 0.0
 
 
 ## Direction skills aim in: the stick if held, otherwise where the hero faces.

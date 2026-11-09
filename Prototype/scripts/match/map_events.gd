@@ -19,9 +19,15 @@ const WAVE_90 := [[["nbld", 3], ["otau", 2]], [["nwzr", 3], ["unec", 2]], [["ngs
 	[["nwzr", 3]], [["hkni", 3]], [["ngst", 2]], [["nbld", 3]], [["ngst", 4]], [["nbld", 3], ["otau", 2]],
 	[["hkni", 3], ["edoc", 2]], [["nwzr", 3], ["unec", 2]]]
 const BOSS_RESPAWN := 10.0
-## Creeps pile up if nobody farms them, as in the map. Caps keep a phone at 60 FPS.
-const CAMP_CAP := 10
-const TOTAL_CAP := 80
+## Creeps pile up if nobody farms them, as in the map. "Map" pile-ups (the
+## default) only stop a camp at 60; the "Phone-safe" setting keeps the old caps.
+const MAP_CAMP_CAP := 60
+const MAP_TOTAL_CAP := 720
+const SAFE_CAMP_CAP := 10
+const SAFE_TOTAL_CAP := 80
+
+var camp_cap := MAP_CAMP_CAP
+var total_cap := MAP_TOTAL_CAP
 
 ## The ArenaMatch (typed loosely: naming it here would create a dependency cycle).
 var arena: Node
@@ -31,6 +37,9 @@ var boss_spots := {}
 var colossus_spot := Vector3.ZERO
 
 var timers := {30: 30.0, 60: 60.0, 90: 90.0}
+var _wake_clock := 0.0
+## Heroes or summons this close to a camp's centre wake its sleeping creeps.
+const WAKE_RADIUS := 13.0
 var _camp_units: Array = []
 var _wave_90_units: Array[Creep] = []
 var _boss_stage := {"a": 0, "b": 0}
@@ -38,6 +47,10 @@ var colossus: Creep
 
 
 func _ready() -> void:
+	var settings := get_node_or_null("/root/GameSettings")
+	if settings and settings.creep_limit == "safe":
+		camp_cap = SAFE_CAMP_CAP
+		total_cap = SAFE_TOTAL_CAP
 	for i in camps.size():
 		_camp_units.append([])
 	for chain in boss_spots:
@@ -47,6 +60,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_wake_clock += delta
+	if _wake_clock >= 0.25:
+		_wake_clock = 0.0
+		_wake_camps()
 	for period in timers:
 		timers[period] -= delta
 		if timers[period] <= 0.0:
@@ -64,13 +81,31 @@ func _wave(period: int) -> void:
 		_camp_units[camp] = _camp_units[camp].filter(func(u): return is_instance_valid(u) and u.is_alive())
 		for group in table[camp]:
 			for n in group[1]:
-				if _camp_units[camp].size() >= CAMP_CAP or alive_creeps() >= TOTAL_CAP:
+				if _camp_units[camp].size() >= camp_cap or alive_creeps() >= total_cap:
 					break
-				var spot: Vector3 = camps[camp] + Vector3(randf_range(-2.2, 2.2), 0, randf_range(-2.2, 2.2))
+				# Spread new creeps on a widening spiral so a pile grows outward.
+				var k: int = _camp_units[camp].size()
+				var spot: Vector3 = camps[camp] + Vector3(cos(k * 2.4), 0, sin(k * 2.4)) * (0.8 + 0.42 * sqrt(k)) * 1.6
 				var unit := _spawn(group[0], spot)
+				unit.camp = camp
 				_camp_units[camp].append(unit)
 				if period == 90:
 					_wave_90_units.append(unit)
+
+
+## Sleeping camps cost nothing; 4×/s, wake the camps a hero or summon is near.
+func _wake_camps() -> void:
+	var visitors: Array[Node] = get_tree().get_nodes_in_group("heroes") + get_tree().get_nodes_in_group("summons")
+	for i in camps.size():
+		var near := false
+		for unit in visitors:
+			if unit.is_alive() and unit.global_position.distance_to(camps[i]) <= WAKE_RADIUS:
+				near = true
+				break
+		if near:
+			for creep in _camp_units[i]:
+				if is_instance_valid(creep):
+					creep.wake()
 
 
 func alive_creeps() -> int:
