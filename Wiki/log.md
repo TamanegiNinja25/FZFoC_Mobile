@@ -6,6 +6,11 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Release v0.8.2 published and signed
+- The first v0.8.2 build caught a wrong paste (113 characters instead of 3,556). The owner replaced the secret and re-ran the job; it passed and signed with the shared key (SHA-256 `0B:C6:54:D7…04:02`, matching the local keystore).
+- The published APK installed on the test phone as an update over the existing build (version code 700 → 802) without uninstalling, and launched showing v0.8.2.
+- Release signing is solved; every later release installs as an update.
+
 ## 2026-11-09 — Release v0.8.2 (signing fix)
 - The v0.8.1 build failed while decoding the signing secret, so no v0.8.1 release exists; the tag stays.
 - The release workflow now strips whitespace from the pasted secret and checks it's a keystore with the expected alias. On failure it names the problem in an annotation; on success it posts the certificate's public SHA-256 fingerprint.
