@@ -1,9 +1,30 @@
 extends Node
-## Autoload "Sfx": plays the generated sound effects (assets/sfx, made by
-## tools/generate_assets.py) on the SFX bus, and gives every button in the
-## game a press animation and a click sound automatically.
+## Autoload "Sfx": plays sound effects on the SFX bus, and gives every button
+## in the game a press animation and a click sound automatically.
+## Each sound name maps to one or more variants, picked at random so repeated
+## hits don't sound mechanical. Variants are Kenney's CC0 packs where one fits
+## (assets/thirdparty/kenney, see CREDITS.md) and otherwise the generated
+## sounds in assets/sfx (tools/generate_assets.py).
 
-const SOUNDS := ["click", "confirm", "back", "hit", "slam", "dash", "transform", "kill", "victory", "defeat", "levelup", "duel"]
+const KENNEY := "res://assets/thirdparty/kenney/"
+const GENERATED := "res://assets/sfx/%s.wav"
+const SOUNDS := {
+	"click": [KENNEY + "interface_sounds/click_001.ogg"],
+	"confirm": [KENNEY + "interface_sounds/confirmation_001.ogg"],
+	"back": [KENNEY + "interface_sounds/back_001.ogg"],
+	"error": [KENNEY + "interface_sounds/error_001.ogg"],
+	"open": [KENNEY + "interface_sounds/open_001.ogg"],
+	"hit": [KENNEY + "rpg_sounds/knifeSlice.ogg", KENNEY + "rpg_sounds/knifeSlice2.ogg", KENNEY + "rpg_sounds/chop.ogg", "hit"],
+	"dash": [KENNEY + "rpg_sounds/drawKnife2.ogg", KENNEY + "rpg_sounds/cloth3.ogg"],
+	"coins": [KENNEY + "rpg_sounds/handleCoins.ogg", KENNEY + "rpg_sounds/handleCoins2.ogg"],
+	"slam": ["slam"], "transform": ["transform"], "kill": ["kill"], "victory": ["victory"],
+	"defeat": ["defeat"], "levelup": ["levelup"], "duel": ["duel"],
+}
+## Music tracks (cynicmusic, CC0 — see CREDITS.md); generated WAVs are the fallback.
+const MUSIC := {
+	"menu": "res://assets/thirdparty/music/town_theme_rpg.mp3",
+	"battle": "res://assets/thirdparty/music/battle_theme_a.mp3",
+}
 const VOICES := 8
 
 var _streams := {}
@@ -14,9 +35,15 @@ var _next := 0
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS  # menus work while the game is paused
 	for sound in SOUNDS:
-		var stream := load("res://assets/sfx/%s.wav" % sound)
-		if stream:
-			_streams[sound] = stream
+		var variants: Array[AudioStream] = []
+		for source: String in SOUNDS[sound]:
+			var path := source if source.begins_with("res://") else GENERATED % source
+			if ResourceLoader.exists(path):
+				variants.append(load(path))
+		if variants.is_empty() and ResourceLoader.exists(GENERATED % sound):
+			variants.append(load(GENERATED % sound))
+		if not variants.is_empty():
+			_streams[sound] = variants
 	for i in VOICES:
 		var player := AudioStreamPlayer.new()
 		player.bus = "SFX"
@@ -34,12 +61,9 @@ func play_music(track: String, volume_db := -6.0) -> void:
 	if track == _music_name:
 		return
 	_music_name = track
-	var stream := load("res://assets/music/%s.wav" % track) as AudioStreamWAV
+	var stream := _music_stream(track)
 	if stream == null:
 		return
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = int(stream.get_length() * stream.mix_rate)
 	if _music.get_parent() == null:
 		_music.bus = "Music"
 		add_child(_music)
@@ -53,12 +77,30 @@ func play_music(track: String, volume_db := -6.0) -> void:
 	tween.tween_property(_music, "volume_db", volume_db, 0.8)
 
 
+func _music_stream(track: String) -> AudioStream:
+	if MUSIC.has(track) and ResourceLoader.exists(MUSIC[track]):
+		var mp3 := load(MUSIC[track]) as AudioStreamMP3
+		if mp3:
+			mp3.loop = true
+			return mp3
+	var wav := load("res://assets/music/%s.wav" % track) as AudioStreamWAV
+	if wav:
+		wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		wav.loop_begin = 0
+		wav.loop_end = int(wav.get_length() * wav.mix_rate)
+	return wav
+
+
+func has_sound(sound: String) -> bool:
+	return _streams.has(sound)
+
+
 func play(sound: String, volume_db := 0.0, pitch := 1.0) -> void:
 	if not _streams.has(sound):
 		return
 	var player := _players[_next]
 	_next = (_next + 1) % VOICES
-	player.stream = _streams[sound]
+	player.stream = _streams[sound].pick_random()
 	player.volume_db = volume_db
 	player.pitch_scale = pitch
 	player.play()

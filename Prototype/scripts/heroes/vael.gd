@@ -1,7 +1,7 @@
 class_name Vael
 extends HeroDef
 ## Vael, the Kiln Knight — an iron knight whose armour is a living kiln.
-## Bruiser: hammer and shield. Transformation: Kindled — the kiln doors burst
+## Bruiser: sword and shield. Transformation: Kindled — the kiln doors burst
 ## open, he grows and glows, and Bellows Slam becomes Eruption.
 ## Base stats match the tuned prototype hero, so the meter balance (≈90 s fill)
 ## still holds.
@@ -14,7 +14,7 @@ func _init() -> void:
 	title = "the Kiln Knight"
 	form_name = "Kindled"
 	role = "Bruiser"
-	description = "An iron knight whose armour is a living kiln. Hammer and shield; hard to kill, strongest in the thick of a fight."
+	description = "An iron knight whose armour is a living kiln. Sword and shield; hard to kill, strongest in the thick of a fight."
 
 	max_hp = 1000.0
 	hp_regen = 5.0
@@ -39,8 +39,10 @@ func _init() -> void:
 	form_scale = 1.4
 
 
+## Look: KayKit Knight (CC0, Kay Lousberg) with sword and round shield.
 func create_model() -> Node3D:
-	return VaelModel.new()
+	return RiggedModel.make("res://assets/thirdparty/kaykit/characters/Knight.glb", "1H_Melee_Attack_Chop", "2H_Melee_Attack_Spin",
+			["1H_Sword", "Round_Shield"], Color(1.0, 0.45, 0.1))
 
 
 func create_skills() -> Array[Skill]:

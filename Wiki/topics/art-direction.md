@@ -1,8 +1,8 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-hero-design-vael, 2026-11-08-ui-polish-and-phase-2]
-updated: 2026-11-08
+sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-hero-design-vael, 2026-11-08-ui-polish-and-phase-2, 2026-11-09-phase-8-assets-agents-skills]
+updated: 2026-11-09
 ---
 # Art direction
 
@@ -94,6 +94,19 @@ MT6789, Mali-G57 MC2, 1080×2460 at 60 Hz. Vsync can't be disabled, so GPU time 
   90% gets most of the saving with a sharper image and leaves about 9 ms of the 16.7 ms frame free. Long benchmark runs can hit mid-run throttling, so measurements use short repeated rounds ([src](../sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md)).
 - **Arena (Phase 2):** Godot's primitive shapes default to high detail and never get automatic LODs — the first arena drew ~890k triangles. Setting segment counts cut it to ~50k. The bigger slowdown was the phone's saved settings holding desktop values; with phone defaults the arena holds a **locked 60 FPS at GPU 10.2 ms** ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
 - **Not yet tested:** sustained heat over a full match ([src](../sources/2026-11-08-phone-benchmark-infinix-note-30.md)).
+
+## Rigged characters and scenery (Phase 8)
+- **Hero models:**
+  - Seven heroes switched from primitive models to rigged, animated KayKit characters (CC0, Kay Lousberg); Barrow stays a primitive stone giant ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - Each hero shows only its own weapons: Vael a sword and shield, Ryn twin knives, Sable a crossbow, Tamsin and Morrow staves, Kael a blade, Hask an axe and shield ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - Clips: Idle and Running loop at a speed matched to movement; attack, cast, hit, death and spawn play once ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+- **Summons:** Barrow-Dead summons are skeleton warriors that rise out of the ground ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+- **Size budget:** each character is trimmed to the 14–18 animations the game uses (`tools/glb_strip.py`), about 1–1.3 MB instead of about 4 MB ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+- **Scenery:**
+  - A castle and towers behind each base, team banners at the fountains, camp props, mountains, hills and forest outside the walls, and trees around the duel arena ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - Every piece shares one texture, so all of it merges into **one mesh, one draw call**, with no collision.
+  - Mountains are sunk so their hex-tile bases stay hidden, and the bright tile colours are toned toward the muted arena palette ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+- **Style check:** chunky low-poly characters sit closer to "stylized toon" than the earlier "high-poly stylized" target. The phone budget rewards it, but the [decision](#decision) should be revisited *(inference)*.
 
 ## Readability from the top-down camera
 - First hero check on the phone: Vael's silhouette (pauldrons, helm, hammer) reads, but his chest glow faces away from the camera. Signature details — glow, colour accents — belong on **top-facing surfaces** (shoulders, back, helm) ([src](../sources/2026-11-08-hero-design-vael.md)). See [Roster](roster.md).

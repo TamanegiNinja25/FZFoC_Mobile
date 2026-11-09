@@ -137,6 +137,16 @@ Nobody is there to answer questions during a scheduled run.
 
 ## Project agents
 - **mechanics-analyst** (`.claude/agents/mechanics-analyst.md`) — studies reference games and maps, with REA tools when installed, and writes clean-room mechanic specs to `Outputs/`. Treat its specs like any output: they aren't sources. If the user moves a spec into `RAW/`, ingest it normally.
+- **Game-studio agents** (adopted from Claude Code Game Studios, MIT; `.claude/agents/LICENSE-claude-code-game-studios.txt`). Each opens with a "This project — read first" preamble.
+  - Godot: godot-specialist, godot-gdscript-specialist, godot-shader-specialist.
+  - Design: game-designer, systems-designer, economy-designer.
+  - Art, audio and UX: technical-artist, art-director, sound-designer, ux-designer.
+  - Quality and engineering: performance-analyst, qa-lead, network-programmer, ai-programmer.
+  - Their output is like any output: not a source.
+- **Skills** (`.claude/skills/`, from awesome-gamedev-agent-skills, Apache-2.0; keep its LICENSE and NOTICE files).
+  - Godot: GDScript, 3D, animation, audio, export, headless testing, multiplayer, physics, resources, shaders, signals/groups, UI controls, nodes/scenes.
+  - General: game feel, performance, asset creation, audio design, game UI/UX, game AI, behaviour trees / utility AI, cameras, physics tuning, level design.
+- **Third-party assets** go in `Prototype/assets/thirdparty/`: CC0 or a licence that allows the use, the licence file beside the pack, and a line in `CREDITS.md` plus the in-game Credits screen. Never pass a site's bot check; use the creator's official mirror or ask the owner.
 
 ## Version control
 This folder is the git repository `TamanegiNinja25/FrozenThrone_FightOfTheCharacters` (public, branch `main`). Git history is the second record of change, alongside `log.md`.

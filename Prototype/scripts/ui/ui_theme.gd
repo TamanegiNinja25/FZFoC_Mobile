@@ -1,8 +1,10 @@
 class_name UiTheme
 extends RefCounted
 ## Shared menu theme: dark stone panels, bevelled gold-trimmed buttons and
-## parchment text — the classic fantasy-RTS feel from the UI direction,
-## built from scratch (no assets from any existing game).
+## parchment text — the classic fantasy-RTS feel from the UI direction.
+## Buttons and menu panels are skinned with Kenney's "UI pack: RPG extension"
+## (CC0 — assets/thirdparty/CREDITS.md), tinted toward the stone-and-gold
+## palette; the flat styles remain as the fallback and for the HUD.
 
 const STONE := Color(0.15, 0.14, 0.13)
 const STONE_LIGHT := Color(0.24, 0.22, 0.2)
@@ -11,17 +13,25 @@ const GOLD := Color(0.78, 0.62, 0.32)
 const GOLD_BRIGHT := Color(1.0, 0.84, 0.45)
 const PARCHMENT := Color(0.94, 0.88, 0.72)
 const MUTED := Color(0.55, 0.52, 0.47)
+const KENNEY_UI := "res://assets/thirdparty/kenney/ui_rpg/"
 
 
 static func build() -> Theme:
 	var theme := Theme.new()
 	theme.default_font_size = 24
 
-	var normal := _box(STONE, GOLD, 3)
-	var hover := _box(STONE_LIGHT, GOLD_BRIGHT, 3)
-	var pressed := _box(STONE_DARK, GOLD_BRIGHT, 3)
-	pressed.shadow_size = 0
-	var disabled := _box(STONE_DARK, MUTED.darkened(0.3), 2)
+	var flat_pressed := _box(STONE_DARK, GOLD_BRIGHT, 3)
+	flat_pressed.shadow_size = 0
+	var normal: StyleBox = _box(STONE, GOLD, 3)
+	var hover: StyleBox = _box(STONE_LIGHT, GOLD_BRIGHT, 3)
+	var pressed: StyleBox = flat_pressed
+	var disabled: StyleBox = _box(STONE_DARK, MUTED.darkened(0.3), 2)
+	var skinned := ResourceLoader.exists(KENNEY_UI + "buttonLong_brown.png")
+	if skinned:
+		normal = _skin("buttonLong_brown", Vector4(12, 10, 12, 14), button_tint("normal"))
+		hover = _skin("buttonLong_brown", Vector4(12, 10, 12, 14), button_tint("hover"))
+		pressed = _skin("buttonLong_brown_pressed", Vector4(12, 12, 12, 10), button_tint("pressed"))
+		disabled = _skin("buttonLong_brown", Vector4(12, 10, 12, 14), button_tint("disabled"))
 	for type in ["Button", "OptionButton"]:
 		theme.set_stylebox("normal", type, normal)
 		theme.set_stylebox("hover", type, hover)
@@ -33,7 +43,9 @@ static func build() -> Theme:
 		theme.set_color("font_pressed_color", type, GOLD_BRIGHT)
 		theme.set_color("font_disabled_color", type, MUTED)
 
-	var panel := _box(Color(STONE_DARK, 0.96), GOLD, 4)
+	var panel: StyleBox = _box(Color(STONE_DARK, 0.96), GOLD, 4)
+	if skinned:
+		panel = _skin("panel_brown", Vector4(16, 16, 16, 16), Color(0.42, 0.38, 0.34))
 	panel.set_content_margin_all(24)
 	theme.set_stylebox("panel", "PanelContainer", panel)
 	theme.set_stylebox("panel", "Panel", panel)
@@ -118,6 +130,38 @@ static func pop_in(control: Control) -> void:
 	tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(control, "modulate:a", 1.0, 0.22)
 	tween.tween_property(control, "scale", Vector2.ONE, 0.26)
+
+
+## Tint multiplied over the brown Kenney button for each state ("normal",
+## "hover", "pressed", "disabled"). The parchment text must stay readable on it.
+static func button_tint(state: String) -> Color:
+	match state:
+		"hover":
+			return Color(0.95, 0.88, 0.75)
+		"pressed":
+			return Color(0.62, 0.55, 0.48)
+		"disabled":
+			return Color(0.4, 0.4, 0.4)
+	return Color(0.75, 0.68, 0.58)
+
+
+## A 9-slice skin from a Kenney texture: margins are left, top, right, bottom
+## in texture pixels (kept unstretched), the middle tiles.
+static func _skin(texture: String, margins: Vector4, tint: Color) -> StyleBoxTexture:
+	var box := StyleBoxTexture.new()
+	box.texture = load(KENNEY_UI + texture + ".png")
+	box.texture_margin_left = margins.x
+	box.texture_margin_top = margins.y
+	box.texture_margin_right = margins.z
+	box.texture_margin_bottom = margins.w
+	box.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	box.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	box.modulate_color = tint
+	box.content_margin_left = 18
+	box.content_margin_right = 18
+	box.content_margin_top = 10
+	box.content_margin_bottom = 14
+	return box
 
 
 static func _box(bg: Color, border: Color, width: int) -> StyleBoxFlat:

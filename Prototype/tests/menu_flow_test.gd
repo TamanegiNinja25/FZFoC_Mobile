@@ -21,7 +21,12 @@ func _process(_delta: float) -> bool:
 	match _frames:
 		5:
 			var labels: Array = _menu.buttons.values().map(func(b): return b.text)
-			_check(labels == ["Single Player", "Play with Friends", "Settings", "Quit"], "menu order: %s" % ", ".join(labels))
+			_check(labels == ["Single Player", "Play with Friends", "Settings", "Credits", "Quit"], "menu order: %s" % ", ".join(labels))
+			_menu.buttons.credits.pressed.emit()
+			_check(_menu._credits.visible and not _menu._main_panel.visible, "Credits opens the credits screen")
+			_check("Kay Lousberg" in CreditsPanel.credits_text() and "Kenney" in CreditsPanel.credits_text() and "cynicmusic" in CreditsPanel.credits_text(),
+					"credits name every third-party creator")
+			_menu.show_screen("main")
 			_menu.buttons.single.pressed.emit()
 			_check(_menu._hero_select.visible and not _menu._main_panel.visible, "Single Player opens hero select")
 			_check(_menu._hero_select.selected_id == "vael", "Vael is selected by default")

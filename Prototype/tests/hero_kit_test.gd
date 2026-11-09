@@ -31,7 +31,7 @@ func _process(_delta: float) -> bool:
 			_check(not _hero.try_skill(0), "an unlearned skill can't be cast")
 			for s in _hero.skills:
 				s.rank = 1  # rank 1 everywhere, so the numbers below are the base values
-			_check(_hero.model is VaelModel, "Vael's model is built")
+			_check(_hero.model is RiggedModel and _hero.model._player != null, "Vael's rigged model is built with its animations")
 			# Slam: dummy 0 sits at (4, 0, -3); stand 2 units from it, far from the others.
 			_hero.global_position = Vector3(4, 0, -1)
 			var hp_before := _dummies.map(func(d): return d.hp)

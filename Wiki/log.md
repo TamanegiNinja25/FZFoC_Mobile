@@ -7,6 +7,15 @@ updated: 2026-11-08
 Newest entry first.
 
 ## 2026-11-09 — Ingest (design + implementation)
+- Ingested `2026-11-09-phase-8-assets-agents-skills.md` (Phase 8); [source note](sources/2026-11-09-phase-8-assets-agents-skills.md) created.
+- [Assets and licensing](topics/assets-and-licensing.md) gains the Phase 8 asset pass: CC0 only, official mirrors because of itch.io's bot check, applicable packs only, credit in CREDITS.md and in game, agent and skill licences.
+- [Art direction](topics/art-direction.md) gains the rigged characters and the single-mesh scenery.
+- [UI and audio direction](topics/ui-and-audio-direction.md) gains the Kenney skins and sounds, cynicmusic music and the Credits screen.
+- [Roster](topics/roster.md) gains each hero's rigged look; Vael now carries a sword.
+- History snapshots saved for all four pages; index and backlog updated.
+- Pending: phone check of the rigged heroes and scenery; whether the art-direction decision should move to "stylized low-poly".
+
+## 2026-11-09 — Ingest (design + implementation)
 - Ingested `2026-11-09-phase-7-feel-heroes-original-rules.md` (Phase 7, prototype v0.7.0); source note created; [Roster](topics/roster.md) gains five heroes, realms and the balance pass (history snapshot saved); [Hero arena genre](topics/hero-arena-genre.md) notes Classic's 4v4, unique picks and leaver rule; backlog and index updated.
 - Pending: cold-start phone check, a fresh balance round, the release signing secret (owner action).
 

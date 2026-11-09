@@ -1,14 +1,15 @@
 extends Node3D
 ## Main menu: a dark, ember-lit backdrop with Kindled Vael turning slowly, and
-## a stone panel with Single Player, Play with Friends, Settings and Quit.
-## Hero select, settings and the local-play panel open over it.
+## a stone panel with Single Player, Play with Friends, Settings, Credits and
+## Quit. Hero select, settings, credits and the local-play panel open over it.
 
 var _ui := Control.new()
 var _main_panel: PanelContainer
 var _hero_select: HeroSelect
 var _settings: SettingsPanel
 var _friends: LobbyPanel
-var _hero_model: VaelModel
+var _credits: CreditsPanel
+var _hero_model: Node3D
 var _title: Label
 var _time := 0.0
 var buttons := {}
@@ -45,7 +46,7 @@ func _notification(what: int) -> void:
 
 
 func show_screen(screen: String) -> void:
-	var panels := {"main": _main_panel, "heroes": _hero_select, "settings": _settings, "friends": _friends}
+	var panels := {"main": _main_panel, "heroes": _hero_select, "settings": _settings, "friends": _friends, "credits": _credits}
 	for key in panels:
 		var was_visible: bool = panels[key].visible
 		panels[key].visible = key == screen
@@ -80,7 +81,7 @@ func _build_backdrop() -> void:
 	var holder := Node3D.new()
 	holder.position = Vector3(1.6, 0, 0)
 	stand.add_child(holder)
-	_hero_model = VaelModel.new()
+	_hero_model = Roster.create("vael").create_model()
 	holder.add_child(_hero_model)
 	_hero_model.set_form.call_deferred(true, 1.0)
 
@@ -103,13 +104,13 @@ func _build_ui() -> void:
 	_main_panel.anchor_top = 0.5
 	_main_panel.anchor_bottom = 0.5
 	_main_panel.offset_left = 60
-	_main_panel.offset_top = -300
+	_main_panel.offset_top = -320
 	_main_panel.offset_right = 520
-	_main_panel.offset_bottom = 300
+	_main_panel.offset_bottom = 320
 	_ui.add_child(_main_panel)
 	var column := VBoxContainer.new()
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
-	column.add_theme_constant_override("separation", 16)
+	column.add_theme_constant_override("separation", 14)
 	_main_panel.add_child(column)
 
 	_title = UiTheme.title(Label.new(), 64)
@@ -129,16 +130,18 @@ func _build_ui() -> void:
 		column.add_child(notice)
 		Session.notice = ""
 
-	for spec in [["single", "Single Player"], ["friends", "Play with Friends"], ["settings", "Settings"], ["quit", "Quit"]]:
+	for spec in [["single", "Single Player"], ["friends", "Play with Friends"], ["settings", "Settings"], ["credits", "Credits"], ["quit", "Quit"]]:
 		var button := Button.new()
 		button.text = spec[1]
-		button.custom_minimum_size = Vector2(380, 72)
-		button.add_theme_font_size_override("font_size", 28)
+		var minor: bool = spec[0] in ["credits", "quit"]
+		button.custom_minimum_size = Vector2(380, 56 if minor else 72)
+		button.add_theme_font_size_override("font_size", 24 if minor else 28)
 		column.add_child(button)
 		buttons[spec[0]] = button
 	buttons.single.pressed.connect(_on_single_player)
 	buttons.friends.pressed.connect(func(): show_screen("friends"))
 	buttons.settings.pressed.connect(func(): show_screen("settings"))
+	buttons.credits.pressed.connect(func(): show_screen("credits"))
 	buttons.quit.pressed.connect(func(): get_tree().quit())
 
 	_hero_select = HeroSelect.new()
@@ -156,8 +159,11 @@ func _build_ui() -> void:
 	_friends = LobbyPanel.new()
 	_friends.back_requested.connect(func(): show_screen("main"))
 	_center(_friends)
+	_credits = CreditsPanel.new()
+	_credits.closed.connect(func(): show_screen("main"))
+	_center(_credits)
 	Net.match_starting.connect(_on_net_match_starting)
-	for panel in [_hero_select, _settings, _friends]:
+	for panel in [_hero_select, _settings, _friends, _credits]:
 		panel.visible = false
 	_slide_in_main_panel.call_deferred()
 

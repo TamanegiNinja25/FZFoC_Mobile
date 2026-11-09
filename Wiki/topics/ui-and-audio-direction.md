@@ -1,8 +1,8 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-ui-and-audio-direction, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music]
-updated: 2026-11-08
+sources: [2026-11-08-ui-and-audio-direction, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-09-phase-8-assets-agents-skills]
+updated: 2026-11-09
 ---
 # UI and audio direction
 
@@ -47,6 +47,12 @@ Phase 1 of the game build put the UI direction into practice ([src](../sources/2
 - **Settings** (audio buses; 3D resolution, shadows, FPS cap) in the main menu and in game; **pause menu** with Resume · Settings · Quit to Menu · Quit Game.
 - **Polish:** safe-area insets for the camera cutout, a stone backing behind HUD text, slide/pulse/pop-in animations, press feedback on every button, and ten **original sounds synthesised from code** (click, confirm, back, hit, slam, dash, transform, kill, victory, defeat). The app icon is an original hammer-and-slash emblem. A generator script rebuilds the icon and sounds, documenting their originality ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
 - **Music (Phase 5):** an original slow minor menu theme with bells and a 110 BPM war-drum battle loop, generated from code and played on the Music bus — the orchestral, folk-with-drums direction above, made without any existing recording ([src](../sources/2026-11-08-phase-5-heroes-and-music.md)).
+- **Phase 8 pack assets:**
+  - Buttons and menu panels use Kenney's RPG UI pack as 9-slice skins, tinted toward the stone-and-gold palette ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - Sounds come from Kenney packs with random variants: three hit sounds, dash, coins on buy and sell, error, and menu click/confirm/back ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - Menu and battle music are cynicmusic's CC0 themes ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - The generated sounds stay for slam, transform, kill, victory, defeat, level-up and duel, and as fallbacks ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+- **Credits screen** in the main menu lists every creator, work, licence and use ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
 - A phone check caught hero-select text pushing buttons off screen; detail text now scrolls in a fixed box — long text needs a fixed area on phones *(inference)*.
 
 ## Sources for assets

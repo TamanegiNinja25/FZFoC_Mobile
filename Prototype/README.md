@@ -119,8 +119,26 @@ The reference map's systems, after a fidelity audit (`Outputs/2026-11-08-foc-fid
 - **Join by address on the same Wi-Fi:** the host's address is shown big; joiners see their own address, get their network prefix pre-filled (type the last number), and the last host and name are remembered; addresses are checked, and a join nobody answers fails clearly after 8 s.
 - **Phone (Infinix NOTE 30):** a 4v4 Classic match with 570 creeps piled up runs at 46–51 FPS, the same as the near-empty training ground on the warm test phone (53 FPS) once Android's launch boost ends, so pile-ups no longer cost frame rate (60 FPS while boosted). Spatial grid for unit searches, sleeping camps, on-screen-only creep animation, one draw call and low-poly shapes per creep, no creep shadows, waves spawned over several frames.
 
+### Phase 8: free CC0 assets
+Every third-party asset is **CC0** and credited in [`assets/thirdparty/CREDITS.md`](assets/thirdparty/CREDITS.md) and on the in-game **Credits** screen (main menu). Each pack's licence file sits beside it.
+
+- **Heroes and summons:**
+  - Seven heroes are rigged, animated KayKit characters by Kay Lousberg: Vael Knight, Ryn hooded Rogue, Sable Rogue, Tamsin Mage, Morrow skeleton Mage, Kael skeleton Rogue, Hask Barbarian.
+  - Barrow stays a primitive stone giant.
+  - `scripts/heroes/rigged_model.gd` shows only each hero's weapons and plays Idle/Running at movement speed, plus attack, cast, hit, death and spawn clips.
+  - Barrow-Dead summons are skeleton warriors that rise from the ground.
+- **Scenery** (`scripts/match/scenery.gd`, KayKit Medieval Hexagon):
+  - A castle and towers behind each base, team banners, camp props, mountains and forest outside the walls, trees around the duel arena.
+  - All of it is merged into one mesh (one draw call), with no collision.
+- **Audio:**
+  - Kenney RPG and interface sounds, with random variants per sound.
+  - cynicmusic's *Town Theme RPG* (menu) and *Battle Theme A* (battle).
+  - Generated sounds fill the rest and act as fallbacks.
+- **UI:** Kenney RPG UI pack buttons and panels as 9-slice skins, tinted to the stone-and-gold palette.
+- **Size:** `tools/glb_strip.py in.glb out.glb Anim1 Anim2 …` drops unused animations from a GLB (KayKit characters go from about 4 MB to about 1 MB).
+
 ### Original assets
-`tools/generate_assets.py` synthesises the app icon (hammer-and-slash emblem in gold and ember, plus Android adaptive layers) and all sound effects from code — nothing taken from other games. Rerun it to rebuild `assets/`.
+`tools/generate_assets.py` synthesises the app icon (hammer-and-slash emblem in gold and ember, plus Android adaptive layers) and the remaining sound effects and fallback music from code — nothing taken from other games. Rerun it to rebuild `assets/`.
 
 | Control | Action |
 |---|---|
@@ -136,7 +154,7 @@ The reference map's systems, after a fidelity audit (`Outputs/2026-11-08-foc-fid
 On desktop, the mouse emulates touch, so the joystick can be tested by clicking and dragging. The game fills wide phone screens (stretch aspect "expand"), so there are no black bars on 20:9 displays.
 
 ## Vael, the Kiln Knight
-An original iron knight whose armour is a living kiln; hammer and shield; bruiser. Design: [Roster](../Wiki/topics/roster.md).
+An original iron knight whose armour is a living kiln; sword and shield; bruiser. Design: [Roster](../Wiki/topics/roster.md).
 
 | Slot | Name | Normal | Kindled |
 |---|---|---|---|

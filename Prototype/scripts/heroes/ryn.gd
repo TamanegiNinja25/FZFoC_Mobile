@@ -33,8 +33,10 @@ func _init() -> void:
 	form_scale = 1.2
 
 
+## Look: KayKit Rogue (hooded, CC0, Kay Lousberg) with twin knives.
 func create_model() -> Node3D:
-	return RynModel.new()
+	return RiggedModel.make("res://assets/thirdparty/kaykit/characters/Rogue_Hooded.glb", "Dualwield_Melee_Attack_Slice", "2H_Melee_Attack_Spin",
+			["Knife", "Knife_Offhand"], Color(0.35, 1.0, 0.95))
 
 
 func create_skills() -> Array[Skill]:

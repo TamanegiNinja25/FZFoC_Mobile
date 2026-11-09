@@ -374,6 +374,7 @@ func _build_world() -> void:
 	_sun.directional_shadow_max_distance = 40.0
 	add_child(_sun)
 
+	_plane(Vector2(240, 180), Vector3(0, -0.03, -10), Color(0.24, 0.3, 0.22))           # land outside the walls
 	_plane(HALF_FIELD * 2.0 + Vector2(2, 2), Vector3.ZERO, Color(0.31, 0.36, 0.28))   # grass
 	_plane(Vector2(76, 6), Vector3(0, 0.01, 0), Color(0.42, 0.39, 0.33))                # central lane
 	for camp in CAMPS:
@@ -429,6 +430,7 @@ func _build_world() -> void:
 		_pillar(Vector3(21 * x, 0, 5 * x), 1.3, 2.6)
 		for z in [-1.0, 1.0]:
 			_pillar(Vector3(6 * x, 0, 8 * z), 1.1, 3.2)
+	Scenery.build(self, BASES, HALF_FIELD, DUEL_CENTER, Duel.RADIUS)
 
 	camera = Camera3D.new()
 	camera.fov = 50

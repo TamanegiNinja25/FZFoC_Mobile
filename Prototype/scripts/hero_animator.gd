@@ -7,6 +7,9 @@ extends Node
 ## on respawn, plus a glowing aura while transformed.
 ## It moves the model's position and X/Z rotation only: the hero owns facing
 ## (through target_yaw) and the form owns scale.
+## Rigged models (RiggedModel, with real animation clips) get their clips
+## played instead of the procedural pose: Idle/Running from the movement speed,
+## and attack, cast, hit and death as one-shots.
 
 const TURN_SPEED := 16.0
 const ATTACK_TIME := 0.3
@@ -41,7 +44,17 @@ func setup(target: Node3D, target_model: Node3D) -> void:
 	_build_aura()
 
 
+func _rigged() -> bool:
+	return model != null and model.has_method("play_anim")
+
+
 func play(kind: String) -> void:
+	if _rigged():
+		model.play_anim(kind)
+		if kind == "attack" and hero.is_inside_tree() and not hero.definition.ranged:
+			var trail: Color = _aura_material.albedo_color if _aura_material else Color.WHITE
+			UnitFx.slash(hero.get_parent(), hero.global_position, model.rotation.y, 1.8, Color(trail.r, trail.g, trail.b, 0.45))
+		return
 	match kind:
 		"attack":
 			_attack = ATTACK_TIME
@@ -60,12 +73,16 @@ func die() -> void:
 	_dying = 0.0
 	_attack = 0.0
 	_cast = 0.0
+	if _rigged():
+		model.play_anim("death")
 
 
 ## Back from the dead: pop up at the spawn point.
 func respawn() -> void:
 	_dying = -1.0
 	hero.visible = true
+	if _rigged():
+		model.revive()
 	model.rotation.x = 0.0
 	model.rotation.z = 0.0
 	model.position = Vector3.ZERO
@@ -90,6 +107,10 @@ func _process(delta: float) -> void:
 	if step_speed > 40.0:
 		step_speed = 0.0  # a teleport (respawn, duel), not running
 	_speed = lerpf(_speed, step_speed, minf(delta * 10.0, 1.0))
+	if _rigged():
+		model.set_locomotion(_speed)
+		_update_aura()
+		return
 	var run := clampf(_speed / 6.0, 0.0, 1.4)
 	if run > 0.08:
 		_phase += delta * (7.0 + _speed * 1.2)
@@ -114,6 +135,10 @@ func _process(delta: float) -> void:
 		else:
 			pivot.rotation = Vector3(swing + sin(_phase) * 0.12 * run, 0, 0)
 
+	_update_aura()
+
+
+func _update_aura() -> void:
 	if _aura:
 		var on: bool = hero.in_form and hero.visible
 		_aura.visible = on
@@ -134,6 +159,12 @@ static func _curve(t: float) -> float:
 
 func _animate_death(delta: float) -> void:
 	_dying += delta
+	if _rigged():  # the clip plays the fall; hide once it has landed
+		if _aura:
+			_aura.visible = false
+		if _dying >= 1.8 and hero.visible:
+			hero.visible = false
+		return
 	var t := clampf(_dying / DEATH_TIME, 0.0, 1.0)
 	model.rotation.x = lerpf(model.rotation.x, 1.35, minf(delta * 9.0, 1.0))
 	model.position.y = lerpf(0.0, -0.35, t)

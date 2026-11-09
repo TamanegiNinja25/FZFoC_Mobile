@@ -181,8 +181,7 @@ func _on_buy() -> void:
 	_status.text = error
 	if error == "" and item and item.is_tome():
 		_status.text = "%s used" % item.display_name
-	if error != "":
-		Sfx.play("back", -4.0)
+	Sfx.play("error" if error != "" else "coins", -4.0)
 
 
 func _on_sell(index: int) -> void:
@@ -190,6 +189,7 @@ func _on_sell(index: int) -> void:
 		var refund := floori(hero.items[index].cost * ItemCatalog.SELL_RATE)
 		if hero.sell(index):
 			_status.text = "Sold for %d gold" % refund
+			Sfx.play("coins", -4.0)
 		else:
 			_status.text = "Return to your fountain to sell"
 

@@ -61,6 +61,8 @@ var _walk_phase := 0.0
 var _lunge := 0.0
 var _punch := 0.0
 var _stars: Node3D
+## Rigged look (KayKit skeletons) for some summons; null for primitive creeps.
+var _rig: RiggedModel
 ## Sleeping: a camp creep at home, healthy and without a target turns its
 ## physics off; MapEvents wakes its camp when a hero comes near, and any hit,
 ## stun, root or bleed wakes it at once. Bosses just think 4×/s while idle.
@@ -276,6 +278,9 @@ func _process(delta: float) -> void:
 	moved.y = 0.0
 	_last_pos = global_position
 	_speed = lerpf(_speed, moved.length() / maxf(delta, 0.0001), minf(delta * 10.0, 1.0))
+	if _rig:
+		_rig.set_locomotion(_speed if not frozen else 0.0)
+		return
 	var walking := _speed > 0.4 and not frozen
 	# Idle and settled: stop animating until something happens.
 	_settle = _settle + delta if not walking and _lunge <= 0.0 and _punch <= 0.0 and _stun_time <= 0.0 else 0.0
@@ -301,6 +306,8 @@ func _process(delta: float) -> void:
 func _hit(target: Node3D) -> void:
 	_turn_toward(target.global_position - global_position)
 	_lunge = 1.0
+	if _rig:
+		_rig.play_anim("attack")
 	_animate_now()
 	if owner_hero and is_instance_valid(owner_hero):
 		owner_hero.deal_damage(target, damage)  # the hero gets the kill and the gold
@@ -503,7 +510,10 @@ func _vanish() -> void:
 	if _bar:
 		_bar.visible = false
 	var tween := create_tween()
-	if _body:
+	if _rig:
+		_rig.play_anim("death")
+		tween.tween_interval(1.0)
+	elif _body:
 		tween.tween_property(_body, "rotation:x", -PI / 2.0, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 		tween.tween_property(_body, "position:y", -0.6 * _size, 0.5).set_delay(0.15)
 	tween.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.25)
@@ -517,10 +527,20 @@ func _build_visual() -> void:
 	var color: Color = info.color
 	if owner_hero:
 		color = color.lerp(Hero.TEAM_COLORS[team], 0.25)
-	_body = Node3D.new()
-	add_child(_body)
-	var shape: String = info.shape
-	_part(_merged(shape, color), Vector3.ZERO, _vertex_material(), size)
+	if key == "summon:skeleton":
+		var weapons := "res://assets/thirdparty/kaykit/characters/skeleton_weapons/"
+		_rig = RiggedModel.make("res://assets/thirdparty/kaykit/characters/Skeleton_Warrior.glb", "1H_Melee_Attack_Chop",
+				"1H_Melee_Attack_Chop", [], Color(0.85, 0.85, 0.75),
+				[["handslot_r", weapons + "Skeleton_Blade.gltf"], ["handslot_l", weapons + "Skeleton_Shield_Small_A.gltf"]])
+		_rig.spawn_anim = "Spawn_Ground_Skeletons"
+		_rig.height = 2.0
+		_body = _rig
+		add_child(_body)
+	else:
+		_body = Node3D.new()
+		add_child(_body)
+		var shape: String = info.shape
+		_part(_merged(shape, color), Vector3.ZERO, _vertex_material(), size)
 	if is_boss:
 		var crown := _part(_mesh("torus", Vector3(0.3, 0.42, 0)), Vector3(0, 2.25, 0), _material(Color(1.0, 0.8, 0.3)), size)
 		crown.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

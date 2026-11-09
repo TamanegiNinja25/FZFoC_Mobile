@@ -1,8 +1,8 @@
 ---
 type: topic
 category: Legal and IP
-sources: [2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decision-visual-style]
-updated: 2026-11-08
+sources: [2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decision-visual-style, 2026-11-09-phase-8-assets-agents-skills]
+updated: 2026-11-09
 ---
 # Assets and licensing
 
@@ -36,6 +36,25 @@ Each Sketchfab model shows its own licence on its page ([src](../sources/2026-11
 - Choose 1–2 visual styles before downloading, or the game will look stitched together ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)). Chosen: high-poly stylized ([src](../sources/2026-11-08-decision-visual-style.md)).
 - Track every asset in a credits file from day one; CC BY requires attribution ([src](../sources/2026-11-08-sketchfab-assets-and-local-multiplayer.md)). A ready-made template: `Outputs/2026-11-08-asset-credits-template.md`.
 - Save a screenshot of each licence in case the page changes *(inference)*.
+
+## In practice: the Phase 8 asset pass
+- **What was taken:** CC0 packs only, from creators whose licence files ship with each pack, all credited ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)):
+  - Kay Lousberg: KayKit Adventurers, Skeletons and Medieval Hexagon;
+  - Kenney: RPG sounds, interface sounds and the RPG UI pack;
+  - cynicmusic: menu and battle themes.
+- **Where:**
+  - itch.io hides pages behind a bot check, so files came from each creator's official GitHub repository or OpenGameArt copy, after checking the licence there ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - Passing a bot check is the owner's job, not the assistant's *(inference)*.
+- **Only applicable assets:**
+  - 2D sprite sheets were skipped (the game is 3D), and so were icon packs (the original skill icons already fit) ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - "Choose 1–2 styles" held: everything is low-poly or toon, from one 3D creator plus one UI and sound creator *(inference)*.
+- **Credit lives in two places:**
+  - `Prototype/assets/thirdparty/CREDITS.md` gives creator, licence, source and use for each pack.
+  - An in-game Credits screen names the same creators ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - CC0 doesn't require credit; the owner asked for it anyway.
+- **Agent and skill licences:**
+  - The adopted agents are MIT, and their licence is kept beside them.
+  - The skills are Apache-2.0, which requires keeping the NOTICE file; it sits in `.claude/skills/` ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
 
 ## Related
 - [Copyright vs game mechanics](copyright-vs-game-mechanics.md)

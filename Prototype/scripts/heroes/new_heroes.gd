@@ -4,6 +4,8 @@ extends RefCounted
 ## reference map (an archer, a summoner, a low-health transformer, a storm
 ## caster, a guardian) with original names, looks and kits. Their skills are
 ## built from the configurable skill types (StrikeSkill, ProjectileSkill, …).
+## Looks: KayKit characters (CC0, Kay Lousberg — assets/thirdparty/CREDITS.md);
+## the primitive models in new_hero_models.gd remain as a fallback.
 
 
 static func sable() -> HeroDef:
@@ -35,7 +37,7 @@ static func sable() -> HeroDef:
 	d.form_damage_mult = 1.3
 	d.form_speed_mult = 1.15
 	d.form_scale = 1.25
-	d.model_builder = func(): return NewHeroModels.SableModel.new()
+	d.model_builder = func(): return RiggedModel.make("res://assets/thirdparty/kaykit/characters/Rogue.glb", "2H_Ranged_Shoot", "2H_Ranged_Shoot", ["2H_Crossbow"], Color(1.0, 0.6, 0.25))
 	d.skills_builder = NewHeroes.sable_skills
 	return d
 
@@ -100,7 +102,7 @@ static func morrow() -> HeroDef:
 	d.form_damage_mult = 1.3
 	d.form_speed_mult = 1.1
 	d.form_scale = 1.3
-	d.model_builder = func(): return NewHeroModels.MorrowModel.new()
+	d.model_builder = func(): return RiggedModel.make("res://assets/thirdparty/kaykit/characters/Skeleton_Mage.glb", "Spellcast_Shoot", "Spellcast_Summon", [], Color(0.5, 1.0, 0.6), [["handslot_r", "res://assets/thirdparty/kaykit/characters/skeleton_weapons/Skeleton_Staff.gltf"]])
 	d.skills_builder = NewHeroes.morrow_skills
 	return d
 
@@ -160,7 +162,7 @@ static func kael() -> HeroDef:
 	d.form_damage_mult = 1.4
 	d.form_speed_mult = 1.25
 	d.form_scale = 1.25
-	d.model_builder = func(): return NewHeroModels.KaelModel.new()
+	d.model_builder = func(): return RiggedModel.make("res://assets/thirdparty/kaykit/characters/Skeleton_Rogue.glb", "1H_Melee_Attack_Slice_Diagonal", "2H_Melee_Attack_Spin", [], Color(0.85, 0.9, 1.0), [["handslot_r", "res://assets/thirdparty/kaykit/characters/skeleton_weapons/Skeleton_Blade.gltf"]])
 	d.skills_builder = NewHeroes.kael_skills
 	return d
 
@@ -222,7 +224,7 @@ static func tamsin() -> HeroDef:
 	d.form_damage_mult = 1.3
 	d.form_speed_mult = 1.2
 	d.form_scale = 1.25
-	d.model_builder = func(): return NewHeroModels.TamsinModel.new()
+	d.model_builder = func(): return RiggedModel.make("res://assets/thirdparty/kaykit/characters/Mage.glb", "Spellcast_Shoot", "Spellcast_Raise", ["2H_Staff"], Color(0.6, 0.8, 1.0))
 	d.skills_builder = NewHeroes.tamsin_skills
 	return d
 
@@ -280,7 +282,7 @@ static func hask() -> HeroDef:
 	d.form_damage_mult = 1.2
 	d.form_speed_mult = 1.0
 	d.form_scale = 1.5
-	d.model_builder = func(): return NewHeroModels.HaskModel.new()
+	d.model_builder = func(): return RiggedModel.make("res://assets/thirdparty/kaykit/characters/Barbarian.glb", "1H_Melee_Attack_Chop", "2H_Melee_Attack_Spin", ["1H_Axe", "Barbarian_Round_Shield"], Color(1.0, 0.8, 0.4))
 	d.skills_builder = NewHeroes.hask_skills
 	return d
 

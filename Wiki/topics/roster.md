@@ -1,8 +1,8 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-08-phase-6-map-systems, 2026-11-09-phase-7-feel-heroes-original-rules]
-updated: 2026-11-08
+sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-08-phase-6-map-systems, 2026-11-09-phase-7-feel-heroes-original-rules, 2026-11-09-phase-8-assets-agents-skills]
+updated: 2026-11-09
 ---
 # Roster
 
@@ -18,7 +18,7 @@ FZFoC Mobile's original heroes, each with a basic attack, three ranked skills, a
 Sources: ([src](../sources/2026-11-08-hero-design-vael.md)), ([src](../sources/2026-11-08-vael-eruption.md)).
 
 ## Vael, the Kiln Knight
-An iron knight whose armour is a living kiln: hammer in the right hand, shield in the left, dark iron with an ember glow ([src](../sources/2026-11-08-hero-design-vael.md)).
+An iron knight whose armour is a living kiln: hammer in the right hand, shield in the left, dark iron with an ember glow ([src](../sources/2026-11-08-hero-design-vael.md)). Since Phase 8 he is drawn with the rigged KayKit Knight, so he carries a **sword** and round shield instead ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
 
 | Slot | Name | Effect | Cooldown |
 |---|---|---|---|
@@ -38,6 +38,10 @@ Values from the design ([src](../sources/2026-11-08-hero-design-vael.md)) and it
 - **Polished model:** rounded pauldrons, barrel hammer, round shield with a team-coloured emblem, a belt; glow added on top-visible shoulder vents and a helm crest, applying the phone finding below ([src](../sources/2026-11-08-ui-polish-and-phase-2.md)).
 - **Phone check:** the silhouette reads at the game camera, but the chest glow faces away from it; glow belongs on top-facing surfaces such as shoulders, back vents and helm crest ([src](../sources/2026-11-08-hero-design-vael.md)).
 - **Sound:** Vael needs cast shouts, select/order lines and a big Kindled sound moment *(inference from the audio direction)* ([src](../sources/2026-11-08-ui-and-audio-direction.md)).
+
+- **Rigged looks (Phase 8):**
+  - Vael is the Knight, Ryn the hooded Rogue, Sable the Rogue with a crossbow, Tamsin the Mage, Morrow the skeleton Mage, Kael the skeleton Rogue and Hask the Barbarian. Barrow stays a primitive stone giant ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+  - The primitive models remain in the code as a fallback *(inference)*.
 
 ## Ryn and Barrow
 - **Ryn:** hooded duelist, twin blades, wind-cyan glow; 820 HP, move 7.0, 26 damage every 0.55 s. Cyclone Cut: dash 6, 100 to everything on the path (7 s). Flurry: +60% attack speed for 4 s (10 s). Tempest: 12 s, 15% shield, ×1.2 damage, ×1.4 speed; Tempest Cut reaches 9 units for 150 ([src](../sources/2026-11-08-phase-5-heroes-and-music.md)).
