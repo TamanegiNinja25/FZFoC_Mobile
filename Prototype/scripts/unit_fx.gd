@@ -90,6 +90,8 @@ static func _cone(radius: float, height: float) -> CylinderMesh:
 static func play(world: Node, kind: String, data: Array) -> void:
 	if world == null or not world.is_inside_tree():
 		return
+	if not visible_to_camera(world, data[0] if data[0] is Vector3 else Vector3.INF):
+		return  # nobody sees it: skip the effect entirely
 	match kind:
 		"ring":
 			Effects.ring(world, data[0], data[1], data[2])
@@ -107,75 +109,61 @@ static func play(world: Node, kind: String, data: Array) -> void:
 			column(world, data[0], data[1], data[2])
 
 
+## CPU particles: no GPU work at all while off screen, one batched draw on screen.
 static func burst(world: Node, at: Vector3, color: Color, amount: int, speed: float) -> void:
-	var particles := GPUParticles3D.new()
+	if not visible_to_camera(world, at):
+		return
+	var particles := CPUParticles3D.new()
 	particles.one_shot = true
 	particles.explosiveness = 0.95
-	particles.amount = clampi(amount, 4, 48)
+	particles.amount = clampi(amount, 4, 32)
 	particles.lifetime = 0.55
-	var process := ParticleProcessMaterial.new()
-	process.direction = Vector3(0, 1, 0)
-	process.spread = 80.0
-	process.initial_velocity_min = speed * 0.5
-	process.initial_velocity_max = speed
-	process.gravity = Vector3(0, -9.0, 0)
-	process.scale_min = 0.6
-	process.scale_max = 1.2
-	particles.process_material = process
-	var quad := QuadMesh.new()
-	quad.size = Vector2(0.14, 0.14)
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
-	material.albedo_color = color
-	quad.material = material
-	particles.draw_pass_1 = quad
+	particles.direction = Vector3(0, 1, 0)
+	particles.spread = 80.0
+	particles.initial_velocity_min = speed * 0.5
+	particles.initial_velocity_max = speed
+	particles.gravity = Vector3(0, -9.0, 0)
+	particles.scale_amount_min = 0.6
+	particles.scale_amount_max = 1.2
+	particles.mesh = _spark_quad(color)
+	particles.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	world.add_child(particles)
 	particles.global_position = at + Vector3(0, 0.8, 0)
 	particles.emitting = true
 	world.get_tree().create_timer(1.0).timeout.connect(particles.queue_free)
 
 
+## Is `at` near what the camera shows? Effects far off screen are skipped.
+static func visible_to_camera(world: Node, at: Vector3) -> bool:
+	if at == Vector3.INF:
+		return true
+	var camera := world.get_viewport().get_camera_3d()
+	if camera == null:
+		return true
+	var focus := camera.global_position - Vector3(0, camera.global_position.y, 0) + Vector3(0, 0, -10)
+	return Vector2(at.x - focus.x, at.z - focus.z).length() <= 40.0
+
+
 static func slash(world: Node, at: Vector3, yaw: float, radius: float, color: Color) -> void:
-	var arc := MeshInstance3D.new()
-	arc.mesh = _crescent()
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.albedo_color = color
-	arc.material_override = material
-	arc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	world.add_child(arc)
+	var arc := _instance(world, _crescent(), _fade_material(color, true))
 	arc.global_position = at + Vector3(0, 1.0, 0)
 	arc.rotation.y = yaw + 0.9
 	arc.scale = Vector3.ONE * radius * 0.6
+	arc.transparency = 1.0 - color.a
 	var tween := arc.create_tween().set_parallel(true)
 	tween.tween_property(arc, "rotation:y", yaw - 0.9, 0.16)
 	tween.tween_property(arc, "scale", Vector3.ONE * radius, 0.16)
-	tween.tween_property(material, "albedo_color:a", 0.0, 0.25).set_delay(0.08)
+	tween.tween_property(arc, "transparency", 1.0, 0.25).set_delay(0.08)
 	tween.chain().tween_callback(arc.queue_free)
 
 
 static func ghost(world: Node, at: Vector3, yaw: float, color: Color) -> void:
-	var image := MeshInstance3D.new()
-	var capsule := CapsuleMesh.new()
-	capsule.radius = 0.4
-	capsule.height = 1.8
-	capsule.radial_segments = 10
-	capsule.rings = 3
-	image.mesh = capsule
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(color.r, color.g, color.b, 0.45)
-	image.material_override = material
-	image.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	world.add_child(image)
+	var image := _instance(world, _cached_mesh("ghost"), _fade_material(color, false))
 	image.global_position = at + Vector3(0, 0.95, 0)
 	image.rotation.y = yaw
+	image.transparency = 0.55
 	var tween := image.create_tween()
-	tween.tween_property(material, "albedo_color:a", 0.0, 0.3)
+	tween.tween_property(image, "transparency", 1.0, 0.3)
 	tween.tween_callback(image.queue_free)
 
 
@@ -183,73 +171,115 @@ static func beam(world: Node, from: Vector3, to: Vector3, color: Color, width: f
 	var length := from.distance_to(to)
 	if length < 0.1:
 		return
-	var line := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(width, width, length)
-	line.mesh = box
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = color
-	material.emission_enabled = true
-	material.emission = color
-	line.material_override = material
-	line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	world.add_child(line)
+	var line := _instance(world, _cached_mesh("unit_box"), _fade_material(color, false))
 	var lift := Vector3(0, 1.2, 0)
 	line.global_position = (from + to) / 2.0 + lift
 	line.look_at(to + lift, Vector3.UP)
+	line.scale = Vector3(width, width, length)
+	line.transparency = 1.0 - color.a
 	var tween := line.create_tween().set_parallel(true)
-	tween.tween_property(line, "scale", Vector3(0.2, 0.2, 1.0), 0.3)
-	tween.tween_property(material, "albedo_color:a", 0.0, 0.3)
+	tween.tween_property(line, "scale", Vector3(width * 0.2, width * 0.2, length), 0.3)
+	tween.tween_property(line, "transparency", 1.0, 0.3)
 	tween.chain().tween_callback(line.queue_free)
 
 
 static func rock(world: Node, at: Vector3, radius: float) -> void:
-	var boulder := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = radius * 0.45
-	sphere.height = radius * 0.8
-	sphere.radial_segments = 12
-	sphere.rings = 6
-	boulder.mesh = sphere
-	boulder.material_override = Toon.material(Color(0.5, 0.45, 0.38))
-	world.add_child(boulder)
+	if not _cache.has("rock_material"):
+		_cache["rock_material"] = Toon.material(Color(0.5, 0.45, 0.38))
+	var boulder := _instance(world, _cached_mesh("rock"), _cache["rock_material"])
 	boulder.global_position = at + Vector3(0, 9.0, 0)
+	boulder.scale = Vector3.ONE * radius
 	var tween := boulder.create_tween()
 	tween.tween_property(boulder, "global_position", at + Vector3(0, radius * 0.3, 0), 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func():
 		burst(world, at, Color(0.7, 0.6, 0.45), 30, 7.0)
 		Effects.ring(world, at, radius, Color(1.0, 0.8, 0.4, 0.95)))
-	tween.tween_property(boulder, "scale", Vector3(1.3, 0.05, 1.3), 0.2)
+	tween.tween_property(boulder, "scale", Vector3(1.3, 0.05, 1.3) * radius, 0.2)
 	tween.tween_callback(boulder.queue_free)
 
 
 static func column(world: Node, at: Vector3, color: Color, height: float) -> void:
-	var pillar := MeshInstance3D.new()
-	var cylinder := CylinderMesh.new()
-	cylinder.top_radius = 0.55
-	cylinder.bottom_radius = 0.75
-	cylinder.height = height
-	cylinder.radial_segments = 16
-	cylinder.rings = 1
-	cylinder.cap_top = false
-	cylinder.cap_bottom = false
-	pillar.mesh = cylinder
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.albedo_color = Color(color.r, color.g, color.b, 0.55)
-	pillar.material_override = material
-	pillar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	world.add_child(pillar)
+	var pillar := _instance(world, _cached_mesh("column"), _fade_material(color, true))
 	pillar.global_position = at + Vector3(0, height / 2.0, 0)
-	pillar.scale = Vector3(1, 0.1, 1)
+	pillar.scale = Vector3(1, 0.1 * height, 1)
+	pillar.transparency = 0.45
 	var tween := pillar.create_tween().set_parallel(true)
-	tween.tween_property(pillar, "scale", Vector3(1, 1, 1), 0.2)
-	tween.tween_property(material, "albedo_color:a", 0.0, 0.5).set_delay(0.15)
+	tween.tween_property(pillar, "scale", Vector3(1, height, 1), 0.2)
+	tween.tween_property(pillar, "transparency", 1.0, 0.5).set_delay(0.15)
 	tween.chain().tween_callback(pillar.queue_free)
+
+
+## Effects share meshes and materials; each instance fades through its own
+## `transparency`, so no resources are created while fighting.
+static func _instance(world: Node, mesh: Mesh, material: Material) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.mesh = mesh
+	node.material_override = material
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	world.add_child(node)
+	return node
+
+
+static func _fade_material(color: Color, double_sided: bool) -> StandardMaterial3D:
+	var key := "fade:%s:%s" % [color.to_html(false), double_sided]
+	if not _cache.has(key):
+		var material := StandardMaterial3D.new()
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		material.albedo_color = Color(color.r, color.g, color.b, 1.0)
+		if double_sided:
+			material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_cache[key] = material
+	return _cache[key]
+
+
+static func _cached_mesh(kind: String) -> Mesh:
+	if _cache.has("mesh:" + kind):
+		return _cache["mesh:" + kind]
+	var mesh: Mesh
+	match kind:
+		"ghost":
+			var capsule := CapsuleMesh.new()
+			capsule.radius = 0.4
+			capsule.height = 1.8
+			capsule.radial_segments = 10
+			capsule.rings = 3
+			mesh = capsule
+		"unit_box":
+			mesh = BoxMesh.new()
+		"rock":
+			var sphere := SphereMesh.new()
+			sphere.radius = 0.45
+			sphere.height = 0.8
+			sphere.radial_segments = 12
+			sphere.rings = 6
+			mesh = sphere
+		"column":
+			var cylinder := CylinderMesh.new()
+			cylinder.top_radius = 0.55
+			cylinder.bottom_radius = 0.75
+			cylinder.height = 1.0
+			cylinder.radial_segments = 16
+			cylinder.rings = 1
+			cylinder.cap_top = false
+			cylinder.cap_bottom = false
+			mesh = cylinder
+	_cache["mesh:" + kind] = mesh
+	return mesh
+
+
+static func _spark_quad(color: Color) -> QuadMesh:
+	var key := "spark:" + color.to_html(false)
+	if not _cache.has(key):
+		var quad := QuadMesh.new()
+		quad.size = Vector2(0.14, 0.14)
+		var material := StandardMaterial3D.new()
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+		material.albedo_color = Color(color.r, color.g, color.b, 1.0)
+		quad.material = material
+		_cache[key] = quad
+	return _cache[key]
 
 
 ## A flat crescent (120° ribbon, radius 1), built once and shared.

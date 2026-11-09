@@ -16,7 +16,8 @@ extends Resource
 @export var description := ""
 @export var stats := {}
 @export var consumable := false
-## Consumable effect: "heal" (amount over 5 s) or "meter" (instant charge).
+## Consumable effect: "heal" (amount over 5 s), "meter" (instant charge),
+## "recall", "knife", "cloak", "capture" or "release".
 @export var use := ""
 @export var use_amount := 0.0
 ## Stat-shop tome: attribute points granted on purchase, e.g. {"str": 2}.

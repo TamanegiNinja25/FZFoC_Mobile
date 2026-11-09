@@ -60,7 +60,7 @@ func _pack() -> Dictionary:
 		var cooldowns := []
 		for skill in h.skills:
 			cooldowns.append(skill.time_left)
-		var item_ids := PackedStringArray()
+		var item_ids := PackedStringArray()  # the full Capture Orb is its own item id
 		for item in h.items:
 			item_ids.append(item.id)
 		var ranks := PackedInt32Array()
@@ -131,13 +131,27 @@ func end(winner: int) -> void:
 	_end.rpc(winner)
 
 
-## A friend dropped out: a bot takes over their hero.
+## A friend dropped out. As in the reference map, their allies are paid by
+## the leaver's level (2,000 at 6–15, 6,000 at 16–30, 18,000 above); then a
+## bot takes over the hero so the teams stay even.
 func _on_peer_left(peer_id: int) -> void:
 	var h := _hero_of(peer_id)
-	if h:
-		h.owner_peer = 0
-		arena.add_bot_brain(h)
-		announce("%s left — a bot takes over" % arena.hero_label(h), Color(0.8, 0.8, 0.8))
+	if h == null:
+		return
+	var share := 0
+	if h.level > 30:
+		share = 18000
+	elif h.level > 15:
+		share = 6000
+	elif h.level > 5:
+		share = 2000
+	if share > 0:
+		for ally in arena.heroes:
+			if ally != h and ally.team == h.team:
+				ally.gold += share
+	h.owner_peer = 0
+	arena.add_bot_brain(h)
+	announce("%s left — a bot takes over%s" % [arena.hero_label(h), " (+%d gold to allies)" % share if share > 0 else ""], Color(0.8, 0.8, 0.8))
 
 
 # --------------------------------------------------------------- client side
@@ -248,6 +262,9 @@ func _fx(index: int, kind: String, data: Array) -> void:
 				h.model.play_slam(data[0], data[1])
 		"boulder":
 			Projectile.launch(h, data[0], BoulderHurlSkill.SPEED, BoulderHurlSkill.RANGE, 0.0, true)
+		"shot":
+			var shot := Projectile.launch(h, data[0], data[1], data[2], 0.0, true)
+			shot.configure(data[3], data[4], 0.0, false, data[5], data[6])
 		"ring":
 			Effects.ring(arena, data[0], data[1], data[2])
 		"vfx":

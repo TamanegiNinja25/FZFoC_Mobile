@@ -64,7 +64,7 @@ func _catalogue() -> void:
 		_check(item.icon() != null, "icon exists for %s" % item.id) if item.icon() == null else null
 	_check(categories.keys().size() == 8 and categories.values().all(func(n): return n >= 2),
 			"8 categories, each with ≥2 items: %s" % str(categories))
-	_check(categories.Stats == 7 and categories.Exclusive == 3 and categories.Artifacts == 7, "7 tomes, 3 exclusive items, 7 artifacts")
+	_check(categories.Stats == 7 and categories.Exclusive == 8 and categories.Artifacts == 7, "7 tomes, 8 exclusive items (one per hero), 7 artifacts")
 	_check(ItemCatalog.in_category("Relics").size() == 3, "category filter works (3 relics)")
 
 

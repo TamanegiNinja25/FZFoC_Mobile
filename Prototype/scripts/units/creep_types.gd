@@ -43,6 +43,9 @@ const COLOSSUS := {"name": "The Undying Colossus", "level": 20, "hp": 100000, "d
 
 const SUMMONS := {
 	"golem": {"name": "Forge Golem", "level": 4, "hp": 900, "damage": 45, "interval": 1.2, "range": 2.0, "bounty": 50, "size": 1.0, "color": Color(0.9, 0.45, 0.15), "shape": "golem"},
+	"wisp": {"name": "Grave Wisp", "level": 2, "hp": 380, "damage": 24, "interval": 1.1, "range": 5.0, "bounty": 25, "size": 0.6, "color": Color(0.55, 1.0, 0.7), "shape": "caster"},
+	"skeleton": {"name": "Barrow-Dead", "level": 3, "hp": 650, "damage": 38, "interval": 1.2, "range": 1.9, "bounty": 30, "size": 0.85, "color": Color(0.82, 0.8, 0.7), "shape": "brute"},
+	"captured": {"name": "Captured creep", "level": 3, "hp": 800, "damage": 30, "interval": 1.4, "range": 2.0, "bounty": 30, "size": 0.9, "color": Color(0.7, 0.6, 1.0), "shape": "beast"},
 }
 
 

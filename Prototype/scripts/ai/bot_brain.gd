@@ -9,7 +9,7 @@ extends Node
 ##                lands skills, saves its form for a fight, dashes to finish
 
 const AGGRO_RANGE := 16.0
-const FARM_RANGE := 30.0
+const FARM_RANGE := 22.0
 ## Camps bigger than this are left alone until the bot is level 8.
 const PILE_LIMIT := 12
 ## Healthy bots go looking for enemy heroes this far away (about half the map).
@@ -102,7 +102,9 @@ func _decide() -> void:
 			hero.ai_move = _flat_direction(target.global_position)
 			hero.try_skill(i)
 
-	if distance > hero.attack_range * 0.85:
+	if hero.definition.ranged and target is Hero and distance < hero.attack_range * 0.45 and not hero.is_rooted():
+		hero.ai_move = -_flat_direction(target.global_position)  # ranged heroes kite: step back, keep shooting
+	elif distance > hero.attack_range * 0.85:
 		_move_to(target.global_position)
 	else:
 		hero.ai_move = Vector3.ZERO  # in range: the auto-attack does the work
@@ -148,7 +150,7 @@ func _choose_target() -> Node3D:
 	var best: Node3D = null
 	var best_score := INF
 	for node in get_tree().get_nodes_in_group("heroes"):
-		if not hero.is_hostile(node) or not node.is_alive():
+		if not hero.is_hostile(node) or not node.is_alive() or node.is_hidden():
 			continue
 		var distance := hero.global_position.distance_to(node.global_position)
 		if distance > AGGRO_RANGE:
@@ -165,14 +167,14 @@ func _choose_target() -> Node3D:
 	# the map, as players hunt in the reference map, instead of farming forever.
 	if hero.hp / hero.max_hp > 0.6 and hero.level >= _enemy_level():
 		for node in get_tree().get_nodes_in_group("heroes"):
-			if hero.is_hostile(node) and node.is_alive() and not node.frozen:
+			if hero.is_hostile(node) and node.is_alive() and not node.frozen and not node.is_hidden():
 				var distance := hero.global_position.distance_to(node.global_position)
 				if distance < HUNT_RANGE and distance < best_score:
 					best = node
 					best_score = distance
 		if best:
 			return best
-	for node in get_tree().get_nodes_in_group("units"):
+	for node in Creep.nearby(get_tree(), hero.global_position, FARM_RANGE):
 		if node is Hero or not hero.is_hostile(node) or not node.is_alive() or not _worth_farming(node):
 			continue
 		var distance := hero.global_position.distance_to(node.global_position)
@@ -217,7 +219,7 @@ func _count_enemy_heroes(radius: float) -> int:
 
 func _count_hostiles(radius: float) -> int:
 	var count := 0
-	for node in get_tree().get_nodes_in_group("units"):
+	for node in Creep.nearby(get_tree(), hero.global_position, radius):
 		if hero.is_hostile(node) and node.is_alive() and hero.global_position.distance_to(node.global_position) <= radius:
 			count += 1
 	return count

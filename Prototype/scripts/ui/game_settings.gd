@@ -13,7 +13,8 @@ var render_scale := Platform.render_scale()
 var shadow_cascades := Platform.shadow_cascades()
 var fps_cap := 60
 var show_fps := false
-## Creep pile-ups: "map" (as the reference map — camps grow until 60) or "safe" (10 per camp, 80 in all).
+## Creep pile-ups: "map" (as the reference map — camps grow until 60),
+## "balanced" (camps grow until 25) or "safe" (10 per camp, 80 in all).
 var creep_limit := "map"
 
 

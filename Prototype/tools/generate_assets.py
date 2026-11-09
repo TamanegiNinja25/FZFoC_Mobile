@@ -285,6 +285,54 @@ def glyph(img, x, y, e, item):
             py = -0.18 + i * 0.18 - (pips - 1) * 0.0
             over(img, GOLD, soft(rect_sdf(x, y, 0.02, py, 0.1, 0.1, deg(45)), e))
         return
+    if item == "emberstring_bow":
+        over(img, (0.4, 0.22, 0.12, 1), soft(np.maximum(np.abs(circle_sdf(x, y, 0.35, 0, 0.62)) - 0.06, x - 0.05), e))
+        over(img, LIQUID, soft(rect_sdf(x, y, -0.18, 0, 0.02, 0.55, 0), e))
+        return
+    if item == "gravebloom_censer":
+        over(img, (0.55, 0.5, 0.42, 1), soft(rect_sdf(x, y, 0, -0.5, 0.03, 0.15, 0), e))
+        over(img, (0.55, 0.5, 0.42, 1), soft(circle_sdf(x, y, 0, 0.05, 0.3), e))
+        over(img, (0.5, 1.0, 0.6, 1), soft(circle_sdf(x, y, 0, 0.05, 0.16), e))
+        return
+    if item == "moonless_hilt":
+        over(img, (0.88, 0.9, 0.95, 1), soft(rect_sdf(x, y, 0.08, -0.15, 0.06, 0.5, deg(30)), e))
+        over(img, (0.15, 0.15, 0.2, 1), soft(rect_sdf(x, y, -0.2, 0.35, 0.07, 0.18, deg(30)), e))
+        over(img, (0.75, 0.75, 0.95, 1), soft(rect_sdf(x, y, -0.12, 0.22, 0.2, 0.04, deg(-60)), e))
+        return
+    if item == "thunderhead_crown":
+        base = rect_sdf(x, y, 0, 0.25, 0.42, 0.12, 0)
+        peaks = np.minimum(np.minimum(tri_sdf(x, y, (-0.42, 0.15), (-0.18, 0.15), (-0.3, -0.3)),
+                                      tri_sdf(x, y, (-0.12, 0.15), (0.12, 0.15), (0, -0.45))),
+                           tri_sdf(x, y, (0.18, 0.15), (0.42, 0.15), (0.3, -0.3)))
+        over(img, GOLD, soft(np.minimum(base, peaks), e))
+        over(img, (0.6, 0.8, 1.0, 1), soft(circle_sdf(x, y, 0, 0.25, 0.08), e))
+        return
+    if item == "wardens_bulwark":
+        over(img, (0.62, 0.64, 0.68, 1), soft(rect_sdf(x, y, 0, 0, 0.36, 0.55, 0) - 0.04, e))
+        over(img, GOLD, soft(rect_sdf(x, y, 0, 0, 0.06, 0.5, 0), e))
+        over(img, GOLD, soft(rect_sdf(x, y, 0, -0.1, 0.32, 0.05, 0), e))
+        return
+    if item == "homeward_scroll":
+        over(img, (0.9, 0.85, 0.7, 1), soft(rect_sdf(x, y, 0, 0, 0.36, 0.45, 0), e))
+        for sy in (-0.45, 0.45):
+            over(img, (0.6, 0.45, 0.3, 1), soft(rect_sdf(x, y, 0, sy, 0.44, 0.07, 0) - 0.03, e))
+        over(img, (0.4, 0.55, 0.9, 1), soft(circle_sdf(x, y, 0, 0, 0.13), e))
+        return
+    if item == "throwing_knives":
+        for i, ox in enumerate((-0.25, 0.0, 0.25)):
+            over(img, STEEL, soft(tri_sdf(x, y, (ox - 0.07, 0.15), (ox + 0.07, 0.15), (ox, -0.5)), e))
+            over(img, WOODC, soft(rect_sdf(x, y, ox, 0.32, 0.04, 0.17, 0), e))
+        return
+    if item == "shadow_cloak":
+        over(img, (0.28, 0.24, 0.4, 1), soft(np.minimum(tri_sdf(x, y, (-0.5, 0.55), (0.5, 0.55), (0, -0.4)), circle_sdf(x, y, 0, -0.35, 0.2)), e))
+        over(img, (0.6, 0.5, 0.9, 1), soft(rect_sdf(x, y, 0, -0.35, 0.12, 0.03, 0), e))
+        return
+    if item in ("capture_orb", "capture_orb_full"):
+        over(img, (0.85, 0.85, 0.88, 1), soft(circle_sdf(x, y, 0, 0, 0.42), e))
+        over(img, (0.6, 0.4, 1.0, 1) if item == "capture_orb_full" else (0.75, 0.2, 0.25, 1), soft(np.maximum(circle_sdf(x, y, 0, 0, 0.42), y), e))
+        over(img, (0.15, 0.15, 0.18, 1), soft(np.abs(y) - 0.04, e) * soft(circle_sdf(x, y, 0, 0, 0.42), e))
+        over(img, (0.95, 0.95, 0.95, 1), soft(circle_sdf(x, y, 0, 0, 0.1), e))
+        return
     if item == "kilnheart_core":
         hexagon = np.maximum(np.abs(x) * 0.866 + np.abs(y) * 0.5, np.abs(y)) - 0.46
         over(img, (0.35, 0.33, 0.33, 1), soft(hexagon, e))
@@ -366,6 +414,10 @@ ITEMS = {
     "tome_str_2": "Stats", "tome_agi_2": "Stats", "tome_str_5": "Stats", "tome_agi_5": "Stats",
     "tome_all_100": "Stats", "tome_xp_minor": "Stats", "tome_xp_greater": "Stats",
     "kilnheart_core": "Exclusive", "galeheart_ribbon": "Exclusive", "cairnstone_heart": "Exclusive",
+    "emberstring_bow": "Exclusive", "gravebloom_censer": "Exclusive", "moonless_hilt": "Exclusive",
+    "thunderhead_crown": "Exclusive", "wardens_bulwark": "Exclusive",
+    "homeward_scroll": "Consumables", "throwing_knives": "Consumables", "shadow_cloak": "Consumables",
+    "capture_orb": "Consumables", "capture_orb_full": "Consumables",
     **{artifact: "Artifacts" for artifact in ARTIFACT_PARTS},
 }
 

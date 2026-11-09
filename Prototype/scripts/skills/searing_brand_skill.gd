@@ -4,17 +4,17 @@ extends Skill
 ## damage and a stun (the reference map's most common skill effect).
 
 const RANGE := 7.0
-const DAMAGE := 110.0
+const DAMAGE := 100.0
 
 
 func _init() -> void:
 	skill_name = "Searing Brand"
-	description = "Hit the nearest enemy within 7 for 110 (+35% per rank) and stun it for 1.25 s (+0.25 s per rank)."
+	description = "Hit the nearest enemy within 7 for 100 (+35% per rank) and stun it for 1 s (+0.25 s per rank)."
 	cooldown = 10.0
 
 
 func stun_time() -> float:
-	return 1.0 + 0.25 * rank
+	return 0.75 + 0.25 * rank
 
 
 func _cast(hero: Hero) -> void:

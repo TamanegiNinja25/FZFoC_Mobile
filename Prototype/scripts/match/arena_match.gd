@@ -9,6 +9,9 @@ extends Node3D
 
 const MOBILE_KILLS := 15
 const CLASSIC_KILLS := 50
+## Mobile is 3v3; Classic is the reference map's 4v4.
+const MOBILE_TEAM := 3
+const CLASSIC_TEAM := 4
 const MATCH_TIME := 480.0
 ## Experience multiplier: Mobile packs a full levelling curve into 8 minutes.
 const MOBILE_XP_RATE := 3.0
@@ -21,10 +24,11 @@ const RESPAWN_TIME := 6.0
 const CIRCLES := [Vector3(-32, 0, -8), Vector3(32, 0, 8)]
 const CIRCLE_RADIUS := 2.2
 ## The 12 creep camps in the order of the map's camp regions (rect18…rect29),
-## laid out so each camp's wave twin sits opposite it.
-const CAMPS := [Vector3(-14, 0, -12), Vector3(-14, 0, 12), Vector3(-26, 0, -21), Vector3(-26, 0, 21),
-	Vector3(-31, 0, -12), Vector3(-31, 0, 12), Vector3(31, 0, 12), Vector3(31, 0, -12),
-	Vector3(26, 0, 21), Vector3(14, 0, 12), Vector3(26, 0, -21), Vector3(14, 0, -12)]
+## laid out so each camp's wave twin sits opposite it, and every camp at least
+## 20 units from a base so piles never reach a fountain.
+const CAMPS := [Vector3(-14, 0, -12), Vector3(-14, 0, 12), Vector3(-25, 0, -21), Vector3(-25, 0, 21),
+	Vector3(-37, 0, -21), Vector3(-37, 0, 21), Vector3(37, 0, 21), Vector3(37, 0, -21),
+	Vector3(25, 0, 21), Vector3(14, 0, 12), Vector3(25, 0, -21), Vector3(14, 0, -12)]
 const BOSS_SPOTS := {"a": Vector3(-7, 0, 22), "b": Vector3(7, 0, 22)}
 const COLOSSUS_SPOT := Vector3(0, 0, -23)
 const DUEL_CENTER := Vector3(0, 0, -46)
@@ -36,6 +40,7 @@ const ADAPT_PER_KILL := 0.1
 const ALLY_SKILL := 0.55
 
 var classic := false
+var team_size := MOBILE_TEAM
 var kill_target := MOBILE_KILLS
 var time_left := MATCH_TIME
 var kills := [0, 0]
@@ -73,6 +78,7 @@ func _ready() -> void:
 	online = Net.is_online() and Session.mode == Session.Mode.LOCAL_FRIENDS
 	is_authority = not online or Net.is_host()
 	classic = Session.classic
+	team_size = CLASSIC_TEAM if classic else MOBILE_TEAM
 	kill_target = CLASSIC_KILLS if classic else MOBILE_KILLS
 	time_left = INF if classic else MATCH_TIME
 	Controls.register()
@@ -295,39 +301,53 @@ func finish(team: int) -> void:
 
 
 # ------------------------------------------------------------------ spawning
-## Six heroes, identical on every device: slot order and names never change.
-## Offline: the player is blue slot 0. Online: each peer owns a slot on the team
-## the host gave it; bots fill the rest.
+## Six (Mobile) or eight (Classic) heroes, identical on every device: slot
+## order and names never change. Offline: the player is blue slot 0. Online:
+## each peer owns a slot on the team the host gave it; bots fill the rest.
+## Every hero is picked once, as in the reference map: bots take heroes no
+## player chose.
 func _spawn_teams() -> void:
-	var owners := [[0, 0, 0], [0, 0, 0]]
+	var owners := []
+	for team in 2:
+		var row := []
+		row.resize(team_size)
+		row.fill(0)
+		owners.append(row)
+	var taken := []
 	if online:
 		var peers: Array = Session.net_teams.keys()
 		peers.sort()
 		var filled := [0, 0]
 		for peer_id in peers:
 			var team: int = Session.net_teams[peer_id]
-			if filled[team] < 3:
+			if filled[team] < team_size:
 				owners[team][filled[team]] = peer_id
 				filled[team] += 1
+				taken.append(Net.heroes.get(peer_id, "vael"))
+	else:
+		taken.append(Session.hero_id)
+	var bot_count := team_size * 2 - taken.size()
+	var bot_picks := Roster.unique_bot_heroes(taken, bot_count)
+	var next_bot := 0
 	var my_id := multiplayer.get_unique_id() if online else 0
 	for team in 2:
-		for i in 3:
+		for i in team_size:
 			var h := Hero.new()
 			h.team = team
 			h.owner_peer = owners[team][i]
 			h.is_player = (h.owner_peer == my_id) if online else (team == 0 and i == 0)
 			h.puppet = not is_authority
 			h.xp_rate = 1.0 if classic else MOBILE_XP_RATE
-			var slot := team * 3 + i
 			if online and h.owner_peer != 0:
 				h.definition = Roster.create(Net.heroes.get(h.owner_peer, "vael"))
 			elif not online and h.is_player:
 				h.definition = Roster.create(Session.hero_id)
 			else:
-				h.definition = Roster.create(Roster.bot_hero(slot))
+				h.definition = Roster.create(bot_picks[next_bot])
+				next_bot += 1
 			h.respawn_time = RESPAWN_TIME
-			h.name = "Hero%d" % (team * 3 + i)
-			h.position = BASES[team] + Vector3(0, 0, (i - 1) * 3.0)
+			h.name = "Hero%d" % (team * team_size + i)
+			h.position = BASES[team] + Vector3(0, 0, (i - (team_size - 1) / 2.0) * 3.0)
 			add_child(h)
 			h.died.connect(_on_hero_died.bind(h))
 			heroes.append(h)

@@ -71,6 +71,13 @@ var camp := -1
 static var _mesh_cache := {}
 static var _material_cache := {}
 static var _next_id := 1
+## Spatial grid: creeps by 8-unit cell, so "who is near here" looks at a few
+## cells instead of every unit on the map (hundreds in a pile-up).
+const CELL := 8.0
+static var _grid := {}
+var _cell := Vector2i(1 << 30, 1 << 30)
+var _on_screen := false
+var _settle := 0.0
 
 
 ## Builds a unit from its key (see CreepTypes.lookup).
@@ -91,6 +98,21 @@ static func summon(hero: Hero, kind: String, at: Vector3, duration: float, power
 	unit.max_hp *= power
 	unit.hp = unit.max_hp
 	unit.damage *= power
+	unit.add_to_group("summons")
+	hero.get_parent().add_child(unit)
+	unit.global_position = at
+	unit.home = at
+	return unit
+
+
+## A captured creep released by its hero's Capture Orb: its own type and
+## stats, fighting for the hero's team for `duration` seconds.
+static func summon_key(hero: Hero, unit_key: String, at: Vector3, duration: float) -> Creep:
+	var unit := create(unit_key)
+	unit.team = hero.team
+	unit.owner_hero = hero
+	unit.lifetime = duration
+	unit.bounty = 30
 	unit.add_to_group("summons")
 	hero.get_parent().add_child(unit)
 	unit.global_position = at
@@ -131,16 +153,17 @@ func _ready() -> void:
 	add_child(shape)
 	# Puppets on clients are moved by snapshots, so they stay out of the physics.
 	collision_layer = 0 if puppet else CREEP_LAYER
-	collision_mask = 0 if puppet else 1 | CREEP_LAYER
+	collision_mask = 0 if puppet else 1
 	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
 	_last_pos = global_position
 	_idle_clock = randf() * 0.25  # spread sleeping creeps' thinking across frames
 	_build_visual()
-	# Only creeps on screen run their animation.
+	_grid_update()
+	# Only creeps on screen that are moving, lunging or flinching animate.
 	var notifier := VisibleOnScreenNotifier3D.new()
 	notifier.aabb = AABB(Vector3(-1, 0, -1) * _size, Vector3(2, 3, 2) * _size)
-	notifier.screen_entered.connect(func(): set_process(true))
-	notifier.screen_exited.connect(func(): set_process(false))
+	notifier.screen_entered.connect(_on_screen_entered)
+	notifier.screen_exited.connect(_on_screen_exited)
 	add_child(notifier)
 	set_process(false)
 
@@ -217,11 +240,11 @@ func _think() -> void:
 	# (a handful) instead of every unit on the map.
 	var candidates: Array[Node]
 	if owner_hero:
-		candidates = get_tree().get_nodes_in_group("units")
+		candidates = Creep.nearby(get_tree(), global_position, range_)
 	else:
 		candidates = get_tree().get_nodes_in_group("heroes") + get_tree().get_nodes_in_group("summons")
 	for node in candidates:
-		if is_hostile(node) and node.is_alive():
+		if is_hostile(node) and node.is_alive() and Hero.can_see(self, node):
 			var d := global_position.distance_to(node.global_position)
 			if d < best:
 				best = d
@@ -236,6 +259,8 @@ func _step(offset: Vector3, _delta: float) -> void:
 	move_and_slide()
 	global_position.y = 0.0
 	_turn_toward(direction)
+	_grid_update()
+	_animate_now()
 
 
 func _turn_toward(direction: Vector3) -> void:
@@ -252,6 +277,11 @@ func _process(delta: float) -> void:
 	_last_pos = global_position
 	_speed = lerpf(_speed, moved.length() / maxf(delta, 0.0001), minf(delta * 10.0, 1.0))
 	var walking := _speed > 0.4 and not frozen
+	# Idle and settled: stop animating until something happens.
+	_settle = _settle + delta if not walking and _lunge <= 0.0 and _punch <= 0.0 and _stun_time <= 0.0 else 0.0
+	if _settle > 0.4:
+		set_process(false)
+		return
 	if walking:
 		_walk_phase += delta * (6.0 + _speed * 1.5) / _size
 	_lunge = maxf(_lunge - delta * 5.0, 0.0)
@@ -271,6 +301,7 @@ func _process(delta: float) -> void:
 func _hit(target: Node3D) -> void:
 	_turn_toward(target.global_position - global_position)
 	_lunge = 1.0
+	_animate_now()
 	if owner_hero and is_instance_valid(owner_hero):
 		owner_hero.deal_damage(target, damage)  # the hero gets the kill and the gold
 	else:
@@ -280,7 +311,7 @@ func _hit(target: Node3D) -> void:
 func _try_slam() -> void:
 	var radius: float = slam[0]
 	var hit := false
-	for node in get_tree().get_nodes_in_group("units"):
+	for node in Creep.nearby(get_tree(), global_position, radius):
 		if is_hostile(node) and node.is_alive() and global_position.distance_to(node.global_position) <= radius:
 			if node is Hero or node.is_in_group("summons"):
 				node.take_damage(slam[1], self)
@@ -313,6 +344,7 @@ func take_damage(amount: float, attacker: Node = null) -> Dictionary:
 	var dealt := minf(amount, hp)
 	hp -= dealt
 	_punch = 1.0
+	_animate_now()
 	_update_bar()
 	if attacker and is_instance_valid(attacker) and attacker is Node3D and is_hostile(attacker) and _target == null:
 		_target = attacker
@@ -339,6 +371,19 @@ func apply_root(duration: float) -> void:
 	wake()
 	if not _dead and not is_colossus:
 		_root_time = maxf(_root_time, duration)
+
+
+## Forced movement (pulls and knockbacks); bosses barely budge, the colossus not at all.
+func push(push_velocity: Vector3, duration: float) -> void:
+	if _dead or frozen or is_colossus:
+		return
+	wake()
+	var travel := push_velocity * duration * (0.3 if is_boss else 1.0)
+	var collision := move_and_collide(travel, true)
+	var target := global_position + (collision.get_travel() if collision else travel)
+	var tween := create_tween()
+	tween.tween_property(self, "global_position", target, duration)
+	tween.tween_callback(_grid_update)
 
 
 func apply_dot(dps: float, duration: float, source: Hero) -> void:
@@ -380,16 +425,76 @@ func apply_snapshot(x: float, z: float, new_hp: float, new_max: float) -> void:
 	if global_position.distance_to(target) > 6.0:
 		global_position = target
 	_net_target = target
+	_animate_now()
 	max_hp = new_max
 	if not is_equal_approx(hp, new_hp):
 		if new_hp < hp:
 			_punch = 1.0
+			_animate_now()
 		hp = new_hp
 		_update_bar()
 
 
+func _on_screen_entered() -> void:
+	_on_screen = true
+	_animate_now()
+
+
+func _on_screen_exited() -> void:
+	_on_screen = false
+	set_process(false)
+
+
+func _animate_now() -> void:
+	if _on_screen and not is_processing():
+		_settle = 0.0
+		_last_pos = global_position
+		set_process(true)
+
+
+func _grid_update() -> void:
+	var cell := Vector2i(floori(global_position.x / CELL), floori(global_position.z / CELL))
+	if cell == _cell:
+		return
+	_grid_remove()
+	_cell = cell
+	if not _grid.has(cell):
+		_grid[cell] = []
+	_grid[cell].append(self)
+
+
+func _grid_remove() -> void:
+	if _grid.has(_cell):
+		_grid[_cell].erase(self)
+		if _grid[_cell].is_empty():
+			_grid.erase(_cell)
+	_cell = Vector2i(1 << 30, 1 << 30)
+
+
+func _exit_tree() -> void:
+	_grid_remove()
+
+
+## Every unit that might be within `radius` of `at`: heroes, creeps and
+## summons in the nearby grid cells, and training dummies. Callers still check
+## the exact distance and whether a unit is hostile and alive.
+static func nearby(tree: SceneTree, at: Vector3, radius: float) -> Array[Node]:
+	var found: Array[Node] = tree.get_nodes_in_group("heroes") + tree.get_nodes_in_group("enemies")
+	var low := Vector2i(floori((at.x - radius) / CELL), floori((at.z - radius) / CELL))
+	var high := Vector2i(floori((at.x + radius) / CELL), floori((at.z + radius) / CELL))
+	for cx in range(low.x, high.x + 1):
+		for cz in range(low.y, high.y + 1):
+			var cell := Vector2i(cx, cz)
+			if _grid.has(cell):
+				for unit in _grid[cell]:
+					if is_instance_valid(unit):
+						found.append(unit)
+	return found
+
+
 ## Death: topple over and sink, then go.
 func _vanish() -> void:
+	_grid_remove()
 	remove_from_group("units")
 	remove_from_group("creeps")
 	remove_from_group("summons")
@@ -415,21 +520,7 @@ func _build_visual() -> void:
 	_body = Node3D.new()
 	add_child(_body)
 	var shape: String = info.shape
-	var body_mat := _material(color)
-	var dark_mat := _material(color.darkened(0.35))
-	match shape:
-		"golem":
-			_part(_mesh("box", Vector3(1.1, 1.2, 0.8)), Vector3(0, 1.0, 0), body_mat, size)
-			_part(_mesh("box", Vector3(0.6, 0.5, 0.5)), Vector3(0, 1.85, 0), dark_mat, size)
-		"beast":
-			_part(_mesh("capsule", Vector3(0.45, 1.4, 0)), Vector3(0, 0.6, 0), body_mat, size, Vector3(90, 0, 0))
-			_part(_mesh("sphere", Vector3(0.38, 0, 0)), Vector3(0, 0.75, -0.75), dark_mat, size)
-		"caster":
-			_part(_mesh("cone", Vector3(0.55, 1.5, 0)), Vector3(0, 0.75, 0), body_mat, size)
-			_part(_mesh("sphere", Vector3(0.3, 0, 0)), Vector3(0, 1.7, 0), dark_mat, size)
-		_:
-			_part(_mesh("capsule", Vector3(0.42, 1.5, 0)), Vector3(0, 0.95, 0), body_mat, size)
-			_part(_mesh("sphere", Vector3(0.3, 0, 0)), Vector3(0, 1.9, 0), dark_mat, size)
+	_part(_merged(shape, color), Vector3.ZERO, _vertex_material(), size)
 	if is_boss:
 		var crown := _part(_mesh("torus", Vector3(0.3, 0.42, 0)), Vector3(0, 2.25, 0), _material(Color(1.0, 0.8, 0.3)), size)
 		crown.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -459,6 +550,10 @@ func _part(mesh: Mesh, at: Vector3, material: Material, size: float, rotation_de
 	var part := MeshInstance3D.new()
 	part.mesh = mesh
 	part.material_override = material
+	# Creeps don't cast shadows (half the draw calls in a pile-up) and aren't
+	# drawn beyond the camera's reach.
+	part.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	part.visibility_range_end = 48.0
 	part.position = at * size
 	part.scale = Vector3.ONE * size
 	part.rotation_degrees = rotation_deg
@@ -473,6 +568,53 @@ func _update_bar() -> void:
 	_bar_fill.scale.x = clampf(hp / max_hp, 0.001, 1.0)
 
 
+## A creep's body and head as one vertex-coloured mesh (one draw call),
+## built once per shape and colour and shared.
+static func _merged(shape: String, color: Color) -> ArrayMesh:
+	var cache_key := "merged:%s:%s" % [shape, color.to_html()]
+	if _mesh_cache.has(cache_key):
+		return _mesh_cache[cache_key]
+	var dark := color.darkened(0.35)
+	var parts: Array  # [mesh, transform, colour]
+	match shape:
+		"golem":
+			parts = [[_mesh("box", Vector3(1.1, 1.2, 0.8)), Transform3D(Basis(), Vector3(0, 1.0, 0)), color],
+				[_mesh("box", Vector3(0.6, 0.5, 0.5)), Transform3D(Basis(), Vector3(0, 1.85, 0)), dark]]
+		"beast":
+			parts = [[_mesh("capsule", Vector3(0.45, 1.4, 0)), Transform3D(Basis.from_euler(Vector3(PI / 2.0, 0, 0)), Vector3(0, 0.6, 0)), color],
+				[_mesh("sphere", Vector3(0.38, 0, 0)), Transform3D(Basis(), Vector3(0, 0.75, -0.75)), dark]]
+		"caster":
+			parts = [[_mesh("cone", Vector3(0.55, 1.5, 0)), Transform3D(Basis(), Vector3(0, 0.75, 0)), color],
+				[_mesh("sphere", Vector3(0.3, 0, 0)), Transform3D(Basis(), Vector3(0, 1.7, 0)), dark]]
+		_:
+			parts = [[_mesh("capsule", Vector3(0.42, 1.5, 0)), Transform3D(Basis(), Vector3(0, 0.95, 0)), color],
+				[_mesh("sphere", Vector3(0.3, 0, 0)), Transform3D(Basis(), Vector3(0, 1.9, 0)), dark]]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for part in parts:
+		var arrays: Array = (part[0] as Mesh).surface_get_arrays(0)
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+		var xf: Transform3D = part[1]
+		var order: Array = indices if indices.size() > 0 else range(verts.size())
+		for i in order:
+			st.set_color(part[2])
+			st.set_normal((xf.basis * normals[i]).normalized())
+			st.add_vertex(xf * verts[i])
+	var mesh := st.commit()
+	_mesh_cache[cache_key] = mesh
+	return mesh
+
+
+static func _vertex_material() -> Material:
+	if not _material_cache.has("vertex"):
+		var material := Toon.material(Color.WHITE)
+		material.vertex_color_use_as_albedo = true
+		_material_cache["vertex"] = material
+	return _material_cache["vertex"]
+
+
 ## Meshes and materials are shared by every unit of the same look.
 static func _mesh(kind: String, size: Vector3) -> Mesh:
 	var cache_key := "%s:%s" % [kind, size]
@@ -483,11 +625,27 @@ static func _mesh(kind: String, size: Vector3) -> Mesh:
 		"box":
 			mesh = PrimitiveModel.box(size)
 		"capsule":
-			mesh = PrimitiveModel.capsule(size.x, size.y)
+			var capsule := CapsuleMesh.new()
+			capsule.radius = size.x
+			capsule.height = size.y
+			capsule.radial_segments = 10
+			capsule.rings = 3
+			mesh = capsule
 		"sphere":
-			mesh = PrimitiveModel.sphere(size.x)
+			var sphere := SphereMesh.new()
+			sphere.radius = size.x
+			sphere.height = size.x * 2.0
+			sphere.radial_segments = 10
+			sphere.rings = 5
+			mesh = sphere
 		"cone":
-			mesh = PrimitiveModel.cone(size.x, size.y)
+			var cone := CylinderMesh.new()
+			cone.top_radius = 0.0
+			cone.bottom_radius = size.x
+			cone.height = size.y
+			cone.radial_segments = 10
+			cone.rings = 1
+			mesh = cone
 		"torus":
 			mesh = PrimitiveModel.torus(size.x, size.y)
 		_:

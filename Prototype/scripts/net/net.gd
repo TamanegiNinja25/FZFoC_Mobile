@@ -12,7 +12,8 @@ signal host_left
 
 const GAME_PORT := 24570
 const DISCOVERY_PORT := 24571
-const MAX_CLIENTS := 5
+## Up to 8 players: the host and 7 friends (Classic is 4v4).
+const MAX_CLIENTS := 7
 const TAG := "FZFOC1"
 
 enum Mode { VERSUS, COOP }
@@ -117,7 +118,24 @@ func start_match() -> void:
 		teams[peer_id] = 0 if mode == Mode.COOP else index % 2
 		index += 1
 	_announce_stop()
-	_begin_match.rpc(teams, heroes, classic)
+	_begin_match.rpc(teams, _unique_choices(), classic)
+
+
+## Each hero once per match: a player who picked a hero already taken (by the
+## host or an earlier joiner) gets the first free one.
+func _unique_choices() -> Dictionary:
+	var resolved := {}
+	var taken := []
+	for peer_id in _sorted_peers():
+		var choice: String = heroes.get(peer_id, "vael")
+		if taken.has(choice):
+			for hero_id in Roster.ids():
+				if not taken.has(hero_id):
+					choice = hero_id
+					break
+		resolved[peer_id] = choice
+		taken.append(choice)
+	return resolved
 
 
 @rpc("authority", "call_local", "reliable")

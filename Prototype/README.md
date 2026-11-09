@@ -96,6 +96,29 @@ The reference map's systems, after a fidelity audit (`Outputs/2026-11-08-foc-fid
 - **Pacing** (`tests/pacing_test.gd`, all-bot Mobile match): ultimates at ~6 min, average level 17 at the end, one duel, creeps at the 80 cap.
 - **Phone (owner's test of the v0.6.0 release):** no issues; performance stayed stable with high creep counts.
 
+### Phase 7: feel, heroes and the original's rules (v0.7.0)
+- **Creeps are physics bodies** (heroes bump into them; piles block like the map's) with walk, attack-lunge, hit and topple-and-sink animation. **Map-style pile-ups** by default: camps grow to 60 (Settings → Creep pile-ups: Map / Balanced 25 / Phone-safe 80 in all). Camps sit at least 20 units from a base so piles never reach a fountain.
+- **Damage numbers** float over your hero's targets (dealt) and over your hero (taken), on clients too; damage totals in the HUD and on the results screen.
+- **Heroes animate** from their real movement (`scripts/hero_animator.gd`): run cycle, idle breathing, smooth turning, a weapon swing on each model's weapon pivot, cast pose, hit flinch, fall on death, rise on respawn, aura in form. Movement eases in and out; dashes end crisply.
+- **Effects** (`scripts/unit_fx.gd`): bursts, slash arcs, afterimages, beams, falling rocks, light columns on every skill, level-up, transformation and recipe; stun stars and root spikes on units. Meshes and materials are shared and instances fade by `transparency`, so fighting creates no resources.
+- **Skill icons**: 32 original round icons (`tools/skill_icons.py`) on the skill buttons and in hero select.
+- **Eight heroes** (`scripts/heroes/new_heroes.gd`, models in `new_hero_models.gd`), each after a mechanic family of the reference map, built from configurable skill types (`StrikeSkill`, `ProjectileSkill`, `AreaSkill`, `SummonSkill`, `BlinkSkill`, `BuffSkill`, `ChainStrikeSkill`):
+
+| Hero | Role · realm | Skills | Ultimate | Special |
+|---|---|---|---|---|
+| Sable, the Ashen Archer | Ranged · Ember Forge | Splinter Volley, Pinning Shot (stun), Ember Rain (zone) | Sunpiercer (20-unit piercing shot) | Ranged attack |
+| Morrow, the Grave Tender | Caster · Stone Barrows | Wisp Swarm (summons), Life Drain, Withering Curse (zone + slow) | Barrow Rising (4 guardians) | Intelligence hero |
+| Kael, the Hollow Blade | Bruiser · Hollow Moon | Crescent Slash (piercing wave), Flash Step (blink), Severing Edge | Moonless Rend (wide wave) | Transforms on his own below 10% HP (once per 90 s), as the map's low-health form |
+| Tamsin, the Storm Caller | Caster · Gale Peaks | Arc Discharge (stun), Thunder Lance (piercing), Static Field | Skyfall Wrath (5 bolts, stuns) | Ranged attack |
+| Hask, the Iron Warden | Giant · Hollow Moon | Shield Bash (stun), Iron Bulwark (guard + shield), Chain Hook (pull) | Fortress (untouchable, knockback slam) | — |
+
+- **Realms** group heroes on the select screen the way the map's taverns group them by series (Ember Forge, Gale Peaks, Stone Barrows, Hollow Moon), with role tabs below.
+- **Items:** an exclusive item per hero (8), plus four after the map's mixed shop — Homeward Scroll (recall), Throwing Knives, Shadow Cloak (unseen until you attack or cast) and Capture Orb (catch a weakened creep, release it later as your ally).
+- **Classic follows the original:** 4v4, every hero picked once (bots take heroes no player chose; duplicate player picks get the first free hero), and the map's leaver rule — allies of a player who leaves get 2,000 / 6,000 / 18,000 gold by the leaver's level, then a bot takes over. Up to 8 players.
+- **Balance pass** (`tests/balance_sim.gd`: batches of all-bot matches, per-hero win rate, kills, deaths, damage per minute): three rounds of 16 all-bot matches brought seven of the eight heroes to a 33–62% win rate; Sable (18%) got a final buff. Ranged bots kite.
+- **Join by address on the same Wi-Fi:** the host's address is shown big; joiners see their own address, get their network prefix pre-filled (type the last number), and the last host and name are remembered; addresses are checked, and a join nobody answers fails clearly after 8 s.
+- **Phone (Infinix NOTE 30):** a 4v4 Classic match with 570 creeps piled up runs at 46–51 FPS, the same as the near-empty training ground on the warm test phone (53 FPS) once Android's launch boost ends, so pile-ups no longer cost frame rate (60 FPS while boosted). Spatial grid for unit searches, sleeping camps, on-screen-only creep animation, one draw call and low-poly shapes per creep, no creep shadows, waves spawned over several frames.
+
 ### Original assets
 `tools/generate_assets.py` synthesises the app icon (hammer-and-slash emblem in gold and ember, plus Android adaptive layers) and all sound effects from code — nothing taken from other games. Rerun it to rebuild `assets/`.
 
@@ -105,6 +128,7 @@ The reference map's systems, after a fidelity audit (`Outputs/2026-11-08-foc-fid
 | WASD / arrow keys | Move (desktop) |
 | Walk into range | Auto-attack the nearest enemy |
 | ATTACK button, or F | Lock onto the nearest enemy (heroes first) and walk to it |
+| Skill icons | Each button shows its skill's icon, its rank as pips, or its cooldown |
 | Skill buttons on the arc, or Q / E / R / T | Cast skills 1–4 (once learned) |
 | **+** badge on a skill | Spend a skill point on it |
 | Space or the TRANSFORM button | Transform when the meter is full |
@@ -217,7 +241,9 @@ Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/update_check_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/map_systems_test.gd
 Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/pacing_test.gd
+Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/lobby_test.gd
 ```
+Balance (not pass/fail): `Godot_v4.7.2-stable_win64_console.exe --headless --path Prototype -s res://tests/balance_sim.gd -- 16`
 The balance test measures how long the meter takes to fill against one dummy. Last result: **87.2 s** (target 90 ± 15 s), 5 kills, no deaths.
 
 ## Charge rule

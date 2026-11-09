@@ -117,13 +117,18 @@ func _on_match_starting(teams: Dictionary) -> void:
 	current_scene = _arena
 	await process_frame
 	await process_frame
-	_check(_arena.online and _arena.heroes.size() == 6, "%s loaded the online arena (6 heroes)" % _role)
+	_check(_arena.online and _arena.heroes.size() == 8, "%s loaded the online Classic arena (4v4, 8 heroes)" % _role)
 	_check(_arena.heroes.filter(func(h): return h.is_player).size() == 1, "%s controls exactly one hero" % _role)
 	if _role == "client":
 		_check(_arena.heroes.all(func(h): return h.puppet), "client heroes are puppets of the host")
 		_mark = _arena.hero.global_position
 	else:
-		_check(_arena.bots.size() == 4, "host runs 4 bots for the empty slots")
+		_check(_arena.bots.size() == 6, "host runs 6 bots for the empty slots")
+		var ids: Array = _arena.heroes.map(func(h): return h.definition.id)
+		var unique := {}
+		for id in ids:
+			unique[id] = true
+		_check(unique.size() == 8, "every hero is picked once online too")
 		var guest: Node = _arena.heroes.filter(func(h): return h.owner_peer != 1 and h.owner_peer != 0)[0]
 		guest.global_position = Vector3(-10, 0, 16)  # open ground, away from bots
 		_mark = guest.global_position

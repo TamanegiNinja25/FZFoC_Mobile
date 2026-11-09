@@ -6,6 +6,10 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Ingest (design + implementation)
+- Ingested `2026-11-09-phase-7-feel-heroes-original-rules.md` (Phase 7, prototype v0.7.0); source note created; [Roster](topics/roster.md) gains five heroes, realms and the balance pass (history snapshot saved); [Hero arena genre](topics/hero-arena-genre.md) notes Classic's 4v4, unique picks and leaver rule; backlog and index updated.
+- Pending: cold-start phone check, a fresh balance round, the release signing secret (owner action).
+
 ## 2026-11-09 — Prototype: hero animation, effects, skill icons
 - Heroes animate procedurally from their real movement (run cycle, idle, smooth turning, attack swing on a weapon pivot, cast pose, hit flinch, fall on death, rise on respawn, aura in form); movement eases in and out; animation and effects relay to network clients.
 - Effect library (bursts, slash arcs, afterimages, beams, falling rock, light columns) used by every skill, level-ups, transformations and recipes.

@@ -5,7 +5,7 @@ An original mobile hero arena for Android, inspired by the gameplay of **Fight O
 [![Download APK](https://img.shields.io/badge/Download-FZFoC.apk-e8a33d?style=for-the-badge&logo=android&logoColor=white)](https://github.com/TamanegiNinja25/FrozenThrone_FightOfTheCharacters/releases/latest/download/FZFoC.apk)
 [![Latest release](https://img.shields.io/github/v/release/TamanegiNinja25/FrozenThrone_FightOfTheCharacters?style=for-the-badge&label=latest)](https://github.com/TamanegiNinja25/FrozenThrone_FightOfTheCharacters/releases/latest)
 
-> **Status: playable alpha.** Six build phases are done: menus, 3v3 against adaptive AI, item shop, local Wi-Fi multiplayer, three heroes, and the reference map's systems (levels 1–50, attributes and ranked skills, the duel, creep waves, boss chains, a win boss, recipes, exclusive items, Mobile and Classic modes). The latest release is **v0.6.0**, tested on the owner's phone with no issues and stable performance under high creep counts. Placeholder-quality models; balance is still being tuned.
+> **Status: playable alpha (v0.7.0).** Seven build phases are done: menus, 3v3 against adaptive AI, item shop, local Wi-Fi multiplayer, the reference map's systems (levels, ranked skills, the duel, creep waves, bosses, recipes, modes), and Phase 7: eight heroes, animation and effects, skill icons, physical creeps with map-style pile-ups, damage numbers, Classic as the original's 4v4 with unique picks, and joining by address. Phone: a 4v4 Classic match with 570 creeps piled up runs at 46–51 FPS, the same as the near-empty training ground on the warm test phone (53 FPS) once Android's launch boost ends, so pile-ups no longer cost frame rate (60 FPS while boosted). Placeholder-quality models; balance is still being tuned.
 
 ## Download and install
 
@@ -21,16 +21,17 @@ All releases and their notes are on the [Releases page](https://github.com/Taman
 
 | | |
 |---|---|
-| **Modes** | Single player 3v3 against bots · Play with friends over local Wi-Fi (Versus or Co-op) · Training ground |
-| **Rules** | **Mobile:** first to 15 kills or the leader after 8:00 · **Classic:** first to 50 kills, no time limit · Either way, killing the 100,000 HP win boss wins |
+| **Modes** | Single player against bots · Play with friends over local Wi-Fi (Versus or Co-op, up to 8 players) · Training ground |
+| **Rules** | **Mobile:** 3v3, first to 15 kills or the leader after 8:00 · **Classic:** the original's 4v4, first to 50 kills, no time limit, every hero picked once · Either way, killing the 100,000 HP win boss wins |
 | **Progression** | Levels 1–50 on Warcraft III's XP curve, shared kill XP · strength / agility / intelligence that grow each level · 4 skills per hero, ranked up with skill points |
-| **World events** | A **duel** every ~5 min (one random hero per team, everyone else frozen, winner earns level × 200 gold) · **creep waves** at 12 camps every 30 / 60 / 90 s · two **boss chains** · the **win boss** |
+| **World events** | A **duel** every ~5 min (one random hero per team, everyone else frozen, winner earns level × 200 gold) · **creep waves** at 12 camps every 30 / 60 / 90 s that pile up like the map's (creeps are physical units) · two **boss chains** · the **win boss** |
+| **Feel** | Animated heroes and creeps, skill effects, floating damage numbers, damage totals, skill icons |
 | **Heroes** | Vael, the Kiln Knight (Bruiser) · Ryn, the Gale Dancer (Speed) · Barrow, the Living Cairn (Giant) |
 | **Transformation** | A meter filled by fighting (~90 s); a timed form with a shield and an upgraded skill. A transformed hero is worth more bounty |
 | **Economy** | Passive gold, kill gold, and kill-spree bonuses |
-| **Shop** | 35 original items in 8 categories: Weapons, Armor, Mobility, Relics, Consumables, a **stat shop** (tomes of strength, agility and lore), **exclusive** items (one per hero) and **artifacts** made from 7 recipes at a combining circle · 6 slots, buy at your fountain |
+| **Shop** | 45 original items in 8 categories: Weapons, Armor, Mobility, Relics, Consumables (incl. recall scroll, throwing knives, shadow cloak, capture orb), a **stat shop**, **exclusive** items (one per hero) and **artifacts** from 7 recipes at a combining circle · 6 slots, buy at your fountain |
 | **AI** | Bots use the same controls as you; their decision skill adapts to the score, but their stats never change |
-| **Multiplayer** | Host-authoritative over local Wi-Fi: no servers, no accounts. Find games automatically or join by IP |
+| **Multiplayer** | Host-authoritative over local Wi-Fi: no servers, no accounts. Find games automatically, or type the host's address (shown on its screen; your network's prefix is pre-filled) |
 | **Controls** | Floating touch joystick · a big ATTACK button with the four skills on an arc around it · a **+** badge on a skill when you can rank it up · TRANSFORM button |
 | **Settings** | Audio volumes, 3D resolution, shadows, FPS cap, FPS counter |
 
@@ -38,9 +39,14 @@ All releases and their notes are on the [Releases page](https://github.com/Taman
 
 | Hero | Role | Skills | Ultimate | Transformation |
 |---|---|---|---|---|
-| **Vael, the Kiln Knight** | Bruiser (strength) | Bellows Slam (area hit), Ember Dash, Searing Brand (stun) | Forge Golem (summon) | **Kindled**: Bellows Slam becomes Eruption |
-| **Ryn, the Gale Dancer** | Speed (agility) | Cyclone Cut (dash that slices its path), Flurry (attack-speed burst), Razor Wind (bleed) | Thousand Cuts (untouchable strikes) | **Tempest**: faster; Cyclone Cut becomes Tempest Cut |
-| **Barrow, the Living Cairn** | Giant (strength) | Quake Stomp (area hit + slow), Boulder Hurl (projectile), Stone Grip (root) | Rockfall (channelled blast + stun) | **Avalanche**: huge, shielded; wider stomp and stronger slow |
+| **Vael, the Kiln Knight** · Ember Forge | Bruiser (strength) | Bellows Slam (area hit), Ember Dash, Searing Brand (stun) | Forge Golem (summon) | **Kindled**: Bellows Slam becomes Eruption |
+| **Ryn, the Gale Dancer** · Gale Peaks | Speed (agility) | Cyclone Cut (dash that slices its path), Flurry (attack-speed burst), Razor Wind (bleed) | Thousand Cuts (untouchable strikes) | **Tempest**: faster; Cyclone Cut becomes Tempest Cut |
+| **Barrow, the Living Cairn** · Stone Barrows | Giant (strength) | Quake Stomp (area hit + slow), Boulder Hurl (projectile), Stone Grip (root) | Rockfall (channelled blast + stun) | **Avalanche**: huge, shielded; wider stomp and stronger slow |
+| **Sable, the Ashen Archer** · Ember Forge | Ranged (agility) | Splinter Volley, Pinning Shot (stun), Ember Rain (zone) | Sunpiercer (piercing shot) | **Ashfall** |
+| **Morrow, the Grave Tender** · Stone Barrows | Caster (intelligence) | Wisp Swarm (summons), Life Drain, Withering Curse | Barrow Rising (4 guardians) | **Lichbloom** |
+| **Kael, the Hollow Blade** · Hollow Moon | Bruiser (agility) | Crescent Slash, Flash Step (blink), Severing Edge | Moonless Rend (wide wave) | **Hollowed**, also on its own below 10% HP |
+| **Tamsin, the Storm Caller** · Gale Peaks | Caster (intelligence) | Arc Discharge (stun), Thunder Lance, Static Field | Skyfall Wrath (5 bolts) | **Stormcrown** |
+| **Hask, the Iron Warden** · Hollow Moon | Giant (strength) | Shield Bash (stun), Iron Bulwark (guard), Chain Hook (pull) | Fortress (knockback slam) | **Unbreakable** |
 
 Every character, model, icon, sound and music track is original. Models are built from code, and icons and audio are synthesised by [`tools/generate_assets.py`](Prototype/tools/generate_assets.py). Nothing is taken from the map, from Blizzard, or from any other game. Game *mechanics* are free to reuse; their *expression* is not ([Copyright vs game mechanics](Wiki/topics/copyright-vs-game-mechanics.md)).
 
@@ -50,7 +56,7 @@ Tested on an **Infinix NOTE 30** (Helio G99, Mali-G57): a locked **60 FPS** in a
 
 ## Build from source
 
-The game is a **Godot 4.7.2** project in [`Prototype/`](Prototype/README.md). Open `Prototype/project.godot` and press F5. That README covers the systems, Android export and the 12 headless test suites plus a two-process network test.
+The game is a **Godot 4.7.2** project in [`Prototype/`](Prototype/README.md). Open `Prototype/project.godot` and press F5. That README covers the systems, Android export, 13 headless test suites, a two-process network test and the balance simulation.
 
 ### Releasing a new version
 
@@ -99,9 +105,11 @@ The research and design behind the game are kept as a self-maintaining markdown 
 - [x] Phase 6: the reference map's systems — levels and attributes, ranked skills (+2 per hero), duel, creep waves, boss chains, win boss, stat shop, exclusive items, recipes, Mobile and Classic modes ([fidelity audit](Outputs/2026-11-08-foc-fidelity-audit.md))
 - [x] Release v0.6.0
 - [x] Phone check for Phase 6: no issues, performance stable with high creep counts
-- [ ] Higher-detail hero models and skill effects
-- [ ] More heroes and items; balance pass
-- [ ] Confirm Wi-Fi game discovery on more Android phones (join by IP always works)
+- [x] Phase 7: hero and creep animation, skill effects and icons, damage numbers, physical creeps with map-style pile-ups
+- [x] Phase 7: five more heroes (8), utility and exclusive items, balance pass, Classic as the original's 4v4 with unique picks and the leaver rule
+- [x] Phase 7: joining by address on the same Wi-Fi (shown address, pre-filled prefix, remembered host, clear timeout)
+- [ ] Releases signed with one key (repository secret `DEBUG_KEYSTORE_BASE64`) so updates install over each other
+- [ ] Sculpted hero models to replace the primitive ones
 
 Open decisions live in [Wiki/backlog.md](Wiki/backlog.md).
 

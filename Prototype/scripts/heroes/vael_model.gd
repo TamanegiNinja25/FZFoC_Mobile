@@ -64,26 +64,8 @@ func set_form(active: bool, form_scale := 1.4) -> void:
 
 ## Expanding shockwave ring for Bellows Slam / Eruption.
 func play_slam(radius: float, hot: bool) -> void:
-	var ring := MeshInstance3D.new()
-	var torus := TorusMesh.new()
-	torus.inner_radius = 0.85
-	torus.outer_radius = 1.0
-	torus.rings = 40
-	torus.ring_segments = 4
-	ring.mesh = torus
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = EMBER if hot else Color(0.95, 0.9, 0.75, 0.85)
-	ring.material_override = material
-	get_parent().get_parent().add_child(ring)  # world space: unaffected by model scale and rotation
-	ring.global_position = global_position + Vector3(0, 0.1, 0)
-	ring.scale = Vector3(radius * 0.3, 1.0, radius * 0.3)
-	var tween := ring.create_tween()
-	tween.tween_property(ring, "scale", Vector3(radius, 1.0, radius), 0.25)
-	tween.parallel().tween_property(material, "albedo_color:a", 0.0, 0.3)
-	tween.tween_callback(ring.queue_free)
-
+	# World space: unaffected by the model's scale and rotation.
+	Effects.ring(get_parent().get_parent(), global_position, radius, EMBER if hot else Color(0.95, 0.9, 0.75, 0.85))
 
 func _add(mesh: Mesh, position_: Vector3, material: Material, scale_ := Vector3.ONE, rotation_deg := Vector3.ZERO, parent: Node3D = null) -> void:
 	var part := MeshInstance3D.new()

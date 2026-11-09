@@ -9,6 +9,7 @@ extends HeroDef
 
 func _init() -> void:
 	id = "vael"
+	realm = "Ember Forge"
 	display_name = "Vael"
 	title = "the Kiln Knight"
 	form_name = "Kindled"

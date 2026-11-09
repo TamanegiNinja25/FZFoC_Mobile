@@ -1,12 +1,12 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-08-phase-6-map-systems]
+sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-08-phase-6-map-systems, 2026-11-09-phase-7-feel-heroes-original-rules]
 updated: 2026-11-08
 ---
 # Roster
 
-FZFoC Mobile's original heroes, each with a basic attack, three ranked skills, an ultimate and a meter-triggered transformation, plus attributes that grow with level. The roster covers the three archetypes: Vael (Bruiser), Ryn (Speed) and Barrow (Giant).
+FZFoC Mobile's original heroes, each with a basic attack, three ranked skills, an ultimate and a meter-triggered transformation, plus attributes that grow with level. Eight heroes cover five roles and four realms: Vael, Kael (Bruiser); Ryn (Speed); Barrow, Hask (Giant); Sable (Ranged); Morrow, Tamsin (Caster) ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
 
 ## Heroes
 | Hero | Archetype | Skills | Transformation | Status |
@@ -50,8 +50,17 @@ Values from the design ([src](../sources/2026-11-08-hero-design-vael.md)) and it
 - **New skills:** Vael — Searing Brand (110 damage and a stun) and Forge Golem (ultimate: a 25 s summon); Ryn — Razor Wind (cone hit plus bleed) and Thousand Cuts (ultimate: untouchable, 8 strikes); Barrow — Stone Grip (root and crush) and Rockfall (ultimate: channelled blast with a stun) ([src](../sources/2026-11-08-phase-6-map-systems.md)).
 - **Exclusive items:** Kilnheart Core (Vael), Galeheart Ribbon (Ryn), Cairnstone Heart (Barrow), 10,000 gold each and refused to other heroes ([src](../sources/2026-11-08-phase-6-map-systems.md)).
 
+## Phase 7: five more heroes
+- **Sable, the Ashen Archer** (Ranged, Ember Forge): Splinter Volley, Pinning Shot (stun), Ember Rain (zone); ultimate Sunpiercer, a 20-unit piercing shot ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+- **Morrow, the Grave Tender** (Caster, Stone Barrows): Wisp Swarm (summons), Life Drain, Withering Curse (zone and slow); ultimate Barrow Rising, four guardians ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+- **Kael, the Hollow Blade** (Bruiser, Hollow Moon): Crescent Slash, Flash Step (blink), Severing Edge; ultimate Moonless Rend. He transforms on his own below 10% HP, at most once per 90 s, after the reference map's low-health transformation ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+- **Tamsin, the Storm Caller** (Caster, Gale Peaks): Arc Discharge (stun), Thunder Lance, Static Field; ultimate Skyfall Wrath, five stunning bolts ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+- **Hask, the Iron Warden** (Giant, Hollow Moon): Shield Bash (stun), Iron Bulwark (guard and shield), Chain Hook (pull); ultimate Fortress, an untouchable knockback slam ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+- **Realms** group heroes on the select screen the way the reference map's taverns group them by series: Ember Forge, Gale Peaks, Stone Barrows, Hollow Moon ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+- **Balance:** three rounds of 16 all-bot matches brought seven of eight heroes to a 33–62% win rate; Sable, at 18%, got a final buff ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+
 ## How heroes are built
-In the prototype each hero is a data definition (identity, stats, form values, model, skills); skills share one cooldown system and deal damage through the same path as auto-attacks, so form multipliers, meter charge and kill rewards apply everywhere ([src](../sources/2026-11-08-hero-design-vael.md)). Each skill also tells bots when it's worth casting, so bots play any hero without hero-specific AI ([src](../sources/2026-11-08-phase-5-heroes-and-music.md)).
+In the prototype each hero is a data definition (identity, stats, form values, model, skills); skills share one cooldown system and deal damage through the same path as auto-attacks, so form multipliers, meter charge and kill rewards apply everywhere ([src](../sources/2026-11-08-hero-design-vael.md)). Each skill also tells bots when it's worth casting, so bots play any hero without hero-specific AI ([src](../sources/2026-11-08-phase-5-heroes-and-music.md)). Phase 7 heroes are composed from configurable skill types (strike, projectile, area, summon, blink, buff, chain strike) ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
 
 ## Open questions
 - ~~How is Eruption empowered?~~ Radius ×1.5, damage ×1.2 ([src](../sources/2026-11-08-vael-eruption.md))

@@ -24,7 +24,7 @@ func _cast(hero: Hero) -> void:
 	var direction := hero.aim_direction()
 	var start := hero.global_position
 	var finish := start + direction * DISTANCE * scale
-	for node in hero.get_tree().get_nodes_in_group("units"):
+	for node in Creep.nearby(hero.get_tree(), (start + finish) / 2.0, DISTANCE * scale / 2.0 + WIDTH):
 		if hero.is_hostile(node) and node.is_alive() and segment_distance(node.global_position, start, finish) <= WIDTH:
 			hero.deal_damage(node, scaled(hero, DAMAGE) * scale)
 	hero.start_dash(direction * DISTANCE * scale / DURATION, DURATION)

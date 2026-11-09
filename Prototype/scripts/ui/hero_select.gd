@@ -1,8 +1,8 @@
 class_name HeroSelect
 extends PanelContainer
-## Hero selection by category: tabs for All / Bruiser / Speed / Giant, a grid
-## of hero cards (planned heroes shown locked), and a detail panel with the
-## hero's role, skills and transformation.
+## Hero selection by category: a row of realm tabs (the way the reference map's
+## taverns group heroes) and a row of role tabs, a grid of hero cards, and a
+## detail panel with the hero's role, attributes, skills and transformation.
 
 signal start_requested(hero_id: String)
 signal training_requested(hero_id: String)
@@ -32,13 +32,18 @@ func _ready() -> void:
 	tabs.alignment = BoxContainer.ALIGNMENT_CENTER
 	tabs.add_theme_constant_override("separation", 10)
 	column.add_child(tabs)
-	for category in ["All"] + Roster.ROLES:
+	var roles := HBoxContainer.new()
+	roles.alignment = BoxContainer.ALIGNMENT_CENTER
+	roles.add_theme_constant_override("separation", 8)
+	column.add_child(roles)
+	for category in ["All"] + Roster.REALMS + Roster.ROLES:
 		var tab := Button.new()
 		tab.text = category
 		tab.toggle_mode = true
-		tab.custom_minimum_size = Vector2(150, 52)
+		tab.custom_minimum_size = Vector2(150, 46)
+		tab.add_theme_font_size_override("font_size", 17)
 		tab.pressed.connect(_show_category.bind(category))
-		tabs.add_child(tab)
+		(roles if Roster.ROLES.has(category) else tabs).add_child(tab)
 		_tab_buttons[category] = tab
 
 	# Rules: Mobile (15 kills or 8:00) or Classic (50 kills, no time limit).
@@ -62,7 +67,7 @@ func _ready() -> void:
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 20)
 	column.add_child(body)
-	_cards.columns = 3
+	_cards.columns = 4
 	_cards.add_theme_constant_override("h_separation", 12)
 	_cards.add_theme_constant_override("v_separation", 12)
 	_cards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -120,7 +125,7 @@ func _show_category(category: String) -> void:
 	for child in _cards.get_children():
 		child.queue_free()
 	for definition in Roster.all():
-		if category == "All" or definition.role == category:
+		if category == "All" or definition.role == category or definition.realm == category:
 			_cards.add_child(_card(definition.display_name, definition.role, definition.id, true))
 	for planned in Roster.PLANNED:
 		if category == "All" or planned[0] == category:
@@ -130,7 +135,7 @@ func _show_category(category: String) -> void:
 func _card(card_name: String, role: String, hero_id: String, available: bool) -> Button:
 	var card := Button.new()
 	card.text = "%s\n%s" % [card_name, role if available else "Coming soon"]
-	card.custom_minimum_size = Vector2(180, 120)
+	card.custom_minimum_size = Vector2(140, 96)
 	card.disabled = not available
 	card.toggle_mode = available
 	card.button_pressed = available and hero_id == selected_id
@@ -145,7 +150,7 @@ func select_hero(hero_id: String) -> void:
 	var definition := Roster.create(hero_id)
 	var lines: Array[String] = [
 		"[font_size=34][color=#ffd673]%s[/color][/font_size]" % definition.display_name,
-		"[i]%s[/i] — %s" % [definition.title, definition.role],
+		"[i]%s[/i] — %s · %s" % [definition.title, definition.role, definition.realm],
 		"",
 		definition.description,
 		"",

@@ -6,7 +6,7 @@ updated: 2026-11-08
 
 The map of the wiki: every page with a one-line summary, grouped by category. Start here.
 
-**Status:** 20 sources · 9 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
+**Status:** 21 sources · 9 topic articles · 3 categories · 3 recorded conflicts · nothing awaiting approval
 
 **Decisions so far:** transformations use a charge meter · prototype engine is Godot 4.7.2 ([record](sources/2026-11-08-decisions-meter-and-godot.md)) · charge rule tuned to a ~90 s fill, aggression rewarded, kill-spree economy ([record](sources/2026-11-08-decisions-charge-rule-and-spree.md)) · transformed heroes carry a higher bounty as risk/reward ([record](sources/2026-11-08-decision-transformed-bounty.md)) · visual style is high-poly stylized ([record](sources/2026-11-08-decision-visual-style.md)) with toon shading ([record](sources/2026-11-08-toon-shading-and-stress-benchmark.md)) · phones use 2 shadow cascades ([record](sources/2026-11-08-decision-phone-shadow-cascades.md)) and 90% 3D resolution; floating touch joystick ([record](sources/2026-11-08-decision-90-percent-resolution-and-touch-joystick.md))
 
@@ -49,6 +49,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Phase 4 — play with friends over local Wi-Fi](sources/2026-11-08-phase-4-local-multiplayer.md) — Host-authoritative LAN play, lobby with discovery, verified with a real phone-hosted match.
 - [Phase 5 — heroes Ryn and Barrow, original music](sources/2026-11-08-phase-5-heroes-and-music.md) — Speed and Giant heroes with new haste, slow and projectile systems; generated menu and battle music.
 - [Phase 6 — the reference map's systems](sources/2026-11-08-phase-6-map-systems.md) — Levels 1–50, attributes and ranked skills, the duel, creep waves, boss chains, win boss, stat shop, exclusive items, recipes, Mobile and Classic modes.
+- [Phase 7 — feel, eight heroes and the original's rules](sources/2026-11-09-phase-7-feel-heroes-original-rules.md) — Physical animated creeps and pile-ups, damage numbers, hero animation and effects, skill icons, five new heroes, utility items, Classic 4v4 with unique picks, balance simulation, phone performance work.
 
 ## Admin
 - [Log](log.md) — what changed and when

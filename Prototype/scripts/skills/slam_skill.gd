@@ -4,12 +4,12 @@ extends Skill
 ## around him. While Kindled it becomes Eruption — see power().
 
 const BASE_RADIUS := 3.0
-const BASE_DAMAGE := 120.0
+const BASE_DAMAGE := 110.0
 
 
 func _init() -> void:
 	skill_name = "Bellows Slam"
-	description = "Hit every enemy within 3 for 120 (+35% per rank). Kindled: Eruption — 4.5 radius, ×1.5 damage."
+	description = "Hit every enemy within 3 for 110 (+35% per rank). Kindled: Eruption — 4.5 radius, ×1.5 damage."
 	cooldown = 6.0
 
 
@@ -25,7 +25,7 @@ func power(hero: Hero) -> Dictionary:
 	if hero.in_form:
 		# Eruption: the kiln vents outward — a wider blast that catches groups and
 		# fleeing enemies, plus a modest hit. With the form's ×1.25 on all damage
-		# the total is ×1.5 (120 → 180), the top of the spec's +30–50% form budget.
+		# the total is ×1.5 (110 → 165), the top of the spec's +30–50% form budget.
 		radius *= 1.5
 		damage *= 1.2
 	return {"radius": radius, "damage": damage}
@@ -33,7 +33,7 @@ func power(hero: Hero) -> Dictionary:
 
 func _cast(hero: Hero) -> void:
 	var p := power(hero)
-	for node in hero.get_tree().get_nodes_in_group("units"):
+	for node in Creep.nearby(hero.get_tree(), hero.global_position, p.radius):
 		if hero.is_hostile(node) and node.is_alive() and hero.global_position.distance_to(node.global_position) <= p.radius:
 			hero.deal_damage(node, p.damage)
 	hero.play_sfx("slam")

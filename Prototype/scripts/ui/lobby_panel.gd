@@ -1,10 +1,17 @@
 class_name LobbyPanel
 extends PanelContainer
 ## Play with Friends: host a game on this phone's Wi-Fi, or join one found on
-## the network (or by IP). The host picks Versus or Co-op and starts the match;
-## bots fill any empty slots.
+## the network or by typing the host's address. Everyone must be on the same
+## Wi-Fi. The host's address is shown big on its screen; joiners get their own
+## network prefix filled in, so they only type the last number. The last
+## address and name are remembered. The host picks Versus or Co-op and the
+## rules, then starts; bots fill any empty slots.
 
 signal back_requested
+
+const PREFS := "user://lobby.cfg"
+## How long a join by address may take before we say nothing answered.
+const CONNECT_TIMEOUT := 8.0
 
 var _net: Node
 var _name := LineEdit.new()
@@ -16,6 +23,10 @@ var _mode := OptionButton.new()
 var _hero := OptionButton.new()
 var _start := Button.new()
 var _pages := {}
+var _host_address := Label.new()
+var _my_address := Label.new()
+var _connect_clock := -1.0
+var _connecting_to := ""
 
 
 func _ready() -> void:
@@ -38,7 +49,7 @@ func _ready() -> void:
 	var name_label := Label.new()
 	name_label.text = "Your name:"
 	name_row.add_child(name_label)
-	_name.text = "Player"
+	_name.text = _pref("name", "Player")
 	_name.max_length = 16
 	_name.custom_minimum_size = Vector2(300, 52)
 	name_row.add_child(_name)
@@ -59,6 +70,10 @@ func _ready() -> void:
 	_pages.choose.add_child(_button("Back", func(): back_requested.emit()))
 
 	_pages.hosting = _page(column)
+	_host_address.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_host_address.add_theme_font_size_override("font_size", 34)
+	_host_address.add_theme_color_override("font_color", UiTheme.GOLD_BRIGHT)
+	_pages.hosting.add_child(_host_address)
 	_mode.add_item("Versus — friends split into teams", 0)
 	_mode.add_item("Co-op — friends together vs bots", 1)
 	_mode.custom_minimum_size = Vector2(560, 56)
@@ -89,10 +104,15 @@ func _ready() -> void:
 	found.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_pages.joining.add_child(found)
 	_pages.joining.add_child(_hosts)
+	_my_address.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_my_address.add_theme_color_override("font_color", UiTheme.MUTED)
+	_pages.joining.add_child(_my_address)
 	var ip_row := HBoxContainer.new()
 	ip_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	_ip.placeholder_text = "or type the host's IP"
-	_ip.custom_minimum_size = Vector2(320, 52)
+	_ip.placeholder_text = "host's address, e.g. 192.168.1.5"
+	_ip.custom_minimum_size = Vector2(360, 56)
+	_ip.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER_DECIMAL
+	_ip.text_submitted.connect(func(text: String): _connect(text.strip_edges()))
 	ip_row.add_child(_ip)
 	var connect := Button.new()
 	connect.text = "Connect"
@@ -117,8 +137,24 @@ func _ready() -> void:
 
 
 func _on_connection_failed(reason: String) -> void:
+	_connect_clock = -1.0
 	_status.text = reason
 	_show("joining")
+
+
+## A join by address that nobody answers fails after CONNECT_TIMEOUT seconds.
+func _process(delta: float) -> void:
+	if _connect_clock < 0.0:
+		return
+	if _net.is_online() and _net.players.size() > 0:
+		_connect_clock = -1.0
+		_set_pref("last_host", _connecting_to)
+		return
+	_connect_clock += delta
+	if _connect_clock >= CONNECT_TIMEOUT:
+		_connect_clock = -1.0
+		_net.leave()
+		_on_connection_failed("No game answered at %s. Check that both phones are on the same Wi-Fi and the host is on the Hosting screen." % _connecting_to)
 
 
 func _on_visibility_changed() -> void:
@@ -162,7 +198,9 @@ func _host() -> void:
 	if error != "":
 		_status.text = error
 		return
-	_status.text = "Hosting on %s — friends: Join Game" % _local_ip()
+	_set_pref("name", _net.my_name)
+	_status.text = "Hosting — friends on the same Wi-Fi tap Join Game"
+	_host_address.text = "Your address:  %s" % _local_ip()
 	_show("hosting")
 	_refresh_players()
 
@@ -170,8 +208,17 @@ func _host() -> void:
 func _join_page() -> void:
 	_apply_hero_choice()
 	_net.my_name = _name.text.strip_edges() if _name.text.strip_edges() != "" else "Friend"
+	_set_pref("name", _net.my_name)
 	_net.start_discovery()
 	_status.text = "Looking for games…"
+	var mine := _local_ip()
+	_my_address.text = "This phone: %s — the host's address should start the same way" % mine
+	# Prefill: the last host if it's on this network, else this network's prefix.
+	var last: String = _pref("last_host", "")
+	if last != "" and _same_network(last, mine):
+		_ip.text = last
+	elif _ip.text == "" and mine.count(".") == 3:
+		_ip.text = mine.substr(0, mine.rfind(".") + 1)
 	_refresh_hosts()
 	_show("joining")
 
@@ -179,16 +226,25 @@ func _join_page() -> void:
 func _connect(address: String) -> void:
 	if address == "":
 		return
+	if not address.is_valid_ip_address():
+		_status.text = "\"%s\" isn't an address — it looks like 192.168.1.5" % address
+		return
+	var mine := _local_ip()
+	if mine.count(".") == 3 and not _same_network(address, mine):
+		_status.text = "%s isn't on this phone's Wi-Fi (%s…). Trying anyway." % [address, mine.substr(0, mine.rfind("."))]
 	_net.stop_discovery()
 	var error: String = _net.join(address)
 	if error != "":
 		_status.text = error
 		return
 	_status.text = "Connecting to %s…" % address
+	_connecting_to = address
+	_connect_clock = 0.0
 	_show("waiting")
 
 
 func _leave() -> void:
+	_connect_clock = -1.0
 	_net.stop_discovery()
 	_net.leave()
 	_show("choose")
@@ -218,6 +274,27 @@ func _refresh_hosts() -> void:
 		none.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		none.add_theme_color_override("font_color", UiTheme.MUTED)
 		_hosts.add_child(none)
+
+
+## Same /24 network: the first three numbers match (home Wi-Fi routers).
+static func _same_network(a: String, b: String) -> bool:
+	var pa := a.split(".")
+	var pb := b.split(".")
+	return pa.size() == 4 and pb.size() == 4 and pa[0] == pb[0] and pa[1] == pb[1] and pa[2] == pb[2]
+
+
+func _pref(key: String, fallback: Variant) -> Variant:
+	var file := ConfigFile.new()
+	if file.load(PREFS) != OK:
+		return fallback
+	return file.get_value("lobby", key, fallback)
+
+
+func _set_pref(key: String, value: Variant) -> void:
+	var file := ConfigFile.new()
+	file.load(PREFS)
+	file.set_value("lobby", key, value)
+	file.save(PREFS)
 
 
 func _local_ip() -> String:

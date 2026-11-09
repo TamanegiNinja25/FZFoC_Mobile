@@ -25,6 +25,9 @@ const MAP_CAMP_CAP := 60
 const MAP_TOTAL_CAP := 720
 const SAFE_CAMP_CAP := 10
 const SAFE_TOTAL_CAP := 80
+const BALANCED_CAMP_CAP := 25
+## A wave's creeps appear over several frames, not all at once (no hitch).
+const SPAWNS_PER_TICK := 12
 
 var camp_cap := MAP_CAMP_CAP
 var total_cap := MAP_TOTAL_CAP
@@ -38,9 +41,13 @@ var colossus_spot := Vector3.ZERO
 
 var timers := {30: 30.0, 60: 60.0, 90: 90.0}
 var _wake_clock := 0.0
+## Creeps waiting to appear: [creep id, position, camp, part of a 90 s wave].
+var _queue: Array = []
 ## Heroes or summons this close to a camp's centre wake its sleeping creeps.
 const WAKE_RADIUS := 13.0
 var _camp_units: Array = []
+var _camp_counts: Array[int] = []
+var _alive := 0
 var _wave_90_units: Array[Creep] = []
 var _boss_stage := {"a": 0, "b": 0}
 var colossus: Creep
@@ -51,8 +58,11 @@ func _ready() -> void:
 	if settings and settings.creep_limit == "safe":
 		camp_cap = SAFE_CAMP_CAP
 		total_cap = SAFE_TOTAL_CAP
+	elif settings and settings.creep_limit == "balanced":
+		camp_cap = BALANCED_CAMP_CAP
 	for i in camps.size():
 		_camp_units.append([])
+		_camp_counts.append(0)
 	for chain in boss_spots:
 		_spawn_boss(chain)
 	colossus = _spawn("colossus", colossus_spot)
@@ -69,28 +79,32 @@ func _physics_process(delta: float) -> void:
 		if timers[period] <= 0.0:
 			timers[period] += period
 			_wave(period)
+	for i in mini(SPAWNS_PER_TICK, _queue.size()):
+		var entry: Array = _queue.pop_front()
+		_spawn_queued(entry[0], entry[1], entry[2], entry[3])
 
 
 func _wave(period: int) -> void:
 	if period == 90:
 		_wave_90_units = _wave_90_units.filter(func(u): return is_instance_valid(u) and u.is_alive())
-		if not _wave_90_units.is_empty():
+		if not _wave_90_units.is_empty() or _queue.any(func(e): return e[3]):
 			return  # the map spawns the 90 s wave only when the last one is dead
 	var table: Array = {30: WAVE_30, 60: WAVE_60, 90: WAVE_90}[period]
 	for camp in camps.size():
 		_camp_units[camp] = _camp_units[camp].filter(func(u): return is_instance_valid(u) and u.is_alive())
 		for group in table[camp]:
 			for n in group[1]:
-				if _camp_units[camp].size() >= camp_cap or alive_creeps() >= total_cap:
+				if _camp_counts[camp] >= camp_cap or _alive >= total_cap:
 					break
 				# Spread new creeps on a widening spiral so a pile grows outward.
-				var k: int = _camp_units[camp].size()
-				var spot: Vector3 = camps[camp] + Vector3(cos(k * 2.4), 0, sin(k * 2.4)) * (0.8 + 0.42 * sqrt(k)) * 1.6
-				var unit := _spawn(group[0], spot)
-				unit.camp = camp
-				_camp_units[camp].append(unit)
-				if period == 90:
-					_wave_90_units.append(unit)
+				var k: int = _camp_counts[camp]
+				var spot: Vector3 = camps[camp] + Vector3(cos(k * 2.4), 0, sin(k * 2.4)) * minf((0.8 + 0.42 * sqrt(k)) * 1.6, 5.5)
+				spot.x = clampf(spot.x, -42.5, 42.5)
+				spot.z = clampf(spot.z, -26.5, 26.5)
+				# Counted now (so caps hold), placed over the next frames.
+				_camp_counts[camp] += 1
+				_alive += 1
+				_queue.append([group[0], spot, camp, period == 90])
 
 
 ## Sleeping camps cost nothing; 4×/s, wake the camps a hero or summon is near.
@@ -108,19 +122,33 @@ func _wake_camps() -> void:
 					creep.wake()
 
 
+func _spawn_queued(creep_id: String, spot: Vector3, camp: int, wave_90: bool) -> void:
+	var unit := _spawn(creep_id, spot)
+	unit.camp = camp
+	_camp_units[camp].append(unit)
+	unit.died.connect(_on_creep_died.bind(camp))
+	if wave_90:
+		_wave_90_units.append(unit)
+
+
+## Places every queued creep at once (tests use this to check a wave).
+func flush_spawns() -> void:
+	while not _queue.is_empty():
+		var entry: Array = _queue.pop_front()
+		_spawn_queued(entry[0], entry[1], entry[2], entry[3])
+
+
+func _on_creep_died(_killer: Hero, camp: int) -> void:
+	_camp_counts[camp] -= 1
+	_alive -= 1
+
+
 func camp_size(index: int) -> int:
-	if index < 0 or index >= _camp_units.size():
-		return 0
-	return _camp_units[index].filter(func(u): return is_instance_valid(u) and u.is_alive()).size()
+	return _camp_counts[index] if index >= 0 and index < _camp_counts.size() else 0
 
 
 func alive_creeps() -> int:
-	var count := 0
-	for list in _camp_units:
-		for unit in list:
-			if is_instance_valid(unit) and unit.is_alive():
-				count += 1
-	return count
+	return _alive
 
 
 func _spawn_boss(chain: String) -> void:

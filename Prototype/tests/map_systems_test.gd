@@ -105,7 +105,7 @@ func _start_arena() -> void:
 		brain.queue_free()  # still heroes, no decisions: the checks stay deterministic
 	_scene.bots.clear()
 	_hero = _scene.hero
-	_check(_scene.kill_target == 15 and _scene.time_left == 480.0, "Mobile rules: 15 kills or 8:00")
+	_check(_scene.kill_target == 15 and _scene.time_left == 480.0 and _scene.heroes.size() == 6, "Mobile rules: 3v3, 15 kills or 8:00")
 	var bosses := get_nodes_in_group("creeps").filter(func(c): return c.is_boss and not c.is_colossus)
 	_check(bosses.size() == 2 and bosses.all(func(c): return c.max_hp == 500.0), "two boss chains start with a 500 HP boss")
 	_check(_scene.events.colossus.max_hp == 100000.0, "the win boss has 100,000 HP")
@@ -118,12 +118,14 @@ func _start_arena() -> void:
 
 
 func _waves() -> void:
+	_scene.events.flush_spawns()
 	_check(_scene.events.alive_creeps() == 42, "30 s wave: 42 creeps across 12 camps (%d)" % _scene.events.alive_creeps())
 	_scene.events.timers[60] = 0.01
 	_wait = 0.2
 
 
 func _wave_cap() -> void:
+	_scene.events.flush_spawns()
 	_check(_scene.events.alive_creeps() == 110, "60 s wave adds 68 on top: 110 creeps piling up, as in the map (%d)" % _scene.events.alive_creeps())
 	for creep in get_nodes_in_group("creeps"):
 		if not creep.is_boss:
@@ -133,6 +135,7 @@ func _wave_cap() -> void:
 
 
 func _wave_90() -> void:
+	_scene.events.flush_spawns()
 	_check(_scene.events.alive_creeps() == 49, "90 s wave on a clear map: 49 creeps (%d)" % _scene.events.alive_creeps())
 	_scene.events.timers[90] = 0.01
 	_saved.count = _scene.events.alive_creeps()
@@ -253,6 +256,12 @@ func _classic() -> void:
 	root.add_child(_scene)
 	current_scene = _scene
 	_check(_scene.kill_target == 50 and _scene.time_left == INF, "Classic rules: 50 kills, no time limit")
+	var picked: Array = _scene.heroes.map(func(h): return h.definition.id)
+	var unique := {}
+	for id in picked:
+		unique[id] = true
+	_check(_scene.heroes.size() == 8 and _scene.heroes.filter(func(h): return h.team == 0).size() == 4, "Classic is 4v4, as in the reference map")
+	_check(unique.size() == 8, "every hero is picked once (%s)" % ", ".join(picked))
 	_check(_scene.hero.xp_rate == 1.0, "Classic levels at the map's own pace (Mobile ×%.0f)" % _scene.MOBILE_XP_RATE)
 	root.get_node("/root/Session").classic = false
 

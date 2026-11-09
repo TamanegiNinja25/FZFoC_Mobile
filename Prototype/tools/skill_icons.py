@@ -29,6 +29,16 @@ SKILLS = {
     "razor_wind": ("ryn", "fan"), "thousand_cuts": ("ryn", "star"),
     "quake_stomp": ("barrow", "rings"), "boulder_hurl": ("barrow", "boulder"),
     "stone_grip": ("barrow", "spikes"), "rockfall": ("barrow", "meteor"),
+    "splinter_volley": ("sable", "volley"), "pinning_shot": ("sable", "arrow"),
+    "ember_rain": ("sable", "zone"), "sunpiercer": ("sable", "beam"),
+    "wisp_swarm": ("morrow", "summon"), "life_drain": ("morrow", "drain"),
+    "withering_curse": ("morrow", "curse"), "barrow_rising": ("morrow", "skull"),
+    "crescent_slash": ("kael", "wave"), "flash_step": ("kael", "blink"),
+    "severing_edge": ("kael", "triple"), "moonless_rend": ("kael", "crescent"),
+    "arc_discharge": ("tamsin", "rings"), "thunder_lance": ("tamsin", "bolt"),
+    "static_field": ("tamsin", "zone"), "skyfall_wrath": ("tamsin", "lightning"),
+    "shield_bash": ("hask", "shield"), "iron_bulwark": ("hask", "shield"),
+    "chain_hook": ("hask", "hook"), "fortress": ("hask", "slam"),
 }
 
 

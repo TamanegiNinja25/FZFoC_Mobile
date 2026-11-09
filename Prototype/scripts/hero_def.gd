@@ -7,8 +7,16 @@ extends Resource
 @export var display_name := ""
 @export var title := ""
 @export var form_name := ""
-## Category on the hero select screen: "Bruiser", "Speed" or "Giant".
+## Category on the hero select screen: "Bruiser", "Speed", "Giant", "Ranged" or "Caster".
 @export var role := ""
+## The hero's realm — the select screen groups heroes by realm the way the
+## reference map's taverns group them by series.
+@export var realm := ""
+## Ranged heroes fire visible shots with their auto-attack.
+@export var ranged := false
+## Transforms on its own when HP falls below this fraction (0 = never), at most
+## once every 90 s — the reference map's low-health transformation.
+@export var auto_form_below := 0.0
 @export_multiline var description := ""
 ## Exclusive (signature) item only this hero can wield.
 @export var exclusive_item := ""
@@ -50,13 +58,20 @@ func attribute_gain(key: String) -> float:
 	return {"str": strength_gain, "agi": agility_gain, "int": intelligence_gain}.get(key, 0.0)
 
 
+## Data-built heroes (NewHeroes) supply builders instead of subclassing.
+var model_builder: Callable
+var skills_builder: Callable
+
+
 ## Returns the hero's visual: a Node3D with set_form(active: bool, scale: float).
 func create_model() -> Node3D:
-	return Node3D.new()
+	return model_builder.call() if model_builder.is_valid() else Node3D.new()
 
 
 ## Skills in button order: three ranked skills (5 ranks) and an ultimate (3 ranks).
 func create_skills() -> Array[Skill]:
+	if skills_builder.is_valid():
+		return skills_builder.call()
 	return []
 
 

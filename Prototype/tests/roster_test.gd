@@ -60,7 +60,8 @@ func _process(delta: float) -> bool:
 				_dummy._dead_time = 0.0
 				_dummy._respawn()
 			_dummy.hp = _dummy.max_hp
-			_hero.global_position = _dummy.global_position + Vector3(0, 0, 2.5 if i == 0 else 5.0)
+			var close: bool = i == 0 or ("reach" in _hero.skills[i] and _hero.skills[i].reach < 5.0)
+			_hero.global_position = _dummy.global_position + Vector3(0, 0, 2.5 if close else 5.0)
 			_hero.ai_move = (_dummy.global_position - _hero.global_position).normalized()
 			_hero.skills[i].time_left = 0.0
 			_hero.skills[i].rank = 1
@@ -83,7 +84,8 @@ func _judge() -> void:
 			var damaged: bool = _dummy.hp < _before.hp or not _dummy.is_alive()
 			var moved: bool = _hero.global_position.distance_to(_before.pos) > 2.0
 			var summoned: bool = get_nodes_in_group("summons").size() > _before.summons
-			var effect := "damage" if damaged else ("movement" if moved else ("haste" if _hero.is_hasted() else ("summon" if summoned else "none")))
+			var buffed: bool = _hero.shield > 0.0 or _hero._guard_time > 0.0
+			var effect := "damage" if damaged else ("movement" if moved else ("haste" if _hero.is_hasted() else ("summon" if summoned else ("buff" if buffed else "none"))))
 			_check(_before.cast and effect != "none", "%s — %s casts with a real effect (%s)" % [who, _before.name, effect])
 		"form":
 			_check(_before.cast and _hero.in_form, "%s transforms into %s" % [who, _hero.definition.form_name])
@@ -96,7 +98,8 @@ func _roles() -> void:
 	var by_role := {}
 	for definition in Roster.all():
 		by_role[definition.role] = definition
-	_check(by_role.keys().size() == 3, "three roles in the roster: %s" % ", ".join(by_role.keys()))
+	_check(by_role.keys().size() == 5, "five roles in the roster: %s" % ", ".join(by_role.keys()))
+	_check(Roster.all().size() == 8 and Roster.ids().size() == 8, "eight heroes: enough for unique picks in a 4v4")
 	_check(by_role.Speed.move_speed > by_role.Bruiser.move_speed and by_role.Speed.max_hp < by_role.Bruiser.max_hp,
 			"Speed is faster and frailer than Bruiser")
 	_check(by_role.Giant.max_hp > by_role.Bruiser.max_hp and by_role.Giant.move_speed < by_role.Bruiser.move_speed,

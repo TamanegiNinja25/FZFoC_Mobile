@@ -123,6 +123,14 @@ var _root_time := 0.0
 var _dots: Array = []
 ## Duel: everyone but the duelists is frozen — no actions, no damage taken.
 var frozen := false
+## Guard buff: take this much less damage while it lasts.
+var _guard_time := 0.0
+var _guard := 0.0
+## Shadow Cloak: enemies can't see (target) the hero until it attacks or casts.
+var _hidden_time := 0.0
+var _auto_form_cooldown := 0.0
+## Capture Orb: the creep type caught inside a full orb.
+var captured_key := ""
 ## Network: the peer controlling this hero (0 = bot or offline).
 var owner_peer := 0
 var model: Node3D
@@ -220,6 +228,9 @@ func _physics_process(delta: float) -> void:
 	_slow_time = maxf(_slow_time - delta, 0.0)
 	_stun_time = maxf(_stun_time - delta, 0.0)
 	_root_time = maxf(_root_time - delta, 0.0)
+	_guard_time = maxf(_guard_time - delta, 0.0)
+	_hidden_time = maxf(_hidden_time - delta, 0.0)
+	_auto_form_cooldown = maxf(_auto_form_cooldown - delta, 0.0)
 	_tick_dots(delta)
 	if not is_alive():
 		return
@@ -283,6 +294,18 @@ func try_transform() -> bool:
 	if in_form or _dead_time > 0.0 or frozen or is_stunned() or not meter.is_full():
 		return false
 	meter.consume()
+	_enter_form()
+	return true
+
+
+## The low-health transformation (HeroDef.auto_form_below): no meter needed.
+func _auto_transform() -> void:
+	_auto_form_cooldown = 90.0
+	_enter_form()
+	vfx("burst", [global_position, Color(0.9, 0.9, 1.0), 40, 8.0])
+
+
+func _enter_form() -> void:
 	meter.locked = true
 	in_form = true
 	_animate("cast")
@@ -295,7 +318,6 @@ func try_transform() -> bool:
 		model.set_form(true, form_scale)
 	form_changed.emit(true)
 	health_changed.emit(hp, max_hp, shield)
-	return true
 
 
 ## Returns {dealt, killed, bounty}. The bounty is read before death ends the form.
@@ -303,6 +325,8 @@ func take_damage(amount: float, attacker: Node = null) -> Dictionary:
 	if _dead_time > 0.0 or _invulnerable_time > 0.0 or frozen:
 		return {"dealt": 0.0, "killed": false, "bounty": 0.0}
 	amount *= 1.0 - damage_reduction
+	if _guard_time > 0.0:
+		amount *= 1.0 - _guard
 	var absorbed := minf(shield, amount)
 	shield -= absorbed
 	var dealt := minf(hp, amount - absorbed) + absorbed
@@ -315,6 +339,8 @@ func take_damage(amount: float, attacker: Node = null) -> Dictionary:
 		var reward := bounty_value()
 		_die(attacker as Hero)
 		return {"dealt": dealt, "killed": true, "bounty": reward}
+	if definition.auto_form_below > 0.0 and not in_form and _auto_form_cooldown <= 0.0 and hp < max_hp * definition.auto_form_below:
+		_auto_transform()
 	return {"dealt": dealt, "killed": false, "bounty": 0.0}
 
 
@@ -423,6 +449,36 @@ func use_item(index: int) -> bool:
 			if meter.locked or meter.is_full():
 				return false
 			meter._add(item.use_amount)
+		"recall":
+			apply_root(item.use_amount)
+			vfx("column", [global_position, Color(0.6, 0.8, 1.0), 4.0])
+			get_tree().create_timer(item.use_amount, false, true).timeout.connect(_recall)
+		"knife":
+			var target := Skill.nearest_hostile(self, 8.0)
+			if target == null:
+				return false
+			vfx("beam", [global_position, target.global_position, Color(0.85, 0.88, 0.92), 0.08])
+			deal_damage(target, item.use_amount)
+		"cloak":
+			hide_for(item.use_amount)
+		"capture":
+			var prey := _capture_target(item.use_amount)
+			if prey == null:
+				return false
+			captured_key = prey.key
+			vfx("beam", [global_position, prey.global_position, Color(0.75, 0.6, 1.0), 0.2])
+			prey._die(null)
+			items[index] = ItemCatalog.find("capture_orb_full")
+			recompute_stats()
+			items_changed.emit()
+			play_sfx("confirm", -4.0)
+			return true
+		"release":
+			if captured_key == "":
+				return false
+			var ally := Creep.summon_key(self, captured_key, global_position + aim_direction() * 2.0, item.use_amount)
+			vfx("column", [ally.global_position, Color(0.75, 0.6, 1.0), 4.0])
+			captured_key = ""
 	items.remove_at(index)
 	recompute_stats()
 	items_changed.emit()
@@ -520,6 +576,22 @@ func share_kill_xp(at: Vector3, victim_level: int, victim_is_hero: bool) -> void
 		ally.add_xp(base / receivers.size() * factor * ally.xp_rate)
 
 
+func _recall() -> void:
+	if is_alive() and is_inside_tree():
+		global_position = _spawn_point
+		velocity = Vector3.ZERO
+		vfx("column", [global_position, Color(0.6, 0.8, 1.0), 4.0])
+
+
+## A wave creep (not a boss or summon) within reach and under half health.
+func _capture_target(reach: float) -> Node3D:
+	for node in get_tree().get_nodes_in_group("creeps"):
+		if node.is_alive() and not node.is_boss and node.owner_hero == null and node.team == -1 \
+				and node.hp < node.max_hp * 0.5 and global_position.distance_to(node.global_position) <= reach:
+			return node
+	return null
+
+
 func recompute_stats() -> void:
 	var total := {}
 	for item in items:
@@ -604,6 +676,35 @@ func make_invulnerable(duration: float) -> void:
 	_invulnerable_time = maxf(_invulnerable_time, duration)
 
 
+## Take `amount` less damage (0.4 = 40%) for `duration` seconds.
+func apply_guard(amount: float, duration: float) -> void:
+	_guard = maxf(_guard if _guard_time > 0.0 else 0.0, amount)
+	_guard_time = maxf(_guard_time, duration)
+
+
+## Forced movement: a pull or a knockback (velocity for `duration` seconds).
+func push(push_velocity: Vector3, duration: float) -> void:
+	if not is_alive() or frozen or _invulnerable_time > 0.0:
+		return
+	_dash_velocity = push_velocity
+	_dash_time = duration
+
+
+## Shadow Cloak: unseen by enemies for `duration` s, until the hero attacks or casts.
+func hide_for(duration: float) -> void:
+	_hidden_time = duration
+	vfx("burst", [global_position, Color(0.3, 0.25, 0.45), 24, 3.0])
+
+
+func is_hidden() -> bool:
+	return _hidden_time > 0.0
+
+
+## Can `viewer`'s side see this unit? Hidden heroes are invisible to enemies.
+static func can_see(_viewer: Node, unit: Node) -> bool:
+	return not (unit is Hero and unit.is_hidden())
+
+
 func is_hasted() -> bool:
 	return _haste_time > 0.0
 
@@ -655,6 +756,7 @@ func try_skill(index: int) -> bool:
 	var cast := skills[index].try_cast(self)
 	if cast:
 		_animate("cast")
+		_hidden_time = 0.0  # casting reveals a cloaked hero
 	return cast
 
 
@@ -856,6 +958,9 @@ func _attack(target: Node3D) -> void:
 	_attack_cooldown = attack_interval / (_haste_mult if _haste_time > 0.0 else 1.0)
 	_face(target.global_position - global_position)
 	_animate("attack")
+	_hidden_time = 0.0  # attacking reveals a cloaked hero
+	if definition.ranged:
+		vfx("beam", [global_position, target.global_position, Color(1.0, 0.92, 0.7, 0.9), 0.07])
 	deal_damage(target, attack_damage)
 	if is_player:
 		play_sfx("hit", -10.0)
@@ -872,8 +977,8 @@ func _attack_target() -> Node3D:
 func _nearest_enemy() -> Node3D:
 	var best: Node3D = null
 	var best_dist := attack_range
-	for node in get_tree().get_nodes_in_group("units"):
-		if is_hostile(node) and node.is_alive():
+	for node in Creep.nearby(get_tree(), global_position, best_dist):
+		if is_hostile(node) and node.is_alive() and can_see(self, node):
 			var dist := global_position.distance_to(node.global_position)
 			if dist <= best_dist:
 				best = node
@@ -954,6 +1059,8 @@ func _die(killer: Hero = null) -> void:
 	_dash_time = 0.0
 	_stun_time = 0.0
 	_root_time = 0.0
+	_guard_time = 0.0
+	_hidden_time = 0.0
 	_dots.clear()
 	_chase_target = null
 	_dead_time = respawn_time

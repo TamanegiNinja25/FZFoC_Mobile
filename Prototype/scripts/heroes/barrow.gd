@@ -6,12 +6,13 @@ extends HeroDef
 
 func _init() -> void:
 	id = "barrow"
+	realm = "Stone Barrows"
 	display_name = "Barrow"
 	title = "the Living Cairn"
 	form_name = "Avalanche"
 	role = "Giant"
 	description = "A giant of stacked boulders woken by old runes. Slow, heavy-handed and nearly impossible to bring down."
-	max_hp = 1450.0
+	max_hp = 1320.0
 	hp_regen = 6.0
 	move_speed = 5.0
 	attack_damage = 58.0

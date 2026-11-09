@@ -88,8 +88,8 @@ func ai_escape() -> bool:
 
 static func hostiles_within(hero: Hero, radius: float) -> Array[Node3D]:
 	var found: Array[Node3D] = []
-	for node in hero.get_tree().get_nodes_in_group("units"):
-		if hero.is_hostile(node) and node.is_alive() and hero.global_position.distance_to(node.global_position) <= radius:
+	for node in Creep.nearby(hero.get_tree(), hero.global_position, radius):
+		if hero.is_hostile(node) and node.is_alive() and Hero.can_see(hero, node) and hero.global_position.distance_to(node.global_position) <= radius:
 			found.append(node)
 	return found
 

@@ -50,7 +50,15 @@ static func _build() -> Array[ItemDef]:
 		ItemDef.make("sages_hourglass", "Sage's Hourglass", "Relics", 5000, "Skills recharge 20% faster.", {"cooldown": 0.2}),
 		ItemDef.make("ember_draught", "Ember Draught", "Consumables", 1000, "Tap to heal 400 HP over 5 s.", {}, "heal", 400.0),
 		ItemDef.make("spark_flask", "Spark Flask", "Consumables", 2000, "Tap to charge the meter by 25.", {}, "meter", 25.0),
+		# Utility items, after the reference map's mixed shop (recall tome, throwing dagger, cloak, capture ball).
+		ItemDef.make("homeward_scroll", "Homeward Scroll", "Consumables", 1000, "Tap: after 2 s standing still, return to your fountain.", {}, "recall", 2.0),
+		ItemDef.make("throwing_knives", "Throwing Knives", "Consumables", 300, "Tap: hit the nearest enemy within 8 for 250.", {}, "knife", 250.0),
+		ItemDef.make("shadow_cloak", "Shadow Cloak", "Consumables", 500, "Tap: unseen by enemies for 5 s, until you attack or cast.", {}, "cloak", 5.0),
+		ItemDef.make("capture_orb", "Capture Orb", "Consumables", 1000, "Tap next to a creep below half health (not a boss) to catch it. Tap the full orb to release it as your ally for 60 s.", {}, "capture", 4.0),
 	]
+	var full_orb := ItemDef.make("capture_orb_full", "Capture Orb (full)", "Consumables", 1000, "A creep is inside. Tap to release it as your ally for 60 s.", {}, "release", 60.0)
+	full_orb.buyable = false
+	items.append(full_orb)
 	# Stat shop — the reference map's tomes and prices, used up on purchase.
 	for spec in [["tome_str_2", "Tome of Might +2", 250, {"str": 2}], ["tome_agi_2", "Tome of Grace +2", 200, {"agi": 2}],
 			["tome_str_5", "Tome of Might +5", 600, {"str": 5}], ["tome_agi_5", "Tome of Grace +5", 500, {"agi": 5}],
@@ -68,7 +76,17 @@ static func _build() -> Array[ItemDef]:
 			["galeheart_ribbon", "Galeheart Ribbon", "ryn", "+12 agility, +25% attack speed, +10% move speed.",
 				{"agi": 12.0, "attack_speed": 0.25, "move_speed": 0.1}],
 			["cairnstone_heart", "Cairnstone Heart", "barrow", "+15 strength, +400 max HP, take 10% less damage.",
-				{"str": 15.0, "hp": 400.0, "armor": 0.1}]]:
+				{"str": 15.0, "hp": 400.0, "armor": 0.1}],
+			["emberstring_bow", "Emberstring Bow", "sable", "+12 agility, +25% attack speed, +15 attack damage.",
+				{"agi": 12.0, "attack_speed": 0.25, "damage": 15.0}],
+			["gravebloom_censer", "Gravebloom Censer", "morrow", "+14 intelligence, +6 HP per second, skills recharge 15% faster.",
+				{"int": 14.0, "regen": 6.0, "cooldown": 0.15}],
+			["moonless_hilt", "Moonless Hilt", "kael", "+12 agility, +30 attack damage, +10% move speed.",
+				{"agi": 12.0, "damage": 30.0, "move_speed": 0.1}],
+			["thunderhead_crown", "Thunderhead Crown", "tamsin", "+15 intelligence, +300 max HP, skills recharge 15% faster.",
+				{"int": 15.0, "hp": 300.0, "cooldown": 0.15}],
+			["wardens_bulwark", "Warden's Bulwark", "hask", "+15 strength, +500 max HP, take 12% less damage.",
+				{"str": 15.0, "hp": 500.0, "armor": 0.12}]]:
 		var item := ItemDef.make(spec[0], spec[1], "Exclusive", 10000, "%s only. %s" % [spec[2].capitalize(), spec[3]], spec[4])
 		item.hero_only = spec[2]
 		items.append(item)

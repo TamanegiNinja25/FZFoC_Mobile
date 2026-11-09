@@ -29,7 +29,7 @@ func _cast(hero: Hero) -> void:
 func _land(hero: Hero, spot: Vector3) -> void:
 	if not is_instance_valid(hero) or not hero.is_alive():
 		return
-	for node in hero.get_tree().get_nodes_in_group("units"):
+	for node in Creep.nearby(hero.get_tree(), spot, RADIUS):
 		if hero.is_hostile(node) and node.is_alive() and spot.distance_to(node.global_position) <= RADIUS:
 			hero.deal_damage(node, scaled(hero, DAMAGE))
 			if node.has_method("apply_stun"):

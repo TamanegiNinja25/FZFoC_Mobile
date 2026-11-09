@@ -6,6 +6,7 @@ extends HeroDef
 
 func _init() -> void:
 	id = "ryn"
+	realm = "Gale Peaks"
 	display_name = "Ryn"
 	title = "the Gale Dancer"
 	form_name = "Tempest"
