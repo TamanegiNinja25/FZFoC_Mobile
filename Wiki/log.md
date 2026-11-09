@@ -6,6 +6,9 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-09 — Release v0.8.1
+- The owner added the `DEBUG_KEYSTORE_BASE64` secret. v0.8.1 has the same content as v0.8.0, built again so it's signed with the shared key and future releases install as updates. The built-in browser couldn't open GitHub to re-run the v0.8.0 job, so a new tag was used instead.
+
 ## 2026-11-09 — Release v0.8.0
 - Tag `v0.8.0` built and published by GitHub Actions; `FZFoC.apk` is 40 MB.
 - The `DEBUG_KEYSTORE_BASE64` secret isn't set yet, so the build was signed with a throwaway key: it won't install over v0.7.0 or the local build without uninstalling first.

@@ -53,7 +53,7 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 
 - Who records the voices — friends, the user, or a hired actor? ([source](sources/2026-11-08-ui-and-audio-direction.md))
 - ~~Which UI kit or style anchors the look?~~ Phase 8: Kenney RPG UI pack, tinted to stone and gold ([source](sources/2026-11-08-ui-and-audio-direction.md)) ([source](sources/2026-11-09-phase-8-assets-agents-skills.md))
-- **Release signing:** v0.8.0 was built without the `DEBUG_KEYSTORE_BASE64` secret (throwaway key); the owner adds the secret and re-runs the release job.
+- **Release signing:** ~~v0.8.0 was built without the `DEBUG_KEYSTORE_BASE64` secret~~ fixed: secret added; v0.8.1 is the first release signed with the shared key.
 - **Phase 8 open:** ~~a phone check of the rigged heroes and single-mesh scenery~~ done 2026-11-09: 4v4 Classic, up to 436 units, 42–56 FPS (average 47), the same as v0.7.0, no errors; whether selected toggle buttons stand out on the tinted skin; skill sound effects (slam, transform) still generated; skill icons and 2D sprites not taken from packs (original icons kept) ([source](sources/2026-11-09-phase-8-assets-agents-skills.md))
 
 ## Wanted sources
