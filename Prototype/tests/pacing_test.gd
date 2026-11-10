@@ -64,7 +64,8 @@ func _finish() -> void:
 	print("END t=%ds over=%s winner=%d  average level %.1f  ultimates learned %d/6  max creeps %d" % [_sim, _scene.over, _scene.winner, average, ultimates, _max_creeps])
 	_check(average >= 10.0 and average < 25.0, "average level %.1f at the end (target 10–25)" % average)
 	_check(ultimates >= 3, "at least half the heroes learned their ultimate (%d)" % ultimates)
-	_check(_duels >= 1, "a duel happened (%d)" % _duels)
+	# The first duel comes 290–310 s in; a fast match can be won before then.
+	_check(_duels >= 1 or _sim < Duel.INTERVAL_MAX, "a duel happened, or the match ended before the first one (%d duels, %d s)" % [_duels, _sim])
 	_check(_max_creeps <= _scene.events.total_cap, "creeps stayed under the pile-up limit (max %d)" % _max_creeps)
 	for failure in _failures:
 		printerr("FAIL: " + failure)

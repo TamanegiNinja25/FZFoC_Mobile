@@ -11,6 +11,8 @@ func _init() -> void:
 	title = "the Gale Dancer"
 	form_name = "Tempest"
 	form_stages = ["Eye of the Gale"]
+	voice = "male2"
+	voice_pitch = 1.08
 	role = "Speed"
 	description = "A hooded duelist who fights on the wind. Twin blades, blinding speed, little armour."
 	max_hp = 820.0

@@ -112,6 +112,7 @@ func _client_action(kind: String, arg: Variant) -> void:
 		return
 	match kind:
 		"skill": h.try_skill(int(arg))
+		"innate": h.try_innate()
 		"learn": h.learn_skill(int(arg))
 		"attack": h.order_attack()
 		"transform": h.try_transform()
@@ -316,7 +317,7 @@ func _fx(index: int, kind: String, data: Array) -> void:
 		"sfx":
 			var sfx := get_node_or_null("/root/Sfx")
 			if sfx:
-				sfx.play(data[0], data[1] + (0.0 if h.is_player else -9.0))
+				sfx.play(data[0], data[1] + (0.0 if h.is_player else -9.0), data[2] if data.size() > 2 else 1.0)
 
 
 @rpc("authority", "reliable")

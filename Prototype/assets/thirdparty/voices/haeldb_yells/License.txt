@@ -1,0 +1,5 @@
+Male Grunt/Yelling sounds
+by HaelDB — https://opengameart.org/content/male-gruntyelling-sounds
+
+Licence: CC0 1.0 (public domain dedication; also offered as OGA-BY 3.0). Used here under CC0.
+Converted to mono 22 kHz and trimmed for FZFoC; a selection of the original files.

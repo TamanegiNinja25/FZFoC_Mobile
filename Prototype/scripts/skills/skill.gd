@@ -61,6 +61,11 @@ func scaled(hero: Hero, base: float) -> float:
 	return base * (1.0 + 0.35 * (maxi(rank, 1) - 1)) * hero.skill_power + hero.attribute_gained(hero.definition.primary)
 
 
+## The skill's own sound (tools/skill_sounds.py makes one per skill name).
+func sound_id() -> String:
+	return "skill:" + skill_name.to_snake_case()
+
+
 ## The skill's icon (tools/skill_icons.py draws one per skill name).
 func icon_path() -> String:
 	return "res://assets/icons/skills/%s.png" % skill_name.to_snake_case()

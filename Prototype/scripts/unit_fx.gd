@@ -176,7 +176,9 @@ static func beam(world: Node, from: Vector3, to: Vector3, color: Color, width: f
 	var line := _instance(world, _cached_mesh("unit_box"), _fade_material(color, false))
 	var lift := Vector3(0, 1.2, 0)
 	line.global_position = (from + to) / 2.0 + lift
-	line.look_at(to + lift, Vector3.UP)
+	# Bolts from the sky fall straight down: look_at needs another "up" for them.
+	var vertical := absf((to - from).normalized().y) > 0.95
+	line.look_at(to + lift, Vector3.FORWARD if vertical else Vector3.UP)
 	line.scale = Vector3(width, width, length)
 	line.transparency = 1.0 - color.a
 	var tween := line.create_tween().set_parallel(true)

@@ -27,6 +27,9 @@ var _sidestep := Vector3.ZERO
 var _sidestep_time := 0.0
 ## Items already bought from the build (parts may since have been fused).
 var _bought := {}
+## Creep-room trip: the pad a bot is walking to, and when it may go again.
+var _room_pad := Vector3.INF
+var _room_cooldown := 60.0
 
 
 func reaction_time() -> float:
@@ -48,6 +51,7 @@ func _physics_process(delta: float) -> void:
 		_retreating = false
 		return
 	_track_stuck(delta)
+	_room_cooldown -= delta
 	if _sidestep_time > 0.0:
 		_sidestep_time -= delta
 		hero.ai_move = _sidestep
@@ -85,6 +89,10 @@ func _decide() -> void:
 		_move_to(arena.circle_position(hero.team))
 		return
 
+	if _creep_rooms(hp_ratio):
+		return
+	_use_capture_orb()
+
 	var target := _choose_target()
 	if target == null:
 		_move_to(arena.center_point())
@@ -102,12 +110,64 @@ func _decide() -> void:
 			hero.ai_move = _flat_direction(target.global_position)
 			hero.try_skill(i)
 
+	# The innate blink closes distance on a hero (and skilful bots use it often).
+	if hero.innate and hero.innate.is_ready() and target is Hero and distance > hero.attack_range + 2.0 \
+			and distance < 9.0 and not hero.definition.ranged and randf() < skill * 0.5:
+		hero.ai_move = _flat_direction(target.global_position)
+		hero._face(hero.ai_move)
+		hero.try_innate()
+
 	if hero.definition.ranged and target is Hero and distance < hero.attack_range * 0.45 and not hero.is_rooted():
 		hero.ai_move = -_flat_direction(target.global_position)  # ranged heroes kite: step back, keep shooting
 	elif distance > hero.attack_range * 0.85:
 		_move_to(target.global_position)
 	else:
 		hero.ai_move = Vector3.ZERO  # in range: the auto-attack does the work
+
+
+## The map's private creep rooms: when the field is quiet a bot walks to a pad
+## (an easy room below level 18, a hard one above), farms the room, and takes
+## the pad back once the room is empty or it's hurt. Returns true while busy.
+func _creep_rooms(hp_ratio: float) -> bool:
+	var room := CreepRooms.room_at(hero.global_position)
+	if room != -1:
+		_room_pad = Vector3.INF
+		var left := get_tree().get_nodes_in_group("creeps").filter(func(c): return c.is_alive() and c.team == -1 \
+				and CreepRooms.room_at(c.global_position) == room)
+		if left.is_empty() or hp_ratio < 0.45:
+			_move_to(CreepRooms.exit_pad(room))
+			return true
+		return false  # fight the room's creeps with the usual targeting
+	if _room_pad != Vector3.INF:
+		if _count_enemy_heroes(10.0) > 0 or hp_ratio < 0.6:
+			_room_pad = Vector3.INF
+			return false
+		_move_to(_room_pad)
+		return true
+	if _room_cooldown <= 0.0 and hero.level >= 6 and hp_ratio > 0.8 and _count_enemy_heroes(15.0) == 0 and randf() < 0.2:
+		_room_cooldown = 120.0
+		var choices: Array = [0, 2] if hero.level < 18 else [1, 3]
+		var best: Vector3 = CreepRooms.ROOMS[choices[0]][0]
+		for i in choices:
+			var pad: Vector3 = CreepRooms.ROOMS[i][0]
+			if hero.global_position.distance_to(pad) < hero.global_position.distance_to(best):
+				best = pad
+		_room_pad = best
+		_move_to(best)
+		return true
+	return false
+
+
+## The capture orb: catch a weakened creep nearby, then keep it out fighting.
+func _use_capture_orb() -> void:
+	for i in hero.items.size():
+		var id: String = hero.items[i].id
+		if id == "capture_orb" and hero._capture_target(hero.items[i].use_amount) != null:
+			hero.use_item(i)
+			return
+		if id == "capture_orb_full" and (hero.pet == null or not is_instance_valid(hero.pet)):
+			hero.use_item(i)
+			return
 
 
 ## Buys the next item of the bot build (one per decision); once the build is

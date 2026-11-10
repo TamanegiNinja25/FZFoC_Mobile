@@ -7,6 +7,7 @@ var duration := 4.0
 var shield := 0.0
 var guard := 0.0          # e.g. 0.4 = take 40% less damage
 var haste := 1.0          # attack speed multiplier
+var invulnerable := 0.0   # seconds untouchable at the start
 var color := Color(0.95, 0.8, 0.45)
 
 
@@ -25,6 +26,8 @@ func _cast(hero: Hero) -> void:
 		hero.apply_guard(guard, length)
 	if haste > 1.0:
 		hero.apply_haste(haste, length)
+	if invulnerable > 0.0:
+		hero.make_invulnerable(invulnerable)
 	hero.vfx("column", [hero.global_position, color, 3.5])
 	hero.vfx("ring", [hero.global_position, 1.8, color])
 	hero.play_sfx("confirm", 0.0)

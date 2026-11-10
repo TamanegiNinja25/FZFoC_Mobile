@@ -10,12 +10,17 @@ signal closed
 const THIRD_PARTY := [
 	["Kay Lousberg (kaylousberg.com)", "KayKit Character Pack: Adventurers 1.0", "CC0 1.0", "Hero models and animations"],
 	["Kay Lousberg", "KayKit Character Pack: Skeletons 1.0", "CC0 1.0", "Morrow, Kael and the Barrow-Dead summons"],
+	["Quaternius (quaternius.com)", "RPG Characters (Nov 2020)", "CC0 1.0", "Oren, Ashka, Nyx, Velka, Corin and Lys"],
 	["Kay Lousberg", "KayKit Medieval Hexagon Pack 1.0", "CC0 1.0", "Castles, towers, banners and scenery"],
 	["Kenney (kenney.nl)", "50 RPG Sound Effects", "CC0 1.0", "Hit, dash and coin sounds"],
 	["Kenney", "Interface Sounds", "CC0 1.0", "Menu and button sounds"],
 	["Kenney", "UI Pack: RPG Extension", "CC0 1.0", "Button and panel skins"],
 	["cynicmusic (OpenGameArt)", "Town Theme RPG", "CC0 1.0", "Menu music"],
 	["cynicmusic", "Battle Theme A", "CC0 1.0", "Battle music"],
+	["Kenney", "Voiceover Pack: Fighter", "CC0 1.0", "Announcer lines"],
+	["HaelDB (OpenGameArt)", "Male Grunt/Yelling sounds", "CC0 1.0", "Hero battle cries"],
+	["thebardofblasphemy (OpenGameArt)", "grunts of male death and pain", "CC0 1.0", "Hero death cries"],
+	["JeanMyna_VA (OpenGameArt)", "Aha! voice pack — Female Fighter Voice Over", "CC-BY 3.0", "Female heroes' battle cries — Voice: JeanMyna_VA (CC-BY 3.0)"],
 ]
 
 
@@ -53,7 +58,7 @@ static func credits_text() -> String:
 	var muted := UiTheme.MUTED.to_html(false)
 	var lines := PackedStringArray()
 	lines.append("[center][b][color=#%s]FrozenThrone: Fight Of The Characters[/color][/b]" % gold)
-	lines.append("An original hero arena. Code, heroes, skill icons, effects and generated sounds are original work.[/center]")
+	lines.append("An original hero arena. Code, all 24 heroes, skill icons, effects, skill sounds and generated sounds are original work.[/center]")
 	lines.append("")
 	lines.append("[b][color=#%s]Assets by other creators[/color][/b] — thank you!" % gold)
 	for entry in THIRD_PARTY:

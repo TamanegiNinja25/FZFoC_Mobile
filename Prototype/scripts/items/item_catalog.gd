@@ -22,7 +22,7 @@ const RECIPES := [
 ## Bots buy in this order when they're at their fountain with enough gold
 ## ("exclusive" means the bot hero's own exclusive item). Two recipe pairs
 ## (Bastion Aegis, Sovereign Blade) are in the build so bots use the circle.
-const BOT_BUILD := ["tempered_blade", "riveted_mail", "bulwark_plate", "wayfarers_treads", "forgebreaker_maul", "exclusive", "kindling_rune"]
+const BOT_BUILD := ["tempered_blade", "riveted_mail", "capture_orb", "bulwark_plate", "wayfarers_treads", "forgebreaker_maul", "exclusive", "kindling_rune"]
 
 
 static var _all: Array[ItemDef] = []
@@ -90,7 +90,39 @@ static func _build() -> Array[ItemDef]:
 			["thunderhead_crown", "Thunderhead Crown", "tamsin", "+15 intelligence, +300 max HP, skills recharge 15% faster.",
 				{"int": 15.0, "hp": 300.0, "cooldown": 0.15}],
 			["wardens_bulwark", "Warden's Bulwark", "hask", "+15 strength, +500 max HP, take 12% less damage.",
-				{"str": 15.0, "hp": 500.0, "armor": 0.12}]]:
+				{"str": 15.0, "hp": 500.0, "armor": 0.12}],
+			["cinderfist_wraps", "Cinderfist Wraps", "pyre", "+12 agility, +25 attack damage, +15% attack speed.",
+				{"agi": 12.0, "damage": 25.0, "attack_speed": 0.15}],
+			["gatekeepers_seal", "Gatekeeper's Seal", "brannoc", "+15 strength, +600 max HP, take 12% less damage.",
+				{"str": 15.0, "hp": 600.0, "armor": 0.12}],
+			["dawnforged_sigil", "Dawnforged Sigil", "seraphine", "+10 strength, +8 agility, +6 HP per second, +25 attack damage.",
+				{"str": 10.0, "agi": 8.0, "regen": 6.0, "damage": 25.0}],
+			["starfire_codex", "Starfire Codex", "ashka", "+16 intelligence, +250 max HP, skills recharge 15% faster.",
+				{"int": 16.0, "hp": 250.0, "cooldown": 0.15}],
+			["rimeglass_compass", "Rimeglass Compass", "isolde", "+15 intelligence, +300 max HP, skills recharge 15% faster.",
+				{"int": 15.0, "hp": 300.0, "cooldown": 0.15}],
+			["windcutter_tsuba", "Windcutter Tsuba", "oren", "+14 agility, +20% attack speed, +10% move speed.",
+				{"agi": 14.0, "attack_speed": 0.2, "move_speed": 0.1}],
+			["galespire_lance", "Galespire Lance", "kestrel", "+12 agility, +30 attack damage, +10% move speed.",
+				{"agi": 12.0, "damage": 30.0, "move_speed": 0.1}],
+			["thunderheart_torc", "Thunderheart Torc", "thane", "+14 strength, +500 max HP, meter charges 25% faster.",
+				{"str": 14.0, "hp": 500.0, "meter_gain": 0.25}],
+			["dunestone_urn", "Dunestone Urn", "dunmar", "+14 strength, +550 max HP, take 12% less damage.",
+				{"str": 14.0, "hp": 550.0, "armor": 0.12}],
+			["marshlight_lantern", "Marshlight Lantern", "mire", "+15 intelligence, +6 HP per second, skills recharge 15% faster.",
+				{"int": 15.0, "regen": 6.0, "cooldown": 0.15}],
+			["carvers_chisel", "Carver's Chisel", "halvard", "+12 strength, +6 intelligence, +20 attack damage, skills recharge 10% faster.",
+				{"str": 12.0, "int": 6.0, "damage": 20.0, "cooldown": 0.1}],
+			["cairnwood_bow", "Cairnwood Bow", "wren", "+13 agility, +28 attack damage, +10% attack speed.",
+				{"agi": 13.0, "damage": 28.0, "attack_speed": 0.1}],
+			["spiritbound_knuckles", "Spiritbound Knuckles", "corin", "+10 strength, +10 agility, +20 attack damage.",
+				{"str": 10.0, "agi": 10.0, "damage": 20.0}],
+			["moonsilver_quiver", "Moonsilver Quiver", "velka", "+13 agility, +25 attack damage, +12% attack speed.",
+				{"agi": 13.0, "damage": 25.0, "attack_speed": 0.12}],
+			["nightglass_dagger", "Nightglass Dagger", "nyx", "+14 agility, +30 attack damage, +10% move speed.",
+				{"agi": 14.0, "damage": 30.0, "move_speed": 0.1}],
+			["tidepearl_circlet", "Tidepearl Circlet", "lys", "+15 intelligence, +300 max HP, +5 HP per second.",
+				{"int": 15.0, "hp": 300.0, "regen": 5.0}]]:
 		var item := ItemDef.make(spec[0], spec[1], "Exclusive", 10000, "%s only. %s" % [spec[2].capitalize(), spec[3]], spec[4])
 		item.hero_only = spec[2]
 		items.append(item)

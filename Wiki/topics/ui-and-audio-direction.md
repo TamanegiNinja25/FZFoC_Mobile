@@ -1,8 +1,8 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-ui-and-audio-direction, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-09-phase-8-assets-agents-skills]
-updated: 2026-11-09
+sources: [2026-11-08-ui-and-audio-direction, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-09-phase-8-assets-agents-skills, 2026-11-10-phase-9-map-gaps-and-24-heroes]
+updated: 2026-11-10
 ---
 # UI and audio direction
 
@@ -52,6 +52,16 @@ Phase 1 of the game build put the UI direction into practice ([src](../sources/2
   - Sounds come from Kenney packs with random variants: three hit sounds, dash, coins on buy and sell, error, and menu click/confirm/back ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
   - Menu and battle music are cynicmusic's CC0 themes ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
   - The generated sounds stay for slam, transform, kill, victory, defeat, level-up and duel, and as fallbacks ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+- **Phase 9 audio:**
+  - every skill has its own generated sound (117 in all) ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md));
+  - every hero has a voice — a battle cry on ultimate, form, ascension and multi-kill, and a death cry — pitched per hero from four CC0/CC-BY packs ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md));
+  - an announcer calls the start, "choose your character", the duel countdown, multi-kills and the result ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Phase 9 HUD:**
+  - an always-on scoreboard under the score;
+  - a BLINK button in the free corner under pause;
+  - BAG and MARK beside the inventory;
+  - an ASCEND state on the transform button;
+  - selected toggles glow gold so the chosen hero, tab or mode reads at a glance ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
 - **Credits screen** in the main menu lists every creator, work, licence and use ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
 - A phone check caught hero-select text pushing buttons off screen; detail text now scrolls in a fixed box — long text needs a fixed area on phones *(inference)*.
 

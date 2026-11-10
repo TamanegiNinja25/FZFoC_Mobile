@@ -20,6 +20,17 @@ const SOUNDS := {
 	"slam": ["slam"], "transform": ["transform"], "kill": ["kill"], "victory": ["victory"],
 	"defeat": ["defeat"], "levelup": ["levelup"], "duel": ["duel"],
 }
+## Announcer lines: Kenney "Voiceover Pack: Fighter" (CC0).
+const ANNOUNCER := "res://assets/thirdparty/voices/kenney_fighter/"
+## Hero voices (CREDITS.md): HaelDB's yells (CC0), thebardofblasphemy's death
+## grunts (CC0) and JeanMyna_VA's "Aha!" (CC-BY 3.0). Each hero picks a set and a pitch.
+const VOICES_DIR := "res://assets/thirdparty/voices/"
+const VOICE_SETS := {
+	"male1": {"cry": ["haeldb_yells/voice1_cry%d.wav", 8], "death": ["bard_death_grunts/death%d.wav", 10]},
+	"male2": {"cry": ["haeldb_yells/voice2_cry%d.wav", 8], "death": ["bard_death_grunts/death%d.wav", 10]},
+	"male3": {"cry": ["haeldb_yells/voice3_cry%d.wav", 8], "death": ["haeldb_yells/voice3_grunt%d.wav", 6]},
+	"female": {"cry": ["jeanmyna_aha/aha%d.wav", 6], "death": ["jeanmyna_aha/aha%d.wav", 6]},
+}
 ## Music tracks (cynicmusic, CC0 — see CREDITS.md); generated WAVs are the fallback.
 const MUSIC := {
 	"menu": "res://assets/thirdparty/music/town_theme_rpg.mp3",
@@ -92,11 +103,41 @@ func _music_stream(track: String) -> AudioStream:
 
 
 func has_sound(sound: String) -> bool:
-	return _streams.has(sound)
+	return _streams.has(sound) or not _resolve(sound).is_empty()
+
+
+## Sounds loaded on first use: "skill:<id>" (assets/sfx/skills), "voice:<set>:<kind>"
+## and "announce:<line>". Returns the variants (empty when there's no file).
+func _resolve(sound: String) -> Array:
+	if _streams.has(sound):
+		return _streams[sound]
+	var paths: Array[String] = []
+	var parts := sound.split(":")
+	if parts[0] == "skill" and parts.size() == 2:
+		paths.append("res://assets/sfx/skills/%s.wav" % parts[1])
+	elif parts[0] == "voice" and parts.size() == 3 and VOICE_SETS.has(parts[1]) and VOICE_SETS[parts[1]].has(parts[2]):
+		var spec: Array = VOICE_SETS[parts[1]][parts[2]]
+		for k in spec[1]:
+			paths.append(VOICES_DIR + spec[0] % (k + 1))
+	elif parts[0] == "announce" and parts.size() == 2:
+		paths.append(ANNOUNCER + parts[1] + ".ogg")
+	else:
+		return []
+	var variants: Array[AudioStream] = []
+	for path in paths:
+		if ResourceLoader.exists(path):
+			variants.append(load(path))
+	_streams[sound] = variants
+	return variants
+
+
+## An announcer line ("fight", "you_win", "3" …), clear of the music.
+func announce(line: String, volume_db := 0.0) -> void:
+	play("announce:" + line, volume_db)
 
 
 func play(sound: String, volume_db := 0.0, pitch := 1.0) -> void:
-	if not _streams.has(sound):
+	if _resolve(sound).is_empty():
 		return
 	var player := _players[_next]
 	_next = (_next + 1) % VOICES

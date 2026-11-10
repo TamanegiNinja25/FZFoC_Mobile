@@ -1,8 +1,8 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-hero-design-vael, 2026-11-08-ui-polish-and-phase-2, 2026-11-09-phase-8-assets-agents-skills]
-updated: 2026-11-09
+sources: [2026-11-08-decision-visual-style, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-ui-and-audio-direction, 2026-11-08-toon-shading-and-stress-benchmark, 2026-11-08-decision-phone-shadow-cascades, 2026-11-08-phone-benchmark-infinix-note-30, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-hero-design-vael, 2026-11-08-ui-polish-and-phase-2, 2026-11-09-phase-8-assets-agents-skills, 2026-11-10-phase-9-map-gaps-and-24-heroes]
+updated: 2026-11-10
 ---
 # Art direction
 
@@ -107,6 +107,12 @@ MT6789, Mali-G57 MC2, 1080×2460 at 60 Hz. Vsync can't be disabled, so GPU time 
   - Every piece shares one texture, so all of it merges into **one mesh, one draw call**, with no collision.
   - Mountains are sunk so their hex-tile bases stay hidden, and the bright tile colours are toned toward the muted arena palette ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
 - **Style check:** chunky low-poly characters sit closer to "stylized toon" than the earlier "high-poly stylized" target. The phone budget rewards it, but the [decision](#decision) should be revisited *(inference)*.
+
+## Phase 9: more bodies for 24 heroes
+- **Bodies:**
+  - Sixteen new heroes share the KayKit bodies, recoloured (a tint over the texture) and re-armed per hero ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+  - Six use Quaternius's RPG characters (CC0): Oren, Ashka, Nyx, Velka, Corin and Lys ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Style:** Quaternius's proportions are a little less chunky than KayKit's but read as the same low-poly family from the game camera *(inference)*.
 
 ## Readability from the top-down camera
 - First hero check on the phone: Vael's silhouette (pauldrons, helm, hammer) reads, but his chest glow faces away from the camera. Signature details — glow, colour accents — belong on **top-facing surfaces** (shoulders, back, helm) ([src](../sources/2026-11-08-hero-design-vael.md)). See [Roster](roster.md).

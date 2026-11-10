@@ -54,10 +54,7 @@ Claims a source marks as its own inference about Warcraft III engine behaviour; 
 - Who records the voices — friends, the user, or a hired actor? ([source](sources/2026-11-08-ui-and-audio-direction.md))
 - ~~Which UI kit or style anchors the look?~~ Phase 8: Kenney RPG UI pack, tinted to stone and gold ([source](sources/2026-11-08-ui-and-audio-direction.md)) ([source](sources/2026-11-09-phase-8-assets-agents-skills.md))
 - ~~**Release signing**~~ solved 2026-11-09: v0.8.2 is signed with the shared key and installs as an update.
-- **Reference-map gaps** (from the 2026-11-09 gap audit output):
-  - missing systems: private creep rooms with teleport pads; multi-stage forms; stat-threshold evolution; live K/D scoreboard; storage unit; host duel switch; custom recall point; skill-name callouts; potion stacking;
-  - values that differ: Classic 50 vs the map's 100 kills; respawn 6 vs 4 s; passive income the map doesn't have; capture is one-shot, not persistent;
-  - scale: 8/24 heroes, 32/120 skills, 45/59 items, no voice or per-skill sound.
+- ~~**Reference-map gaps**~~ closed 2026-11-10: every system from the gap audit is built ([source](sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)). Still open: spoken per-hero voice lines need recorded voice acting; a longer balance run for 24 heroes.
 - **Phase 8 open:** ~~a phone check of the rigged heroes and single-mesh scenery~~ done 2026-11-09: 4v4 Classic, up to 436 units, 42–56 FPS (average 47), the same as v0.7.0, no errors; whether selected toggle buttons stand out on the tinted skin; skill sound effects (slam, transform) still generated; skill icons and 2D sprites not taken from packs (original icons kept) ([source](sources/2026-11-09-phase-8-assets-agents-skills.md))
 
 ## Wanted sources

@@ -160,6 +160,8 @@ var owner_peer := 0
 var model: Node3D
 var animator: HeroAnimator
 var skills: Array[Skill] = []
+## The innate skill (a short blink), or null.
+var innate: Skill
 
 var level := 1
 var xp := 0.0
@@ -224,6 +226,7 @@ func _ready() -> void:
 	animator.setup(self, model)
 	_build_overhead()
 	skills = definition.create_skills()
+	innate = definition.create_innate()
 
 	meter = TransformMeter.new()
 	meter.name = "TransformMeter"
@@ -268,6 +271,8 @@ func _physics_process(delta: float) -> void:
 
 	for skill in skills:
 		skill.tick(delta)
+	if innate:
+		innate.tick(delta)
 	_flush_numbers(delta)
 
 	if is_stunned():
@@ -309,6 +314,8 @@ func _poll_actions() -> void:
 	for i in 4:
 		if Input.is_action_just_pressed("skill_%d" % (i + 1)):
 			try_skill(i)
+	if Input.is_action_just_pressed("innate"):
+		try_innate()
 	if Input.is_action_just_pressed("attack"):
 		order_attack()
 
@@ -327,6 +334,7 @@ func try_transform() -> bool:
 		return true
 	meter.consume()
 	_enter_form()
+	play_voice("cry")
 	return true
 
 
@@ -364,6 +372,7 @@ func _ascend() -> void:
 	vfx("ring", [global_position, 4.0, Color(1.0, 0.85, 0.5, 0.9)])
 	vfx("callout", [global_position, stage_name() + " !!", Color(1.0, 0.85, 0.45)])
 	play_sfx("transform", 2.0)
+	play_voice("cry")
 	if model.has_method("set_form"):
 		model.set_form(true, form_scale_now())
 	form_changed.emit(true)
@@ -882,6 +891,7 @@ func evolve() -> void:
 	definition = next
 	_apply_definition()
 	skills = definition.create_skills()
+	innate = definition.create_innate()
 	for i in mini(ranks.size(), skills.size()):
 		skills[i].rank = mini(ranks[i], skills[i].max_rank)
 	var old_model := model
@@ -899,6 +909,7 @@ func evolve() -> void:
 	vfx("burst", [global_position, Color(1.0, 0.85, 0.4), 32, 9.0])
 	vfx("callout", [global_position, "%s — %s !!" % [definition.display_name, definition.title], Color(1.0, 0.85, 0.4)])
 	play_sfx("transform", 4.0)
+	play_voice("cry")
 	definition_changed.emit()
 	skills_changed.emit()
 
@@ -1012,11 +1023,16 @@ func is_hostile(unit: Node) -> bool:
 ## Plays a sound at full volume for the player's own hero, quieter for others.
 ## The Sfx autoload is looked up at call time: test scripts compile Hero before
 ## autoloads exist, so naming it directly would fail there.
-func play_sfx(sound: String, volume_db := 0.0) -> void:
-	fx.emit("sfx", [sound, volume_db])
+func play_sfx(sound: String, volume_db := 0.0, pitch := 1.0) -> void:
+	fx.emit("sfx", [sound, volume_db, pitch])
 	var sfx := get_node_or_null("/root/Sfx")
 	if sfx:
-		sfx.play(sound, volume_db + (0.0 if is_player else -9.0), randf_range(0.95, 1.05))
+		sfx.play(sound, volume_db + (0.0 if is_player else -9.0), pitch * randf_range(0.95, 1.05))
+
+
+## A line from the hero's voice: "cry" (ultimate, transformation, evolution) or "death".
+func play_voice(kind: String) -> void:
+	play_sfx("voice:%s:%s" % [definition.voice, kind], -2.0, definition.voice_pitch)
 
 
 func is_alive() -> bool:
@@ -1034,6 +1050,23 @@ func try_skill(index: int) -> bool:
 		_animate("cast")
 		_hidden_time = 0.0  # casting reveals a cloaked hero
 		vfx("callout", [global_position, skills[index].display_name(self) + " !!", Color.from_hsv(randf(), 0.55, 1.0)])
+		play_sfx(skills[index].sound_id(), -3.0)
+		if skills[index].ultimate:
+			play_voice("cry")
+	return cast
+
+
+## The innate blink: always learned, a short cooldown.
+func try_innate() -> bool:
+	if puppet:
+		action_requested.emit("innate", null)
+		return false
+	if innate == null or _dead_time > 0.0 or frozen or is_stunned() or is_rooted():
+		return false
+	var cast := innate.try_cast(self)
+	if cast:
+		_hidden_time = 0.0
+		play_sfx(innate.sound_id(), -4.0)
 	return cast
 
 
@@ -1180,6 +1213,9 @@ func _register_kill(base_gold: float) -> void:
 	spree_time_left = spree_window
 	gold += base_gold * (1.0 + spree_gold_bonus * (spree - 1))
 	gold_changed.emit(gold, income_per_second(), spree)
+	if spree == 3:
+		play_sfx("announce:multi_kill", 0.0)
+		play_voice("cry")
 
 
 func _end_spree() -> void:
@@ -1344,6 +1380,7 @@ func _die(killer: Hero = null) -> void:
 	_chase_target = null
 	_dead_time = respawn_time
 	velocity = Vector3.ZERO
+	play_voice("death")
 	if animator:
 		animator.die()  # topples, then hides the hero
 	else:

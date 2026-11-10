@@ -10,6 +10,8 @@ var hero_id := "vael"
 var classic := false
 ## Duels every ~5 min; the host can switch them off for the match, as the map allows.
 var duels := true
+## Shuffles the bots' heroes for the next match (0 = roster order); the host's seed online.
+var bot_seed := 0
 ## Local multiplayer: peer id → team, chosen by the host when the match starts.
 var net_teams := {}
 ## A message for the main menu (e.g. "The host left the game").

@@ -20,6 +20,10 @@ extends Resource
 @export_multiline var description := ""
 ## Exclusive (signature) item only this hero can wield.
 @export var exclusive_item := ""
+## Voice set ("male1", "male2", "male3", "female" — CC0/CC-BY packs, see
+## CREDITS.md) and its pitch, so every hero sounds their own.
+@export var voice := "male1"
+@export var voice_pitch := 1.0
 
 @export_group("Stats")
 ## Level-1 values. Attribute points gained later (levels, tomes, items) add on top.
@@ -74,6 +78,9 @@ var evolve_into: Callable
 ## Data-built heroes (NewHeroes) supply builders instead of subclassing.
 var model_builder: Callable
 var skills_builder: Callable
+## The reference map's innate skill (a short blink on a ~2 s cooldown), always
+## learned and outside the four ranked slots; null-returning or unset = none.
+var innate_builder: Callable
 
 
 ## Returns the hero's visual: a Node3D with set_form(active: bool, scale: float).
@@ -86,6 +93,17 @@ func create_skills() -> Array[Skill]:
 	if skills_builder.is_valid():
 		return skills_builder.call()
 	return []
+
+
+func create_innate() -> Skill:
+	if not innate_builder.is_valid():
+		return null
+	var skill: Skill = innate_builder.call()
+	if skill:
+		skill.rank = 1
+		skill.max_rank = 1
+		skill.required_level = 1
+	return skill
 
 
 ## Rank rules per button slot, using patterns from the reference map's skills:

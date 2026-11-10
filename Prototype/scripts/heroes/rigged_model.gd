@@ -1,6 +1,6 @@
 class_name RiggedModel
 extends Node3D
-## A rigged, animated character (KayKit, CC0 — see assets/thirdparty/CREDITS.md)
+## A rigged, animated character (KayKit or Quaternius, CC0 — see assets/thirdparty/CREDITS.md)
 ## behind the same interface as the primitive hero models, so Hero and
 ## HeroAnimator drive either. It shows only the weapons a hero carries, can
 ## put separate weapon models in empty hands, loops Idle / Running at a speed
@@ -9,6 +9,9 @@ extends Node3D
 
 const IDLE := "Idle"
 const RUN := "Running_A"
+## Quaternius characters: animations are prefixed with their armature name.
+const QUATERNIUS := "res://assets/thirdparty/quaternius/rpg_characters/FBX/%s.fbx"
+const Q_PREFIX := "CharacterArmature|"
 
 var scene_path := ""
 ## Hand-slot meshes to keep visible; every other hand-slot mesh is hidden.
@@ -25,6 +28,15 @@ var glow_color := Color(1.0, 0.7, 0.3)
 ## Colour multiplied over the model's texture, so one character body can
 ## dress several heroes (white = the original colours).
 var tint := Color.WHITE
+## Clip names and the model's own height (KayKit defaults; Quaternius differ).
+var idle_anim := IDLE
+var run_anim := RUN
+var hit_anim := "Hit_A"
+var death_anim := "Death_A"
+var base_height := 2.47
+## Textures applied by mesh name ("" = every other mesh); Quaternius FBX files
+## don't carry their texture paths.
+var skins := {}
 
 var _instance: Node3D
 var _player: AnimationPlayer
@@ -45,6 +57,25 @@ static func make(path: String, attack: String, cast: String, parts: Array, glow:
 	return model
 
 
+## A Quaternius RPG character (CC0): `body` is Warrior, Wizard, Rogue, Ranger,
+## Monk or Cleric; `attack` and `cast` are clip names without the prefix.
+static func quaternius(body: String, attack: String, cast: String, glow: Color, tint_ := Color.WHITE, height_ := 2.2) -> RiggedModel:
+	var model := make(QUATERNIUS % body, Q_PREFIX + attack, Q_PREFIX + cast, [], glow)
+	model.tint = tint_
+	model.height = height_
+	model.idle_anim = Q_PREFIX + "Idle"
+	model.run_anim = Q_PREFIX + "Run"
+	model.hit_anim = Q_PREFIX + "RecieveHit"
+	model.death_anim = Q_PREFIX + "Death"
+	model.base_height = 3.3
+	var textures := "res://assets/thirdparty/quaternius/rpg_characters/Textures/"
+	model.skins = {"": textures + body + "_Texture.png"}
+	var weapon := {"Warrior": "Warrior_Sword", "Wizard": "Wizard_Staff", "Rogue": "Rogue_Dagger", "Ranger": "Ranger_Bow", "Cleric": "Cleric_Staff"}
+	if weapon.has(body):
+		model.skins[weapon[body]] = textures + weapon[body] + "_Texture.png"
+	return model
+
+
 ## The same, recoloured and resized: one KayKit body dressing another hero.
 static func dressed(path: String, attack: String, cast: String, parts: Array, glow: Color, tint_: Color, height_ := 2.2, extra: Array = []) -> RiggedModel:
 	var model := make(path, attack, cast, parts, glow, extra)
@@ -58,7 +89,7 @@ func _ready() -> void:
 	_instance = scene.instantiate()
 	add_child(_instance)
 	_instance.rotation.y = PI  # KayKit characters face +Z; heroes face −Z
-	_instance.scale = Vector3.ONE * (height / 2.47)
+	_instance.scale = Vector3.ONE * (height / base_height)
 	for slot in _instance.find_children("*", "BoneAttachment3D", true, false):
 		if not slot.name.begins_with("handslot"):
 			continue
@@ -71,7 +102,16 @@ func _ready() -> void:
 				slot.add_child(weapon)
 	for mesh in _instance.find_children("*", "MeshInstance3D", true, false):
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-		if tint != Color.WHITE:
+		if not skins.is_empty() and mesh.mesh:
+			var path: String = skins.get(String(mesh.name), skins[""])
+			var skin := StandardMaterial3D.new()
+			skin.albedo_texture = load(path) if ResourceLoader.exists(path) else null
+			skin.albedo_color = tint
+			skin.roughness = 1.0
+			for surface in mesh.mesh.get_surface_count():
+				mesh.set_surface_override_material(surface, skin)
+			continue
+		if tint != Color.WHITE and mesh.mesh:
 			for surface in mesh.mesh.get_surface_count():
 				var base := mesh.get_active_material(surface) as BaseMaterial3D
 				if base:
@@ -81,10 +121,10 @@ func _ready() -> void:
 	var players := _instance.find_children("*", "AnimationPlayer", true, false)
 	if players.size() > 0:
 		_player = players[0]
-		for loop_name in [IDLE, RUN, "Idle_Combat"]:
+		for loop_name in [idle_anim, run_anim, "Idle_Combat"]:
 			if _player.has_animation(loop_name):
 				_player.get_animation(loop_name).loop_mode = Animation.LOOP_LINEAR
-		_player.play(IDLE)
+		_player.play(idle_anim)
 		if spawn_anim != "" and _player.has_animation(spawn_anim):
 			play_anim("spawn")
 
@@ -103,7 +143,7 @@ func set_locomotion(speed: float) -> void:
 	_running = speed > 0.6
 	if _busy <= 0.0:
 		_play_loop(false)
-	if _running and _player.current_animation == RUN:
+	if _running and _player.current_animation == run_anim:
 		_player.speed_scale = clampf(speed / 6.0, 0.6, 1.8)
 	elif _busy <= 0.0:
 		_player.speed_scale = 1.0
@@ -121,9 +161,9 @@ func play_anim(kind: String) -> void:
 		"hit":
 			if _busy > 0.0:
 				return  # don't interrupt an attack or a cast
-			anim = "Hit_A"
+			anim = hit_anim
 		"death":
-			anim = "Death_A"
+			anim = death_anim
 			_dead = true
 		"spawn":
 			anim = spawn_anim
@@ -144,7 +184,7 @@ func revive() -> void:
 
 
 func _play_loop(force: bool) -> void:
-	var wanted := RUN if _running else IDLE
+	var wanted := run_anim if _running else idle_anim
 	if force or _player.current_animation != wanted:
 		_player.speed_scale = 1.0
 		_player.play(wanted, 0.15)

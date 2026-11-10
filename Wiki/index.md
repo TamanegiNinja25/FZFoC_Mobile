@@ -1,6 +1,6 @@
 ---
 type: index
-updated: 2026-11-09
+updated: 2026-11-10
 ---
 # Index
 
@@ -51,6 +51,7 @@ The map of the wiki: every page with a one-line summary, grouped by category. St
 - [Phase 6 — the reference map's systems](sources/2026-11-08-phase-6-map-systems.md) — Levels 1–50, attributes and ranked skills, the duel, creep waves, boss chains, win boss, stat shop, exclusive items, recipes, Mobile and Classic modes.
 - [Phase 7 — feel, eight heroes and the original's rules](sources/2026-11-09-phase-7-feel-heroes-original-rules.md) — Physical animated creeps and pile-ups, damage numbers, hero animation and effects, skill icons, five new heroes, utility items, Classic 4v4 with unique picks, balance simulation, phone performance work.
 - [Phase 8 — free CC0 assets, game-dev agents and skills](sources/2026-11-09-phase-8-assets-agents-skills.md) — Adopted 14 agents and 23 skills; KayKit rigged heroes and skeleton summons, castle and mountain scenery in one draw call, Kenney sounds and UI skins, cynicmusic themes, in-game Credits.
+- [Phase 9 — the reference map's remaining systems and 24 heroes](sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md) — Scoreboard, callouts, 4 s respawn, Classic at 100 kills, duel switch, chained forms, creep rooms, evolution, satchel, lasting capture, recall point, potion stacking; 24 heroes with blinks, skill sounds and voices.
 
 ## Admin
 - [Log](log.md) — what changed and when

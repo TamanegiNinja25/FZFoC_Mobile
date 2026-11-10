@@ -6,6 +6,18 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-10 — Ingest (design + implementation)
+- Ingested `2026-11-10-phase-9-map-gaps-and-24-heroes.md` (Phase 9, v0.9.0); [source note](sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md) created.
+- Topics updated (history snapshots saved):
+  - [Roster](topics/roster.md): 24 heroes;
+  - [Hero transformations](topics/hero-transformations.md): chained forms, evolution;
+  - [Hero arena genre](topics/hero-arena-genre.md): the map systems added;
+  - [UI and audio direction](topics/ui-and-audio-direction.md): skill sounds, voices, announcer, HUD;
+  - [Assets and licensing](topics/assets-and-licensing.md): the first CC-BY asset, Quaternius;
+  - [Art direction](topics/art-direction.md): more bodies.
+- Index and backlog updated: reference-map gaps closed.
+- Pending: spoken voice lines would need recordings; a longer balance run.
+
 ## 2026-11-09 — Question: gaps against the reference map
 - Re-read Fight Of Characters 7.7b E (files byte-identical to the first extraction), including the trigger bodies the first audit only listed, and compared it with v0.8.2. Report: `Outputs/2026-11-09-foc-gap-audit.md`.
 - Still missing:

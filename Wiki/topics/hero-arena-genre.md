@@ -1,8 +1,8 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-3-item-shop, 2026-11-08-phase-4-local-multiplayer, 2026-11-08-phase-6-map-systems, 2026-11-09-phase-7-feel-heroes-original-rules]
-updated: 2026-11-08
+sources: [2026-11-08-fight-of-characters-mobile-feasibility, 2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decisions-meter-and-godot, 2026-11-08-decisions-charge-rule-and-spree, 2026-11-08-decision-transformed-bounty, 2026-11-08-decision-90-percent-resolution-and-touch-joystick, 2026-11-08-game-build-plan-and-phase-1, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-3-item-shop, 2026-11-08-phase-4-local-multiplayer, 2026-11-08-phase-6-map-systems, 2026-11-09-phase-7-feel-heroes-original-rules, 2026-11-10-phase-9-map-gaps-and-24-heroes]
+updated: 2026-11-10
 ---
 # Hero arena genre
 
@@ -67,6 +67,20 @@ For an offline project played with friends, online matchmaking and servers are u
 This replaces the online matchmaking and Photon/Nakama suggestions above only for the offline scenario; a public release would still need them *(inference)*.
 
 **Decided 2026-11-08: Godot** (4.7.2) for the prototype, using its built-in ENet multiplayer for local play ([src](../sources/2026-11-08-decisions-meter-and-godot.md)).
+
+## Reference-map systems added in Phase 9
+- **Scoreboard:** every hero's kills and deaths, with leavers marked ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Cast callouts:** "*skill* !!" floats over the caster ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Respawn:** 4 s ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Classic:** 100 kills, no time limit and no passive gold ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Duels** can be switched off by the host ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Private creep rooms** behind teleport pads, capped at 20 of each creep type ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Items and inventory** ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)):
+  - a storage satchel with six resting slots;
+  - a capture orb whose creature stays until it dies;
+  - a recall point set with MARK;
+  - charged items stacking two to a slot.
+- **Design note:** these trade a little mobile simplicity for fidelity. The scoreboard and callouts add information density to a small screen *(inference)*.
 
 ## Open questions
 - ~~Godot or Unity?~~ Decided: Godot ([src](../sources/2026-11-08-decisions-meter-and-godot.md))

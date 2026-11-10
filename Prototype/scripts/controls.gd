@@ -13,6 +13,7 @@ const INPUTS := {
 	"skill_3": [KEY_R],
 	"skill_4": [KEY_T],
 	"attack": [KEY_F],
+	"innate": [KEY_SHIFT],
 }
 
 

@@ -18,7 +18,7 @@ func _initialize() -> void:
 	_scene = load("res://scenes/main.tscn").instantiate()
 	root.add_child(_scene)
 	current_scene = _scene
-	_steps = [_progression, _form_stages, _shop_rules, _status_effects, _inventory_systems, _evolution, _start_arena, _creep_rooms, _waves, _wave_cap, _wave_90, _bosses,
+	_steps = [_progression, _form_stages, _shop_rules, _status_effects, _inventory_systems, _evolution, _innate_and_voices, _start_arena, _creep_rooms, _waves, _wave_cap, _wave_90, _bosses,
 		_boss_respawned, _duel_start, _duel_fight, _duel_kill, _duel_over, _attack_order, _colossus, _classic, _no_duels, _done]
 
 
@@ -186,6 +186,25 @@ func _evolution() -> void:
 	h.charges.clear()
 
 
+## The map's innate blink (always learned, ~2 s), hero voices and the announcer.
+func _innate_and_voices() -> void:
+	var h := Hero.new()
+	h.definition = MoreHeroes.oren()
+	h.is_player = false
+	h.position = Vector3(0, 0, 6)
+	_scene.add_child(h)
+	_check(h.innate != null and h.innate.is_ready() and h.innate.cooldown <= 2.0, "new heroes have an innate blink, ready from level 1 (%s)" % (h.innate.skill_name if h.innate else "none"))
+	var start := h.global_position
+	h._face(Vector3(1, 0, 0))
+	_check(h.try_innate() and h.global_position.distance_to(start) > 3.0, "the innate blink moves the hero")
+	_check(not h.try_innate(), "the blink has a short cooldown")
+	var sfx: Node = root.get_node("/root/Sfx")
+	_check(sfx.has_sound("voice:male2:cry") and sfx.has_sound("voice:female:cry") and sfx.has_sound("voice:male1:death"), "hero voice sets load (battle cries, death cries)")
+	_check(sfx.has_sound("announce:fight") and sfx.has_sound("announce:you_win") and sfx.has_sound("announce:3"), "announcer lines load")
+	_check(sfx.has_sound(h.skills[0].sound_id()) and sfx.has_sound(h.innate.sound_id()), "skills have their own sounds")
+	h.queue_free()
+
+
 # ------------------------------------------------------------ the arena world
 func _start_arena() -> void:
 	_scene.queue_free()
@@ -239,7 +258,18 @@ func _creep_rooms() -> void:
 	var bot: Hero = _scene.heroes[1]
 	bot.global_position = CreepRooms.ROOMS[1][0]
 	rooms._physics_process(0.016)
-	_check(CreepRooms.room_at(bot.global_position) == -1, "bots ignore the pads")
+	_check(CreepRooms.room_at(bot.global_position) == 1, "bots use the pads too")
+	var brain := BotBrain.new()
+	brain.hero = bot
+	brain.arena = _scene
+	bot.add_child(brain)
+	for unit in rooms._units[1]:
+		unit._die(null)
+	rooms._units[1].clear()
+	brain._creep_rooms(1.0)
+	_check(bot.ai_move.length() > 0.5 and bot.ai_move.dot((CreepRooms.exit_pad(1) - bot.global_position).normalized()) > 0.9,
+			"a bot heads for the exit pad once its room is empty")
+	brain.queue_free()
 	rooms._cooldown.clear()
 	_hero.global_position = CreepRooms.exit_pad(0)
 	rooms._physics_process(0.016)
@@ -358,7 +388,7 @@ func _duel_after() -> void:
 	var duel: Node = _scene.duel
 	_check(duel.phase == "idle" and _scene.heroes.all(func(h): return not h.frozen), "play resumes after the duel")
 	_check(_saved.winner.global_position.distance_to(_saved.positions[_saved.winner]) < 0.5, "the winner returns to where they stood")
-	_check(duel.time_to_duel >= Duel.INTERVAL_MIN - 1.0, "the next duel is ~5 minutes away")
+	_check(duel.time_to_duel >= Duel.INTERVAL_MIN - 30.0, "the next duel is ~5 minutes away (%.0f s)" % duel.time_to_duel)
 
 
 func _attack_order() -> void:

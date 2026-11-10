@@ -80,7 +80,14 @@ func _ready() -> void:
 	_cards.add_theme_constant_override("h_separation", 12)
 	_cards.add_theme_constant_override("v_separation", 12)
 	_cards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.add_child(_cards)
+	# 24 heroes: the cards scroll inside a fixed area, like the details.
+	var card_scroll := ScrollContainer.new()
+	card_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	card_scroll.custom_minimum_size = Vector2(560, 330)
+	card_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	card_scroll.add_child(_cards)
+	body.add_child(card_scroll)
 	# Fixed height with scrolling, so long descriptions can't push the
 	# Start/Back buttons off a phone screen.
 	_details.bbcode_enabled = true

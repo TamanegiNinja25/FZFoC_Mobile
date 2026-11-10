@@ -266,7 +266,37 @@ def tri_sdf(x, y, a, b, c):
     return np.where(inside, -d, d)
 
 
+# Signature items of the 16 heroes in more_heroes.gd: a cut jewel in a gold
+# setting, in the hero's colour.
+SIGNATURE_GEMS = {
+    "cinderfist_wraps": (1.0, 0.5, 0.2),
+    "gatekeepers_seal": (1.0, 0.7, 0.35),
+    "dawnforged_sigil": (1.0, 0.9, 0.55),
+    "starfire_codex": (1.0, 0.55, 0.25),
+    "rimeglass_compass": (0.6, 0.85, 1.0),
+    "windcutter_tsuba": (0.85, 0.95, 1.0),
+    "galespire_lance": (0.7, 0.9, 1.0),
+    "thunderheart_torc": (0.6, 0.8, 1.0),
+    "dunestone_urn": (1.0, 0.85, 0.5),
+    "marshlight_lantern": (0.55, 0.9, 0.45),
+    "carvers_chisel": (0.7, 0.8, 1.0),
+    "cairnwood_bow": (0.7, 0.9, 0.55),
+    "spiritbound_knuckles": (0.55, 0.75, 1.0),
+    "moonsilver_quiver": (0.8, 0.6, 1.0),
+    "nightglass_dagger": (0.6, 0.5, 0.9),
+    "tidepearl_circlet": (0.5, 1.0, 0.95),
+}
+
+
 def glyph(img, x, y, e, item):
+    if item in SIGNATURE_GEMS:
+        r, g, b = SIGNATURE_GEMS[item]
+        setting = np.maximum(np.abs(x) * 0.866 + np.abs(y) * 0.5, np.abs(y)) - 0.5
+        over(img, GOLD, soft(setting, e))
+        gem = np.maximum(np.abs(x) + np.abs(y) * 0.8, 0) - 0.36
+        over(img, (r, g, b, 1), soft(gem, e))
+        over(img, (min(1, r + 0.35), min(1, g + 0.35), min(1, b + 0.35), 1), soft(np.maximum(np.abs(x + 0.08) + np.abs(y + 0.1) * 0.8, 0) - 0.12, e))
+        return
     deg = np.deg2rad
     if item in ARTIFACT_PARTS:
         a, b = ARTIFACT_PARTS[item]
@@ -424,6 +454,7 @@ ITEMS = {
     "thunderhead_crown": "Exclusive", "wardens_bulwark": "Exclusive",
     "homeward_scroll": "Consumables", "throwing_knives": "Consumables", "shadow_cloak": "Consumables",
     "capture_orb": "Consumables", "capture_orb_full": "Consumables", "satchel_of_holding": "Relics",
+    **{gem: "Exclusive" for gem in SIGNATURE_GEMS},
     **{artifact: "Artifacts" for artifact in ARTIFACT_PARTS},
 }
 

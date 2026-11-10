@@ -52,6 +52,8 @@ func show_screen(screen: String) -> void:
 		panels[key].visible = key == screen
 		if key == screen and not was_visible:
 			UiTheme.pop_in.call_deferred(panels[key])
+			if key == "heroes":
+				Sfx.announce("choose_your_character")
 
 
 func _build_backdrop() -> void:
@@ -211,4 +213,5 @@ func _on_single_player() -> void:
 
 func _start_match(hero_id: String, scene: String) -> void:
 	Session.hero_id = hero_id
+	Session.bot_seed = randi_range(1, 999999)  # bots draw from the whole roster
 	get_tree().change_scene_to_file(scene)

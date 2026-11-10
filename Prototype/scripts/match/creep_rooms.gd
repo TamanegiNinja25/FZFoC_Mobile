@@ -7,8 +7,9 @@ extends Node3D
 ## the map's four rooms (unit counts, levels and HP; original names):
 ##   1  four mixed creeps, levels 5–10        2  two giants, levels 15 and 20
 ##   3  ten level-10 fiends                    4  three level-15 and two level-20
-## Only player-controlled heroes use the pads; bots stay on the field. The rooms
-## are built on every device; teleports and spawns run on the host.
+## Players and bots both use the pads (bots farm a room when the field is quiet
+## and leave when it's empty). The rooms are built on every device; teleports
+## and spawns run on the host.
 
 const PAD_RADIUS := 1.3
 const ROOM_RADIUS := 7.5
@@ -59,7 +60,7 @@ func _physics_process(delta: float) -> void:
 		if _cooldown[h] <= 0.0:
 			_cooldown.erase(h)
 	for h: Hero in arena.heroes:
-		if not h.is_alive() or h.frozen or _cooldown.has(h) or not _uses_pads(h):
+		if not h.is_alive() or h.frozen or _cooldown.has(h):
 			continue
 		for i in ROOMS.size():
 			if _flat_distance(h.global_position, ROOMS[i][0]) <= PAD_RADIUS:
@@ -68,11 +69,6 @@ func _physics_process(delta: float) -> void:
 			if _flat_distance(h.global_position, exit_pad(i)) <= PAD_RADIUS:
 				leave(h, i)
 				break
-
-
-## Players (offline: the player; online: anyone a person controls) use pads.
-func _uses_pads(h: Hero) -> bool:
-	return h.is_player or h.owner_peer != 0
 
 
 func enter(h: Hero, room: int) -> void:

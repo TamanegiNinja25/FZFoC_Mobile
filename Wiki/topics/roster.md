@@ -1,12 +1,12 @@
 ---
 type: topic
 category: Game design
-sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-08-phase-6-map-systems, 2026-11-09-phase-7-feel-heroes-original-rules, 2026-11-09-phase-8-assets-agents-skills]
-updated: 2026-11-09
+sources: [2026-11-08-hero-design-vael, 2026-11-08-vael-eruption, 2026-11-08-spec-hero-transformations, 2026-11-08-ui-and-audio-direction, 2026-11-08-ui-polish-and-phase-2, 2026-11-08-phase-5-heroes-and-music, 2026-11-08-phase-6-map-systems, 2026-11-09-phase-7-feel-heroes-original-rules, 2026-11-09-phase-8-assets-agents-skills, 2026-11-10-phase-9-map-gaps-and-24-heroes]
+updated: 2026-11-10
 ---
 # Roster
 
-FZFoC Mobile's original heroes, each with a basic attack, three ranked skills, an ultimate and a meter-triggered transformation, plus attributes that grow with level. Eight heroes cover five roles and four realms: Vael, Kael (Bruiser); Ryn (Speed); Barrow, Hask (Giant); Sable (Ranged); Morrow, Tamsin (Caster) ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+FZFoC Mobile's original heroes, each with a basic attack, three ranked skills, an ultimate and a meter-triggered transformation, plus attributes that grow with level. Twenty-four heroes cover five roles and four realms, six per realm ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
 
 ## Heroes
 | Hero | Archetype | Skills | Transformation | Status |
@@ -62,6 +62,22 @@ Values from the design ([src](../sources/2026-11-08-hero-design-vael.md)) and it
 - **Hask, the Iron Warden** (Giant, Hollow Moon): Shield Bash (stun), Iron Bulwark (guard and shield), Chain Hook (pull); ultimate Fortress, an untouchable knockback slam ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
 - **Realms** group heroes on the select screen the way the reference map's taverns group them by series: Ember Forge, Gale Peaks, Stone Barrows, Hollow Moon ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
 - **Balance:** three rounds of 16 all-bot matches brought seven of eight heroes to a 33–62% win rate; Sable, at 18%, got a final buff ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).
+
+## Phase 9: 24 heroes
+- **Roster:** sixteen more original heroes bring it to the reference map's 24, six per realm ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)):
+  - **Ember Forge:** Pyre, Brannoc, Seraphine, Ashka;
+  - **Gale Peaks:** Isolde, Oren, Kestrel, Thane;
+  - **Stone Barrows:** Dunmar, Mire, Halvard, Wren;
+  - **Hollow Moon:** Corin, Velka, Nyx, Lys.
+- **Every new hero has** ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)):
+  - four ranked skills;
+  - an innate short blink with a 2 s cooldown (the map's innate skills);
+  - a signature item;
+  - a voice of their own.
+- **Corin** evolves into **Corin Unbound** for good at 250 strength and 250 agility, keeping level, items and ranks. It's the map's stat-threshold evolution ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Chained forms:** Tamsin, Pyre and Thane transform in three stages; ten others in two ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Bots** draw from the whole roster each match (a shuffle the host shares online) ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- Balance: 24 all-bot matches found six outliers (Mire, Wren, Ashka, Lys, Kestrel low; Seraphine high); one tuning pass followed (more HP and damage; less healing on Seraphine). Samples are small.
 
 ## How heroes are built
 In the prototype each hero is a data definition (identity, stats, form values, model, skills); skills share one cooldown system and deal damage through the same path as auto-attacks, so form multipliers, meter charge and kill rewards apply everywhere ([src](../sources/2026-11-08-hero-design-vael.md)). Each skill also tells bots when it's worth casting, so bots play any hero without hero-specific AI ([src](../sources/2026-11-08-phase-5-heroes-and-music.md)). Phase 7 heroes are composed from configurable skill types (strike, projectile, area, summon, blink, buff, chain strike) ([src](../sources/2026-11-09-phase-7-feel-heroes-original-rules.md)).

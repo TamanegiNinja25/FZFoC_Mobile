@@ -135,15 +135,21 @@ static func pop_in(control: Control) -> void:
 
 ## Tint multiplied over the brown Kenney button for each state ("normal",
 ## "hover", "pressed", "disabled"). The parchment text must stay readable on it.
+## "pressed" is also how a *selected* toggle looks (hero cards, realm/role
+## tabs, the Mobile/Classic switch), so it has to read as "chosen", not just
+## "pushed down".
 static func button_tint(state: String) -> Color:
+	# Selected toggles must read as "chosen": a warm gold glow, clearly lighter
+	# and yellower than the resting brown, while the dark-brown leather keeps the
+	# parchment text readable. Hover sits between the two; disabled goes grey.
 	match state:
 		"hover":
-			return Color(0.95, 0.88, 0.75)
+			return Color(0.88, 0.8, 0.66)
 		"pressed":
-			return Color(0.62, 0.55, 0.48)
+			return Color(1.0, 0.84, 0.48)
 		"disabled":
-			return Color(0.4, 0.4, 0.4)
-	return Color(0.75, 0.68, 0.58)
+			return Color(0.42, 0.42, 0.42)
+	return Color(0.7, 0.62, 0.52)
 
 
 ## A 9-slice skin from a Kenney texture: margins are left, top, right, bottom

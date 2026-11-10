@@ -60,7 +60,8 @@ func _process(delta: float) -> bool:
 				_dummy._dead_time = 0.0
 				_dummy._respawn()
 			_dummy.hp = _dummy.max_hp
-			var close: bool = i == 0 or ("reach" in _hero.skills[i] and _hero.skills[i].reach < 5.0)
+			var s: Skill = _hero.skills[i]
+			var close: bool = i == 0 or ("reach" in s and s.reach < 5.0) or ("ahead" in s and s.ahead == 0.0 and s.radius < 5.0)
 			_hero.global_position = _dummy.global_position + Vector3(0, 0, 2.5 if close else 5.0)
 			_hero.ai_move = (_dummy.global_position - _hero.global_position).normalized()
 			_hero.skills[i].time_left = 0.0
@@ -99,7 +100,39 @@ func _roles() -> void:
 	for definition in Roster.all():
 		by_role[definition.role] = definition
 	_check(by_role.keys().size() == 5, "five roles in the roster: %s" % ", ".join(by_role.keys()))
-	_check(Roster.all().size() == 8 and Roster.ids().size() == 8, "eight heroes: enough for unique picks in a 4v4")
+	_check(Roster.all().size() == 24 and Roster.ids().size() == 24, "24 heroes, as in the reference map")
+	var realms := {}
+	for definition in Roster.all():
+		realms[definition.realm] = realms.get(definition.realm, 0) + 1
+	_check(realms.size() == 4 and realms.values().all(func(n): return n == 6), "six heroes in each of the four realms: %s" % str(realms))
+	var missing := []
+	for definition in Roster.all():
+		var kit: Array = definition.create_skills()
+		var innate: Skill = definition.create_innate()
+		if innate:
+			kit.append(innate)
+		if definition.evolve_into.is_valid():
+			kit.append_array(definition.evolve_into.call().create_skills())
+		for skill in kit:
+			if not ResourceLoader.exists(skill.icon_path()):
+				missing.append(skill.icon_path().get_file())
+			if not ResourceLoader.exists("res://assets/sfx/skills/%s.wav" % skill.skill_name.to_snake_case()):
+				missing.append(skill.skill_name + " (sound)")
+		if definition.exclusive_item == "" or ItemCatalog.find(definition.exclusive_item) == null:
+			missing.append(definition.id + " exclusive item")
+	_check(missing.is_empty(), "every skill has its own icon and sound, every hero a signature item %s" % str(missing))
+	var voices := Roster.all().map(func(d): return "%s@%.2f" % [d.voice, d.voice_pitch])
+	var unique_voices := {}
+	for v in voices:
+		unique_voices[v] = true
+	_check(unique_voices.size() == voices.size(), "every hero has a voice of their own (set and pitch)")
+	var seen := {}
+	for seed in range(1, 41):
+		Roster.bot_order_seed = seed
+		for id in Roster.unique_bot_heroes(["vael"], 7):
+			seen[id] = true
+	Roster.bot_order_seed = 0
+	_check(seen.size() == 23, "over many matches the bots play every hero (%d of 23)" % seen.size())
 	_check(by_role.Speed.move_speed > by_role.Bruiser.move_speed and by_role.Speed.max_hp < by_role.Bruiser.max_hp,
 			"Speed is faster and frailer than Bruiser")
 	_check(by_role.Giant.max_hp > by_role.Bruiser.max_hp and by_role.Giant.move_speed < by_role.Bruiser.move_speed,

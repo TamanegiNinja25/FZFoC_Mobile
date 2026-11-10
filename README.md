@@ -5,11 +5,14 @@ An original mobile hero arena for Android, inspired by the gameplay of **Fight O
 [![Download APK](https://img.shields.io/badge/Download-FZFoC.apk-e8a33d?style=for-the-badge&logo=android&logoColor=white)](https://github.com/TamanegiNinja25/FrozenThrone_FightOfTheCharacters/releases/latest/download/FZFoC.apk)
 [![Latest release](https://img.shields.io/github/v/release/TamanegiNinja25/FrozenThrone_FightOfTheCharacters?style=for-the-badge&label=latest)](https://github.com/TamanegiNinja25/FrozenThrone_FightOfTheCharacters/releases/latest)
 
-> **Status: playable alpha (v0.8.2).** Eight build phases are done:
+> **Status: playable alpha (v0.9.0).** Nine build phases are done:
 > - menus, 3v3 against adaptive AI, item shop, local Wi-Fi multiplayer;
 > - the reference map's systems: levels, ranked skills, the duel, creep waves, bosses, recipes, modes;
 > - Phase 7: eight heroes, physical creeps with map-style pile-ups, damage numbers, Classic as the original's 4v4 with unique picks, joining by address;
-> - Phase 8: rigged, animated heroes and skeleton summons, castles and mountain scenery, pack sounds and music, skinned menus and a Credits screen. All third-party assets are CC0 and credited.
+> - Phase 8: rigged, animated heroes and skeleton summons, castles and mountain scenery, pack sounds and music, skinned menus and a Credits screen;
+> - Phase 9: everything else from the reference map — scoreboard, chained transformations, private creep rooms, evolution, storage bag, lasting capture, recall point, potion stacking, Classic at 100 kills — and 24 heroes with innate blinks, their own skill sounds and voices.
+>
+> All third-party assets are CC0 or CC-BY and credited.
 >
 > Phone: a 4v4 Classic match with up to 436 units runs at 42–56 FPS (average 47) on the test phone. Balance is still being tuned.
 

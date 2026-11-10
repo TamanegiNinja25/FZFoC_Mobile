@@ -29,6 +29,7 @@ var _button := Button.new()
 var _attack := Button.new()
 var _name := Label.new()
 var _skill_buttons: Array[Button] = []
+var _innate_button := Button.new()
 var _badges: Array[Button] = []
 var _fps := Label.new()
 var _shop_button := Button.new()
@@ -53,6 +54,7 @@ func setup(target: Hero) -> void:
 	hero.leveled_up.connect(func(_l): _pulse(_level))
 	for i in mini(hero.skills.size(), _skill_buttons.size()):
 		_skill_buttons[i].icon = hero.skills[i].icon()
+	_refresh_innate()
 	_refresh_inventory()
 	_on_health_changed(hero.hp, hero.max_hp, hero.shield)
 	_on_meter_changed(hero.meter.charge, hero.meter.max_charge)
@@ -150,6 +152,18 @@ func _ready() -> void:
 		badge.pressed.connect(func(): hero.learn_skill(i))
 		root.add_child(badge)
 		_badges.append(badge)
+
+	# The innate blink: a smaller button in the free corner under the pause
+	# button, clear of the skill arc (always learned).
+	_corner(_innate_button, Rect2(Vector2(-114, -590), Vector2(90, 90)))
+	_innate_button.expand_icon = true
+	_innate_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_innate_button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+	_innate_button.add_theme_constant_override("icon_max_width", 52)
+	_innate_button.add_theme_font_size_override("font_size", 14)
+	_innate_button.pressed.connect(func(): hero.try_innate())
+	_innate_button.visible = false
+	root.add_child(_innate_button)
 
 	# TRANSFORM sits outside the arc, between the second and third skills.
 	_button.text = "TRANSFORM"
@@ -310,6 +324,9 @@ Damage dealt %d   taken %d" % [floori(hero.gold), hero.income_per_second(), spre
 
 	var can_act := hero.is_alive() and not hero.frozen
 	_attack.disabled = not can_act
+	if hero.innate:
+		_innate_button.text = "BLINK" if hero.innate.is_ready() else "%.1f" % hero.innate.time_left
+		_innate_button.disabled = not hero.innate.is_ready() or not can_act
 	for i in _skill_buttons.size():
 		if i >= hero.skills.size():
 			_skill_buttons[i].visible = false
@@ -377,8 +394,16 @@ func _refresh_inventory() -> void:
 		slot.modulate = (Color(0.85, 0.95, 1.0) if _bag_view else Color(1, 1, 1)) if has_item else Color(1, 1, 1, 0.45)
 
 
+func _refresh_innate() -> void:
+	_innate_button.visible = hero.innate != null
+	if hero.innate:
+		_innate_button.icon = hero.innate.icon()
+		_innate_button.tooltip_text = hero.innate.skill_name
+
+
 ## Evolution: new name, new skill icons.
 func _on_definition_changed() -> void:
+	_refresh_innate()
 	_name.text = "%s — %s" % [hero.definition.display_name, hero.definition.title]
 	for i in mini(hero.skills.size(), _skill_buttons.size()):
 		_skill_buttons[i].icon = hero.skills[i].icon()

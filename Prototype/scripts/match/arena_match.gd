@@ -119,6 +119,7 @@ func _ready() -> void:
 			duel.state_changed.connect(_on_duel_state)
 			add_child(duel)
 	Sfx.play_music("battle")
+	Sfx.announce("begin")
 
 	hud = Hud.new()
 	add_child(hud)
@@ -313,6 +314,12 @@ func finish(team: int) -> void:
 	_update_score()
 	var my_team := hero.team if hero else 0
 	Sfx.play("victory" if team == my_team else ("defeat" if team != -1 else "back"))
+	if team == -1:
+		Sfx.announce("its_a_tie")
+	elif team == my_team:
+		Sfx.announce("flawless_victory" if hero and hero.deaths == 0 else "you_win")
+	else:
+		Sfx.announce("you_lose")
 	_show_result()
 	get_tree().paused = true
 
@@ -344,6 +351,8 @@ func _spawn_teams() -> void:
 	else:
 		taken.append(Session.hero_id)
 	var bot_count := team_size * 2 - taken.size()
+	if Session.bot_seed != 0:
+		Roster.bot_order_seed = Session.bot_seed
 	var bot_picks := Roster.unique_bot_heroes(taken, bot_count)
 	var next_bot := 0
 	var my_id := multiplayer.get_unique_id() if online else 0
@@ -660,10 +669,13 @@ func _on_banner(text: String) -> void:
 		"Duel!":
 			_shake = 2.0
 			Sfx.play("duel", 0.0)
+			Sfx.announce("prepare_yourself")
 		"3", "2", "1":
 			Sfx.play("click", 4.0)
+			Sfx.announce(text)
 		"Fight!!":
 			Sfx.play("duel", 2.0)
+			Sfx.announce("fight")
 		_:
 			Sfx.play("kill", 0.0)
 

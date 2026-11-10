@@ -11,6 +11,8 @@ extends RefCounted
 static func sable() -> HeroDef:
 	var d := HeroDef.new()
 	d.id = "sable"
+	d.voice = "female"
+	d.voice_pitch = 1.0
 	d.display_name = "Sable"
 	d.title = "the Ashen Archer"
 	d.form_name = "Ashfall"
@@ -76,6 +78,8 @@ static func sable_skills() -> Array[Skill]:
 static func morrow() -> HeroDef:
 	var d := HeroDef.new()
 	d.id = "morrow"
+	d.voice = "male1"
+	d.voice_pitch = 0.9
 	d.display_name = "Morrow"
 	d.title = "the Grave Tender"
 	d.form_name = "Lichbloom"
@@ -137,6 +141,8 @@ static func morrow_skills() -> Array[Skill]:
 static func kael() -> HeroDef:
 	var d := HeroDef.new()
 	d.id = "kael"
+	d.voice = "male2"
+	d.voice_pitch = 0.9
 	d.display_name = "Kael"
 	d.title = "the Hollow Blade"
 	d.form_name = "Hollowed"
@@ -199,6 +205,8 @@ static func kael_skills() -> Array[Skill]:
 static func tamsin() -> HeroDef:
 	var d := HeroDef.new()
 	d.id = "tamsin"
+	d.voice = "female"
+	d.voice_pitch = 1.15
 	d.display_name = "Tamsin"
 	d.title = "the Storm Caller"
 	d.form_name = "Stormcrown"
@@ -259,6 +267,8 @@ static func tamsin_skills() -> Array[Skill]:
 static func hask() -> HeroDef:
 	var d := HeroDef.new()
 	d.id = "hask"
+	d.voice = "male3"
+	d.voice_pitch = 1.0
 	d.display_name = "Hask"
 	d.title = "the Iron Warden"
 	d.form_name = "Unbreakable"

@@ -11,6 +11,8 @@ func _init() -> void:
 	title = "the Living Cairn"
 	form_name = "Avalanche"
 	form_stages = ["Mountain's Wrath"]
+	voice = "male1"
+	voice_pitch = 0.7
 	role = "Giant"
 	description = "A giant of stacked boulders woken by old runes. Slow, heavy-handed and nearly impossible to bring down."
 	max_hp = 1320.0

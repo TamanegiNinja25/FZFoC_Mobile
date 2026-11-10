@@ -36,13 +36,15 @@ func _process(_delta: float) -> bool:
 		10:
 			var select: HeroSelect = _menu._hero_select
 			var cards: Array = select._cards.get_children().filter(func(c): return not c.is_queued_for_deletion())
-			_check(cards.size() == 1 and not cards[0].disabled and cards[0].text.begins_with("Ryn"), "Speed category shows Ryn")
+			var speed := cards.map(func(c): return c.text.get_slice("\n", 0))
+			_check(cards.size() == 4 and cards.all(func(c): return not c.disabled) and speed.has("Ryn") and speed.has("Pyre") and speed.has("Oren") and speed.has("Nyx"),
+					"Speed category shows Ryn, Pyre, Oren and Nyx (%s)" % ", ".join(speed))
 			select._show_category("Bruiser")
 		12:
 			var select: HeroSelect = _menu._hero_select
 			var cards: Array = select._cards.get_children().filter(func(c): return not c.is_queued_for_deletion())
-			_check(cards.size() == 2 and cards.any(func(c): return c.text.begins_with("Vael")) and cards.any(func(c): return c.text.begins_with("Kael")),
-					"Bruiser category shows Vael and Kael")
+			_check(cards.size() == 5 and cards.any(func(c): return c.text.begins_with("Vael")) and cards.any(func(c): return c.text.begins_with("Corin")),
+					"Bruiser category shows its five heroes, Vael to Corin")
 			_settings_round_trip()
 			select.start_requested.emit("vael")
 		20:

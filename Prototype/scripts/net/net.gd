@@ -120,7 +120,7 @@ func start_match() -> void:
 		teams[peer_id] = 0 if mode == Mode.COOP else index % 2
 		index += 1
 	_announce_stop()
-	_begin_match.rpc(teams, _unique_choices(), {"classic": classic, "duels": duels})
+	_begin_match.rpc(teams, _unique_choices(), {"classic": classic, "duels": duels, "bot_seed": randi_range(1, 999999)})
 
 
 ## Each hero once per match: a player who picked a hero already taken (by the
@@ -148,6 +148,7 @@ func _begin_match(teams: Dictionary, hero_choices: Dictionary, rules: Dictionary
 	var session := get_node("/root/Session")
 	session.classic = classic
 	session.duels = duels
+	session.bot_seed = rules.get("bot_seed", 0)
 	match_starting.emit(teams)
 
 

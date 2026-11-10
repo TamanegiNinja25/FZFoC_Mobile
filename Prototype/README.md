@@ -138,6 +138,32 @@ Every third-party asset is **CC0** and credited in [`assets/thirdparty/CREDITS.m
 - **Phone (Infinix NOTE 30, 2026-11-09):** a 4v4 Classic match with the rigged heroes and the scenery ran for about three minutes, up to 436 units, at 42–56 FPS (average 47), with no script errors. That matches v0.7.0's 46–51 FPS with primitive heroes, so the new models and scenery don't cost frame rate. GPU was 15–21 ms with 115–218 draw calls.
 - **Size:** `tools/glb_strip.py in.glb out.glb Anim1 Anim2 …` drops unused animations from a GLB (KayKit characters go from about 4 MB to about 1 MB).
 
+### Phase 9: the reference map's remaining systems and 24 heroes (v0.9.0)
+A second read of the reference map (every trigger's code, not just the list) found what was still missing; all of it is in now:
+- **Scoreboard:** every hero's kills / deaths, team by team, always on screen; leavers are marked.
+- **Skill name on cast:** "*Skill name* !!" floats over the caster in a random colour.
+- **Rules:**
+  - respawn after 4 s;
+  - Classic is the map's 100 kills, no time limit and no passive gold;
+  - duels can be switched off (lobby for the host, hero select offline).
+- **Chained transformations:** while transformed, a full meter (charging 6× faster) climbs to the next stage. Each stage resets the timer, tops up the shield, hits harder, grows the hero and raises the bounty. Up to three stages: Tamsin, Pyre, Thane.
+- **Private creep rooms:** four walled rooms south of the field, reached by teleport pads by the south wall. Entering spawns the room's creeps (the map's units; 20 of a type at most, "Can't spawn any more creeps."); a pad leads back. Bots farm them too when the field is quiet.
+- **Evolution:** Corin becomes Corin Unbound for good at 250 strength and 250 agility, keeping level, items and ranks.
+- **Items and inventory:**
+  - the Satchel of Holding opens a 6-slot bag (BAG button);
+  - the capture orb keeps its creature (tap to call it out or back);
+  - MARK sets the recall point the Homeward Scroll returns to;
+  - potions, flasks and knives stack two to a slot.
+- **24 heroes, six per realm:** 16 new original heroes (`scripts/heroes/more_heroes.gd`). Each has four skills, an innate blink with a 2 s cooldown (BLINK, or Shift on desktop) and a signature item. Bots draw from the whole roster each match.
+- **Sound and voice:**
+  - every skill has its own sound (`tools/skill_sounds.py`, generated from code);
+  - every hero has a voice (battle cry on ultimate / form / multi-kill, death cry) from CC0 / CC-BY packs, pitched per hero;
+  - an announcer calls the start, "choose your character", the duel countdown, multi-kills and the result.
+- **Looks:** the new heroes use KayKit bodies recoloured and re-armed, plus six Quaternius RPG characters (CC0).
+- **Selected buttons** glow gold, so a chosen hero, tab or mode stands out.
+- **Phone (Infinix NOTE 30):** a 4v4 Classic match with up to 424 units ran at 42–58 FPS (average 49.6), no script errors; debug APK 48.5 MB.
+- **Balance:** 24 all-bot matches, then one tuning pass for six outliers (Mire, Wren, Ashka, Lys and Kestrel buffed; Seraphine heals less). Samples are small.
+
 ### Original assets
 `tools/generate_assets.py` synthesises the app icon (hammer-and-slash emblem in gold and ember, plus Android adaptive layers) and the remaining sound effects and fallback music from code — nothing taken from other games. Rerun it to rebuild `assets/`.
 

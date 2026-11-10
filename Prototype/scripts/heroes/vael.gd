@@ -14,6 +14,8 @@ func _init() -> void:
 	title = "the Kiln Knight"
 	form_name = "Kindled"
 	form_stages = ["Molten Heart"]
+	voice = "male3"
+	voice_pitch = 0.88
 	role = "Bruiser"
 	description = "An iron knight whose armour is a living kiln. Sword and shield; hard to kill, strongest in the thick of a fight."
 

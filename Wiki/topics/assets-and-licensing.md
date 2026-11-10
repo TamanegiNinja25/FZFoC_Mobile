@@ -1,8 +1,8 @@
 ---
 type: topic
 category: Legal and IP
-sources: [2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decision-visual-style, 2026-11-09-phase-8-assets-agents-skills]
-updated: 2026-11-09
+sources: [2026-11-08-sketchfab-assets-and-local-multiplayer, 2026-11-08-decision-visual-style, 2026-11-09-phase-8-assets-agents-skills, 2026-11-10-phase-9-map-gaps-and-24-heroes]
+updated: 2026-11-10
 ---
 # Assets and licensing
 
@@ -55,6 +55,13 @@ Each Sketchfab model shows its own licence on its page ([src](../sources/2026-11
 - **Agent and skill licences:**
   - The adopted agents are MIT, and their licence is kept beside them.
   - The skills are Apache-2.0, which requires keeping the NOTICE file; it sits in `.claude/skills/` ([src](../sources/2026-11-09-phase-8-assets-agents-skills.md)).
+
+## Phase 9 additions
+- **Voices:**
+  - Kenney's Voiceover Pack: Fighter (announcer), HaelDB's yells and thebardofblasphemy's death grunts are CC0 ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+  - JeanMyna_VA's "Aha!" pack is **CC-BY 3.0**: the first asset that requires credit. It is credited in `CREDITS.md`, in its pack folder and on the Credits screen as "Voice: JeanMyna_VA (CC-BY 3.0)" ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Characters:** Quaternius's RPG Characters (CC0) add six bodies ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
+- **Licence check before download:** licence and author were read from each pack's own page before downloading; licence files sit beside each pack ([src](../sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md)).
 
 ## Related
 - [Copyright vs game mechanics](copyright-vs-game-mechanics.md)
