@@ -6,6 +6,10 @@ updated: 2026-11-08
 
 Newest entry first.
 
+## 2026-11-10 — Release v0.9.0
+- Tag `v0.9.0` built by GitHub Actions and signed with the shared key (fingerprint matches); `FZFoC.apk` is 48.5 MB.
+- The published APK installed on the test phone as an update (version code 802 → 900) and launched showing v0.9.0, no script errors.
+
 ## 2026-11-10 — Ingest (design + implementation)
 - Ingested `2026-11-10-phase-9-map-gaps-and-24-heroes.md` (Phase 9, v0.9.0); [source note](sources/2026-11-10-phase-9-map-gaps-and-24-heroes.md) created.
 - Topics updated (history snapshots saved):
